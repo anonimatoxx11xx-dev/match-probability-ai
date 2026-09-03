@@ -1,0 +1,7 @@
+{
+  "name":"match-probability-ai",
+  "version":"1.0.0",
+  "private":true,
+  "scripts":{"dev":"wrangler dev","deploy":"wrangler deploy","db:init":"wrangler d1 execute match-probability-db --local --file=schema.sql","db:seed":"wrangler d1 execute match-probability-db --local --file=seed.sql"},
+  "devDependencies":{"@cloudflare/workers-types":"^4.20260901.0","typescript":"^5.9.2","wrangler":"^4.33.0"}
+}
