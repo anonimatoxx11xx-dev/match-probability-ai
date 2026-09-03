@@ -11,24 +11,24 @@ const leagues = [
   { id: 2, name: 'Champions League', country: 'World', localLeague: 'Champions League' },
 ];
 
-const season = Number(process.env.SEASON || new Date().getUTCFullYear());
-const daysBack = Number(process.env.DAYS_BACK || 21);
-const daysForward = Number(process.env.DAYS_FORWARD || 7);
+// The Free API-Football plan currently exposes historical seasons through 2024.
+// We use 2024 as the real-data bootstrap season; current-season data will be added
+// through a second source rather than fabricating statistics.
+const season = Number(process.env.SEASON || 2024);
 const sleepMs = Number(process.env.REQUEST_DELAY_MS || 7000);
 const maxDetailFixtures = Number(process.env.MAX_DETAIL_FIXTURES || 60);
+const perLeague = Math.max(1, Math.floor(maxDetailFixtures / leagues.length));
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
-const isoDate = d => d.toISOString().slice(0, 10);
-const now = new Date();
-const from = new Date(now.getTime() - daysBack * 86400000);
-const to = new Date(now.getTime() + daysForward * 86400000);
 
 async function api(path) {
   const response = await fetch(`${API}${path}`, {
     headers: { 'x-apisports-key': API_KEY, accept: 'application/json' },
   });
   const remaining = response.headers.get('X-RateLimit-Remaining');
-  if (response.status === 429) throw new Error(`API-Football 429 rate limit; remaining=${remaining ?? 'unknown'}`);
+  if (response.status === 429) {
+    throw new Error(`API-Football 429 rate limit; remaining=${remaining ?? 'unknown'}`);
+  }
   const data = await response.json();
   if (!response.ok || (data.errors && Object.keys(data.errors).length)) {
     throw new Error(`API-Football: ${JSON.stringify(data.errors || data)}`);
@@ -36,7 +36,12 @@ async function api(path) {
   return { data, remaining };
 }
 
-const norm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
+const norm = s => String(s || '')
+  .toLowerCase()
+  .normalize('NFD')
+  .replace(/[\u0300-\u036f]/g, '')
+  .replace(/[^a-z0-9]+/g, ' ')
+  .trim();
 
 function statValue(stats, name) {
   const row = stats?.find(x => norm(x.type) === norm(name));
@@ -55,7 +60,12 @@ function compactFixture(f) {
     fixtureId: f.fixture?.id,
     kickoff: f.fixture?.date || null,
     status: f.fixture?.status?.short || null,
-    league: { id: f.league?.id, name: f.league?.name, country: f.league?.country, season: f.league?.season },
+    league: {
+      id: f.league?.id,
+      name: f.league?.name,
+      country: f.league?.country,
+      season: f.league?.season,
+    },
     home: { id: home?.id, name: home?.name },
     away: { id: away?.id, name: away?.name },
     goals: { home: f.goals?.home ?? null, away: f.goals?.away ?? null },
@@ -80,16 +90,19 @@ function compactFixture(f) {
   };
 }
 
-const fixtureIds = [];
+const candidates = [];
 const teams = new Map();
 
+// One request per competition: retrieve the season fixture list, then keep the
+// most recent completed fixtures. This stays comfortably below the 100/day quota.
 for (const league of leagues) {
-  const q = new URLSearchParams({ league: String(league.id), season: String(season), from: isoDate(from), to: isoDate(to) });
-  const result = await api(`/fixtures?${q}`);
+  const result = await api(`/fixtures?league=${league.id}&season=${season}`);
   const list = result.data.response || [];
   for (const f of list) {
     if (!f.fixture?.id) continue;
-    fixtureIds.push(f.fixture.id);
+    const status = String(f.fixture?.status?.short || '');
+    if (!['FT', 'AET', 'P'].includes(status)) continue;
+    candidates.push({ fixtureId: f.fixture.id, kickoff: f.fixture.date || '', leagueId: league.id });
     if (f.teams?.home?.id) teams.set(f.teams.home.id, { apiId: f.teams.home.id, name: f.teams.home.name, leagueId: league.id });
     if (f.teams?.away?.id) teams.set(f.teams.away.id, { apiId: f.teams.away.id, name: f.teams.away.name, leagueId: league.id });
   }
@@ -97,8 +110,18 @@ for (const league of leagues) {
   await sleep(sleepMs);
 }
 
-const uniqueIds = [...new Set(fixtureIds)].slice(0, maxDetailFixtures);
+// Keep a balanced sample: the latest completed fixtures from each competition.
+const selected = [];
+for (const league of leagues) {
+  selected.push(...candidates
+    .filter(x => x.leagueId === league.id)
+    .sort((a, b) => String(b.kickoff).localeCompare(String(a.kickoff)))
+    .slice(0, perLeague));
+}
+
+const uniqueIds = [...new Set(selected.map(x => x.fixtureId))].slice(0, maxDetailFixtures);
 const details = [];
+
 for (let i = 0; i < uniqueIds.length; i += 20) {
   const ids = uniqueIds.slice(i, i + 20);
   const result = await api(`/fixtures?ids=${ids.join('-')}`);
@@ -112,7 +135,7 @@ details.sort((a, b) => String(a.kickoff).localeCompare(String(b.kickoff)));
 const snapshot = {
   generatedAt: new Date().toISOString(),
   season,
-  window: { from: isoDate(from), to: isoDate(to) },
+  mode: 'historical-bootstrap',
   leagues,
   teams: [...teams.values()],
   fixtures: details,
