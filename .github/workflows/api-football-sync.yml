@@ -2,15 +2,6 @@ name: API-Football Data Sync
 
 on:
   workflow_dispatch:
-    inputs:
-      days_back:
-        description: 'Giorni indietro da importare'
-        required: false
-        default: '21'
-      days_forward:
-        description: 'Giorni avanti da includere'
-        required: false
-        default: '7'
   schedule:
     - cron: '17 3 * * *'
 
@@ -27,9 +18,7 @@ jobs:
     timeout-minutes: 20
     env:
       API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
-      SEASON: '2026'
-      DAYS_BACK: ${{ inputs.days_back || '21' }}
-      DAYS_FORWARD: ${{ inputs.days_forward || '7' }}
+      SEASON: '2024'
       REQUEST_DELAY_MS: '7000'
       MAX_DETAIL_FIXTURES: '60'
     steps:
@@ -50,7 +39,7 @@ jobs:
 
       - name: Validate snapshot
         run: |
-          node -e "const fs=require('fs'); const x=JSON.parse(fs.readFileSync('data/api-football/latest.json','utf8')); if(!x.generatedAt || !Array.isArray(x.fixtures)) process.exit(1); console.log('fixtures='+x.fixtures.length,'teams='+x.teams.length,'generatedAt='+x.generatedAt);"
+          node -e "const fs=require('fs'); const x=JSON.parse(fs.readFileSync('data/api-football/latest.json','utf8')); if(!x.generatedAt || !Array.isArray(x.fixtures)) process.exit(1); console.log('season='+x.season,'fixtures='+x.fixtures.length,'teams='+x.teams.length,'generatedAt='+x.generatedAt);"
 
       - name: Commit snapshot
         run: |
