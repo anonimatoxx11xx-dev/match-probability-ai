@@ -113,7 +113,7 @@ function canonical(name: string) {
 type Snapshot = {
   generatedAt: string;
   season: number;
-  window: { from: string; to: string };
+  mode?: string;
   leagues: Array<{ id: number; name: string; country: string; localLeague: string }>;
   teams: Array<{ apiId: number; name: string; leagueId: number }>;
   fixtures: Array<{
@@ -138,8 +138,6 @@ async function importSnapshot(env: Env) {
   if (!snapshot.generatedAt || !Array.isArray(snapshot.fixtures)) throw new Error('Snapshot non valido');
 
   const leagueRows = await env.DB.prepare('SELECT id,name,api_football_id FROM leagues').all<any>();
-  const teamRows = await env.DB.prepare('SELECT id,league_id,name,api_football_id FROM teams').all<any>();
-
   const localLeagueByApi = new Map<number, number>();
   const localLeagueByName = new Map<string, number>();
   for (const row of leagueRows.results || []) {
@@ -147,14 +145,12 @@ async function importSnapshot(env: Env) {
     localLeagueByName.set(String(row.name), Number(row.id));
   }
 
-  const localTeamByKey = new Map<string, any>();
-  for (const row of teamRows.results || []) {
-    localTeamByKey.set(`${Number(row.league_id)}:${canonical(row.name)}`, row);
-  }
-
+  // Link the six configured competitions to their API-Football IDs.
   const leagueStatements = snapshot.leagues.map((l) => {
     const localId = localLeagueByName.get(l.localLeague);
-    return localId ? env.DB.prepare('UPDATE leagues SET api_football_id=? WHERE id=?').bind(l.id, localId) : null;
+    return localId
+      ? env.DB.prepare('UPDATE leagues SET api_football_id=? WHERE id=?').bind(l.id, localId)
+      : null;
   }).filter(Boolean) as D1PreparedStatement[];
   if (leagueStatements.length) await env.DB.batch(leagueStatements);
 
@@ -164,27 +160,70 @@ async function importSnapshot(env: Env) {
     if (row.api_football_id != null) localLeagueByApi.set(Number(row.api_football_id), Number(row.id));
   }
 
-  const teamStatements: D1PreparedStatement[] = [];
+  // IMPORTANT: teams are global entities. A team can play both its domestic
+  // competition and the Champions League, so never resolve a team by league.
+  // Existing teams are matched by API-Football ID; missing CL-only teams are added.
+  const existingTeamRows = await env.DB.prepare(
+    'SELECT id,league_id,name,api_football_id FROM teams'
+  ).all<any>();
   const teamIdByApi = new Map<number, number>();
+  const teamByCanonical = new Map<string, any>();
+  for (const row of existingTeamRows.results || []) {
+    if (row.api_football_id != null) teamIdByApi.set(Number(row.api_football_id), Number(row.id));
+    teamByCanonical.set(canonical(row.name), row);
+  }
+
+  const teamStatements: D1PreparedStatement[] = [];
   for (const team of snapshot.teams) {
-    const leagueId = localLeagueByApi.get(Number(team.leagueId));
-    if (!leagueId) continue;
-    const local = localTeamByKey.get(`${leagueId}:${canonical(team.name)}`);
-    if (!local) continue;
-    teamIdByApi.set(Number(team.apiId), Number(local.id));
-    teamStatements.push(env.DB.prepare('UPDATE teams SET api_football_id=? WHERE id=? AND (api_football_id IS NULL OR api_football_id=?)').bind(team.apiId, local.id, team.apiId));
+    const apiId = Number(team.apiId);
+    if (!apiId || !team.name) continue;
+    if (teamIdByApi.has(apiId)) continue;
+
+    const existing = teamByCanonical.get(canonical(team.name));
+    if (existing) {
+      teamIdByApi.set(apiId, Number(existing.id));
+      teamStatements.push(
+        env.DB.prepare(
+          'UPDATE teams SET api_football_id=? WHERE id=? AND api_football_id IS NULL'
+        ).bind(apiId, Number(existing.id))
+      );
+      continue;
+    }
+
+    const localLeagueId = localLeagueByApi.get(Number(team.leagueId));
+    if (!localLeagueId) continue;
+    teamStatements.push(
+      env.DB.prepare(
+        'INSERT OR IGNORE INTO teams (league_id,name,api_football_id) VALUES (?,?,?)'
+      ).bind(localLeagueId, team.name, apiId)
+    );
   }
   if (teamStatements.length) await env.DB.batch(teamStatements);
 
+  // Refresh after inserts/updates so newly-created Champions League teams are resolvable.
+  const refreshedTeams = await env.DB.prepare(
+    'SELECT id,league_id,name,api_football_id FROM teams'
+  ).all<any>();
+  teamIdByApi.clear();
+  for (const row of refreshedTeams.results || []) {
+    if (row.api_football_id != null) teamIdByApi.set(Number(row.api_football_id), Number(row.id));
+  }
+
   const matchStatements: D1PreparedStatement[] = [];
   let imported = 0;
+  let skipped = 0;
   for (const f of snapshot.fixtures) {
     if (!f.fixtureId || !['FT', 'AET', 'P'].includes(String(f.status))) continue;
     if (f.goals.home == null || f.goals.away == null) continue;
+
     const leagueId = localLeagueByApi.get(Number(f.league.id));
     const homeId = teamIdByApi.get(Number(f.home.id));
     const awayId = teamIdByApi.get(Number(f.away.id));
-    if (!leagueId || !homeId || !awayId) continue;
+    if (!leagueId || !homeId || !awayId) {
+      skipped++;
+      continue;
+    }
+
     const hs = f.stats.home, as = f.stats.away;
     matchStatements.push(env.DB.prepare(
       `INSERT INTO matches (league_id,home_team_id,away_team_id,kickoff,home_goals,away_goals,home_shots,away_shots,home_sot,away_sot,home_corners,away_corners,home_fouls,away_fouls,home_saves,away_saves,home_cards,away_cards,api_football_id)
@@ -197,8 +236,11 @@ async function importSnapshot(env: Env) {
     ));
     imported++;
   }
-  for (let i = 0; i < matchStatements.length; i += 100) await env.DB.batch(matchStatements.slice(i, i + 100));
+  for (let i = 0; i < matchStatements.length; i += 100) {
+    await env.DB.batch(matchStatements.slice(i, i + 100));
+  }
 
+  // Rebuild team aggregates from the imported real matches.
   await env.DB.exec(`
     INSERT INTO team_stats (team_id,matches,goals_for,goals_against,shots_for,shots_on_target_for,corners_for,fouls_for,saves_for,cards_for,home_matches,home_goals_for,home_goals_against,away_matches,away_goals_for,away_goals_against)
     SELECT t.id,
@@ -228,7 +270,12 @@ async function importSnapshot(env: Env) {
       away_matches=excluded.away_matches,away_goals_for=excluded.away_goals_for,away_goals_against=excluded.away_goals_against;
   `);
 
-  return { generatedAt: snapshot.generatedAt, season: snapshot.season, importedMatches: imported };
+  return {
+    generatedAt: snapshot.generatedAt,
+    season: snapshot.season,
+    importedMatches: imported,
+    skippedMatches: skipped,
+  };
 }
 
 function samplePoisson(lambda: number) {
@@ -256,7 +303,7 @@ export default {
     if (request.method === 'OPTIONS') return json({ ok: true });
     const u = new URL(request.url);
     try {
-      if (u.pathname === '/api/health') return json({ ok: true, service: 'match-probability-ai', version: '1.2.0' });
+      if (u.pathname === '/api/health') return json({ ok: true, service: 'match-probability-ai', version: '1.3.0' });
       if (u.pathname === '/api/provider/test') return json({ ok: true, provider: 'API-Football', configured: Boolean(env.API_FOOTBALL_KEY), mode: 'scheduled-github-collector' });
       if (u.pathname === '/api/data/status') {
         const r = await env.DB.prepare('SELECT COUNT(*) AS matches FROM matches WHERE home_goals IS NOT NULL AND away_goals IS NOT NULL').first<any>();
