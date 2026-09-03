@@ -4,6 +4,6 @@ CREATE TABLE IF NOT EXISTS team_stats (team_id INTEGER PRIMARY KEY,matches INTEG
 CREATE TABLE IF NOT EXISTS matches (id INTEGER PRIMARY KEY AUTOINCREMENT,league_id INTEGER NOT NULL,home_team_id INTEGER NOT NULL,away_team_id INTEGER NOT NULL,kickoff TEXT,home_goals INTEGER,away_goals INTEGER,home_shots INTEGER,away_shots INTEGER,home_sot INTEGER,away_sot INTEGER,home_corners INTEGER,away_corners INTEGER,home_fouls INTEGER,away_fouls INTEGER,home_saves INTEGER,away_saves INTEGER,home_cards INTEGER,away_cards INTEGER,api_football_id INTEGER,FOREIGN KEY (league_id) REFERENCES leagues(id));
 CREATE INDEX IF NOT EXISTS idx_matches_league ON matches(league_id);
 CREATE INDEX IF NOT EXISTS idx_matches_teams ON matches(home_team_id,away_team_id);
-CREATE UNIQUE INDEX IF NOT EXISTS idx_leagues_api_football_id ON leagues(api_football_id) WHERE api_football_id IS NOT NULL;
-CREATE UNIQUE INDEX IF NOT EXISTS idx_teams_api_football_id ON teams(api_football_id) WHERE api_football_id IS NOT NULL;
-CREATE UNIQUE INDEX IF NOT EXISTS idx_matches_api_football_id ON matches(api_football_id) WHERE api_football_id IS NOT NULL;
+CREATE UNIQUE INDEX IF NOT EXISTS idx_leagues_api_football_id ON leagues(api_football_id);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_teams_api_football_id ON teams(api_football_id);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_matches_api_football_id ON matches(api_football_id);
