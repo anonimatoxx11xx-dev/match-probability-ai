@@ -122,12 +122,15 @@ for (const league of leagues) {
 const uniqueIds = [...new Set(selected.map(x => x.fixtureId))].slice(0, maxDetailFixtures);
 const details = [];
 
-for (let i = 0; i < uniqueIds.length; i += 20) {
-  const ids = uniqueIds.slice(i, i + 20);
-  const result = await api(`/fixtures?ids=${ids.join('-')}`);
+// IMPORTANT: the Free API-Football plan rejects the `ids` parameter.
+// Use the single-fixture `id` parameter instead. It costs one request per match,
+// but keeps the collector compatible with the Free plan and avoids fabricated data.
+for (let i = 0; i < uniqueIds.length; i++) {
+  const fixtureId = uniqueIds[i];
+  const result = await api(`/fixtures?id=${fixtureId}`);
   for (const f of result.data.response || []) details.push(compactFixture(f));
-  console.error(`details=${ids.length} remaining=${result.remaining ?? '?'}`);
-  if (i + 20 < uniqueIds.length) await sleep(sleepMs);
+  console.error(`detail=${fixtureId} (${i + 1}/${uniqueIds.length}) remaining=${result.remaining ?? '?'}`);
+  if (i + 1 < uniqueIds.length) await sleep(sleepMs);
 }
 
 details.sort((a, b) => String(a.kickoff).localeCompare(String(b.kickoff)));
