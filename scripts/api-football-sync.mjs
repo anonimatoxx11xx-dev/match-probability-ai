@@ -15,6 +15,7 @@ const season = Number(process.env.SEASON || new Date().getUTCFullYear());
 const daysBack = Number(process.env.DAYS_BACK || 21);
 const daysForward = Number(process.env.DAYS_FORWARD || 7);
 const sleepMs = Number(process.env.REQUEST_DELAY_MS || 7000);
+const maxDetailFixtures = Number(process.env.MAX_DETAIL_FIXTURES || 60);
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const isoDate = d => d.toISOString().slice(0, 10);
@@ -36,26 +37,6 @@ async function api(path) {
 }
 
 const norm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
-
-const aliases = new Map([
-  ['bayern munich', 'fc bayern munchen'],
-  ['bayern munchen', 'fc bayern munchen'],
-  ['bayer leverkusen', 'bayer 04 leverkusen'],
-  ['paris saint germain', 'paris saint germain'],
-  ['psg', 'paris saint germain'],
-  ['inter milan', 'inter'],
-  ['internazionale', 'inter'],
-  ['ac milan', 'milan'],
-  ['as roma', 'roma'],
-  ['ssc napoli', 'napoli'],
-  ['olympique lyonnais', 'olympique lyonnais'],
-  ['olympique de marseille', 'olympique de marseille'],
-]);
-
-function canonical(name) {
-  const n = norm(name);
-  return aliases.get(n) || n;
-}
 
 function statValue(stats, name) {
   const row = stats?.find(x => norm(x.type) === norm(name));
@@ -100,35 +81,33 @@ function compactFixture(f) {
 }
 
 const fixtureIds = [];
-const fixtures = [];
 const teams = new Map();
-const usedLeagueIds = new Set();
 
 for (const league of leagues) {
   const q = new URLSearchParams({ league: String(league.id), season: String(season), from: isoDate(from), to: isoDate(to) });
   const result = await api(`/fixtures?${q}`);
   const list = result.data.response || [];
-  usedLeagueIds.add(league.id);
   for (const f of list) {
     if (!f.fixture?.id) continue;
     fixtureIds.push(f.fixture.id);
-    fixtures.push({ fixtureId: f.fixture.id, leagueId: league.id });
     if (f.teams?.home?.id) teams.set(f.teams.home.id, { apiId: f.teams.home.id, name: f.teams.home.name, leagueId: league.id });
     if (f.teams?.away?.id) teams.set(f.teams.away.id, { apiId: f.teams.away.id, name: f.teams.away.name, leagueId: league.id });
   }
-  console.log(`league=${league.name} fixtures=${list.length} remaining=${result.remaining ?? '?'}`);
+  console.error(`league=${league.name} fixtures=${list.length} remaining=${result.remaining ?? '?'}`);
   await sleep(sleepMs);
 }
 
+const uniqueIds = [...new Set(fixtureIds)].slice(0, maxDetailFixtures);
 const details = [];
-for (let i = 0; i < fixtureIds.length; i += 20) {
-  const ids = fixtureIds.slice(i, i + 20);
-  if (!ids.length) continue;
+for (let i = 0; i < uniqueIds.length; i += 20) {
+  const ids = uniqueIds.slice(i, i + 20);
   const result = await api(`/fixtures?ids=${ids.join('-')}`);
   for (const f of result.data.response || []) details.push(compactFixture(f));
-  console.log(`details=${ids.length} remaining=${result.remaining ?? '?'}`);
-  if (i + 20 < fixtureIds.length) await sleep(sleepMs);
+  console.error(`details=${ids.length} remaining=${result.remaining ?? '?'}`);
+  if (i + 20 < uniqueIds.length) await sleep(sleepMs);
 }
+
+details.sort((a, b) => String(a.kickoff).localeCompare(String(b.kickoff)));
 
 const snapshot = {
   generatedAt: new Date().toISOString(),
