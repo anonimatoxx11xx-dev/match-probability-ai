@@ -1,0 +1,65 @@
+name: API-Football Data Sync
+
+on:
+  workflow_dispatch:
+    inputs:
+      days_back:
+        description: 'Giorni indietro da importare'
+        required: false
+        default: '21'
+      days_forward:
+        description: 'Giorni avanti da includere'
+        required: false
+        default: '7'
+  schedule:
+    - cron: '17 3 * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: api-football-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+      SEASON: '2026'
+      DAYS_BACK: ${{ inputs.days_back || '21' }}
+      DAYS_FORWARD: ${{ inputs.days_forward || '7' }}
+      REQUEST_DELAY_MS: '7000'
+      MAX_DETAIL_FIXTURES: '60'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Check secret
+        run: |
+          if [ -z "$API_FOOTBALL_KEY" ]; then
+            echo "API_FOOTBALL_KEY non configurata nei Secrets del repository"
+            exit 1
+          fi
+
+      - name: Collect API-Football data
+        run: node scripts/api-football-sync.mjs > data/api-football/latest.json
+
+      - name: Validate snapshot
+        run: |
+          node -e "const fs=require('fs'); const x=JSON.parse(fs.readFileSync('data/api-football/latest.json','utf8')); if(!x.generatedAt || !Array.isArray(x.fixtures)) process.exit(1); console.log('fixtures='+x.fixtures.length,'teams='+x.teams.length,'generatedAt='+x.generatedAt);"
+
+      - name: Commit snapshot
+        run: |
+          git config user.name 'match-probability-ai-bot'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/api-football/latest.json
+          if git diff --cached --quiet; then
+            echo 'Nessun cambiamento dati.'
+            exit 0
+          fi
+          git commit -m 'chore: update API-Football snapshot'
+          git push

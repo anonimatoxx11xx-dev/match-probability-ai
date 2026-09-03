@@ -3,14 +3,16 @@ interface Env {
   API_FOOTBALL_KEY: string;
 }
 
+const SNAPSHOT_URL = 'https://raw.githubusercontent.com/anonimatoxx11xx-dev/match-probability-ai/main/data/api-football/latest.json';
+
 const json = (data: unknown, status = 200) =>
   new Response(JSON.stringify(data, null, 2), {
     status,
     headers: {
-      "content-type": "application/json;charset=UTF-8",
-      "access-control-allow-origin": "*",
-      "access-control-allow-headers": "content-type",
-      "access-control-allow-methods": "GET,POST,OPTIONS",
+      'content-type': 'application/json;charset=UTF-8',
+      'access-control-allow-origin': '*',
+      'access-control-allow-headers': 'content-type',
+      'access-control-allow-methods': 'GET,POST,OPTIONS',
     },
   });
 
@@ -72,13 +74,13 @@ function predict(h: Stats, a: Stats) {
       saves: h.saves + a.saves,
       cards: h.cards + a.cards,
     },
-    model: "Poisson + historical team averages + home advantage",
+    model: 'Poisson + historical team averages + home advantage',
   };
 }
 
 async function stats(env: Env, id: number): Promise<Stats | null> {
   const r = await env.DB.prepare(
-    "SELECT goals_for,goals_against,shots_for,shots_on_target_for,corners_for,fouls_for,saves_for,cards_for FROM team_stats WHERE team_id=?"
+    'SELECT goals_for,goals_against,shots_for,shots_on_target_for,corners_for,fouls_for,saves_for,cards_for FROM team_stats WHERE team_id=?'
   ).bind(id).first<any>();
 
   if (!r) return null;
@@ -94,139 +96,202 @@ async function stats(env: Env, id: number): Promise<Stats | null> {
   };
 }
 
-async function footballApi(env: Env, path: string) {
-  if (!env.API_FOOTBALL_KEY) throw new Error("API_FOOTBALL_KEY non configurata");
+function canonical(name: string) {
+  const n = String(name || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
+  const aliases: Record<string, string> = {
+    'bayern munich': 'fc bayern munchen',
+    'bayern munchen': 'fc bayern munchen',
+    'inter milan': 'inter',
+    'internazionale': 'inter',
+    'ac milan': 'milan',
+    'as roma': 'roma',
+    'ssc napoli': 'napoli',
+  };
+  return aliases[n] || n;
+}
 
-  const response = await fetch(`https://v3.football.api-sports.io${path}`, {
-    method: "GET",
-    headers: {
-      "x-apisports-key": env.API_FOOTBALL_KEY,
-      accept: "application/json",
-    },
-  });
+type Snapshot = {
+  generatedAt: string;
+  season: number;
+  window: { from: string; to: string };
+  leagues: Array<{ id: number; name: string; country: string; localLeague: string }>;
+  teams: Array<{ apiId: number; name: string; leagueId: number }>;
+  fixtures: Array<{
+    fixtureId: number;
+    kickoff: string | null;
+    status: string | null;
+    league: { id: number; name: string; country: string; season: number };
+    home: { id: number; name: string };
+    away: { id: number; name: string };
+    goals: { home: number | null; away: number | null };
+    stats: {
+      home: { shots: number | null; sot: number | null; corners: number | null; fouls: number | null; saves: number | null; cards: number | null };
+      away: { shots: number | null; sot: number | null; corners: number | null; fouls: number | null; saves: number | null; cards: number | null };
+    };
+  }>;
+};
 
-  const data = await response.json<any>();
+async function importSnapshot(env: Env) {
+  const response = await fetch(SNAPSHOT_URL, { headers: { accept: 'application/json' } });
+  if (!response.ok) throw new Error(`Snapshot HTTP ${response.status}`);
+  const snapshot = await response.json() as Snapshot;
+  if (!snapshot.generatedAt || !Array.isArray(snapshot.fixtures)) throw new Error('Snapshot non valido');
 
-  if (!response.ok) {
-    throw new Error(`API-Football HTTP ${response.status}`);
+  const leagueRows = await env.DB.prepare('SELECT id,name,api_football_id FROM leagues').all<any>();
+  const teamRows = await env.DB.prepare('SELECT id,league_id,name,api_football_id FROM teams').all<any>();
+
+  const localLeagueByApi = new Map<number, number>();
+  const localLeagueByName = new Map<string, number>();
+  for (const row of leagueRows.results || []) {
+    if (row.api_football_id != null) localLeagueByApi.set(Number(row.api_football_id), Number(row.id));
+    localLeagueByName.set(String(row.name), Number(row.id));
   }
 
-  if (data?.errors && Object.keys(data.errors).length > 0) {
-    throw new Error(`API-Football: ${JSON.stringify(data.errors)}`);
+  const localTeamByKey = new Map<string, any>();
+  for (const row of teamRows.results || []) {
+    localTeamByKey.set(`${Number(row.league_id)}:${canonical(row.name)}`, row);
   }
 
-  return data;
+  const leagueStatements = snapshot.leagues.map((l) => {
+    const localId = localLeagueByName.get(l.localLeague);
+    return localId ? env.DB.prepare('UPDATE leagues SET api_football_id=? WHERE id=?').bind(l.id, localId) : null;
+  }).filter(Boolean) as D1PreparedStatement[];
+  if (leagueStatements.length) await env.DB.batch(leagueStatements);
+
+  const refreshedLeagues = await env.DB.prepare('SELECT id,name,api_football_id FROM leagues').all<any>();
+  localLeagueByApi.clear();
+  for (const row of refreshedLeagues.results || []) {
+    if (row.api_football_id != null) localLeagueByApi.set(Number(row.api_football_id), Number(row.id));
+  }
+
+  const teamStatements: D1PreparedStatement[] = [];
+  const teamIdByApi = new Map<number, number>();
+  for (const team of snapshot.teams) {
+    const leagueId = localLeagueByApi.get(Number(team.leagueId));
+    if (!leagueId) continue;
+    const local = localTeamByKey.get(`${leagueId}:${canonical(team.name)}`);
+    if (!local) continue;
+    teamIdByApi.set(Number(team.apiId), Number(local.id));
+    teamStatements.push(env.DB.prepare('UPDATE teams SET api_football_id=? WHERE id=? AND (api_football_id IS NULL OR api_football_id=?)').bind(team.apiId, local.id, team.apiId));
+  }
+  if (teamStatements.length) await env.DB.batch(teamStatements);
+
+  const matchStatements: D1PreparedStatement[] = [];
+  let imported = 0;
+  for (const f of snapshot.fixtures) {
+    if (!f.fixtureId || !['FT', 'AET', 'P'].includes(String(f.status))) continue;
+    if (f.goals.home == null || f.goals.away == null) continue;
+    const leagueId = localLeagueByApi.get(Number(f.league.id));
+    const homeId = teamIdByApi.get(Number(f.home.id));
+    const awayId = teamIdByApi.get(Number(f.away.id));
+    if (!leagueId || !homeId || !awayId) continue;
+    const hs = f.stats.home, as = f.stats.away;
+    matchStatements.push(env.DB.prepare(
+      `INSERT INTO matches (league_id,home_team_id,away_team_id,kickoff,home_goals,away_goals,home_shots,away_shots,home_sot,away_sot,home_corners,away_corners,home_fouls,away_fouls,home_saves,away_saves,home_cards,away_cards,api_football_id)
+       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+       ON CONFLICT(api_football_id) DO UPDATE SET league_id=excluded.league_id,home_team_id=excluded.home_team_id,away_team_id=excluded.away_team_id,kickoff=excluded.kickoff,home_goals=excluded.home_goals,away_goals=excluded.away_goals,home_shots=excluded.home_shots,away_shots=excluded.away_shots,home_sot=excluded.home_sot,away_sot=excluded.away_sot,home_corners=excluded.home_corners,away_corners=excluded.away_corners,home_fouls=excluded.home_fouls,away_fouls=excluded.away_fouls,home_saves=excluded.home_saves,away_saves=excluded.away_saves,home_cards=excluded.home_cards,away_cards=excluded.away_cards`
+    ).bind(
+      leagueId, homeId, awayId, f.kickoff, f.goals.home, f.goals.away,
+      hs.shots, as.shots, hs.sot, as.sot, hs.corners, as.corners,
+      hs.fouls, as.fouls, hs.saves, as.saves, hs.cards, as.cards, f.fixtureId
+    ));
+    imported++;
+  }
+  for (let i = 0; i < matchStatements.length; i += 100) await env.DB.batch(matchStatements.slice(i, i + 100));
+
+  await env.DB.exec(`
+    INSERT INTO team_stats (team_id,matches,goals_for,goals_against,shots_for,shots_on_target_for,corners_for,fouls_for,saves_for,cards_for,home_matches,home_goals_for,home_goals_against,away_matches,away_goals_for,away_goals_against)
+    SELECT t.id,
+      COUNT(m.id),
+      COALESCE(AVG(CASE WHEN m.home_team_id=t.id THEN m.home_goals ELSE m.away_goals END),0),
+      COALESCE(AVG(CASE WHEN m.home_team_id=t.id THEN m.away_goals ELSE m.home_goals END),0),
+      COALESCE(AVG(CASE WHEN m.home_team_id=t.id THEN m.home_shots ELSE m.away_shots END),0),
+      COALESCE(AVG(CASE WHEN m.home_team_id=t.id THEN m.home_sot ELSE m.away_sot END),0),
+      COALESCE(AVG(CASE WHEN m.home_team_id=t.id THEN m.home_corners ELSE m.away_corners END),0),
+      COALESCE(AVG(CASE WHEN m.home_team_id=t.id THEN m.home_fouls ELSE m.away_fouls END),0),
+      COALESCE(AVG(CASE WHEN m.home_team_id=t.id THEN m.home_saves ELSE m.away_saves END),0),
+      COALESCE(AVG(CASE WHEN m.home_team_id=t.id THEN m.home_cards ELSE m.away_cards END),0),
+      COALESCE(SUM(CASE WHEN m.home_team_id=t.id THEN 1 ELSE 0 END),0),
+      COALESCE(AVG(CASE WHEN m.home_team_id=t.id THEN m.home_goals END),0),
+      COALESCE(AVG(CASE WHEN m.home_team_id=t.id THEN m.away_goals END),0),
+      COALESCE(SUM(CASE WHEN m.away_team_id=t.id THEN 1 ELSE 0 END),0),
+      COALESCE(AVG(CASE WHEN m.away_team_id=t.id THEN m.away_goals END),0),
+      COALESCE(AVG(CASE WHEN m.away_team_id=t.id THEN m.home_goals END),0)
+    FROM teams t
+    LEFT JOIN matches m ON (m.home_team_id=t.id OR m.away_team_id=t.id) AND m.home_goals IS NOT NULL AND m.away_goals IS NOT NULL
+    GROUP BY t.id
+    ON CONFLICT(team_id) DO UPDATE SET
+      matches=excluded.matches,goals_for=excluded.goals_for,goals_against=excluded.goals_against,
+      shots_for=excluded.shots_for,shots_on_target_for=excluded.shots_on_target_for,corners_for=excluded.corners_for,
+      fouls_for=excluded.fouls_for,saves_for=excluded.saves_for,cards_for=excluded.cards_for,
+      home_matches=excluded.home_matches,home_goals_for=excluded.home_goals_for,home_goals_against=excluded.home_goals_against,
+      away_matches=excluded.away_matches,away_goals_for=excluded.away_goals_for,away_goals_against=excluded.away_goals_against;
+  `);
+
+  return { generatedAt: snapshot.generatedAt, season: snapshot.season, importedMatches: imported };
 }
 
 function samplePoisson(lambda: number) {
   const L = Math.exp(-lambda);
   let k = 0, p = 1;
-  do {
-    k++;
-    p *= Math.random();
-  } while (p > L && k < 20);
+  do { k++; p *= Math.random(); } while (p > L && k < 20);
   return k - 1;
 }
 
 async function simulate(env: Env, homeId: number, awayId: number, runs: number) {
   const h = await stats(env, homeId), a = await stats(env, awayId);
-  if (!h || !a) throw new Error("Statistiche squadra non disponibili");
-
+  if (!h || !a) throw new Error('Statistiche squadra non disponibili');
   const base = predict(h, a);
   let hw = 0, d = 0, aw = 0, o25 = 0;
-
   for (let n = 0; n < runs; n++) {
-    const x = samplePoisson(base.expectedGoals.home);
-    const y = samplePoisson(base.expectedGoals.away);
-    if (x > y) hw++;
-    else if (x === y) d++;
-    else aw++;
+    const x = samplePoisson(base.expectedGoals.home), y = samplePoisson(base.expectedGoals.away);
+    if (x > y) hw++; else if (x === y) d++; else aw++;
     if (x + y >= 3) o25++;
   }
-
-  return {
-    runs,
-    homeWin: hw / runs,
-    draw: d / runs,
-    awayWin: aw / runs,
-    over25: o25 / runs,
-    expectedGoals: base.expectedGoals,
-  };
+  return { runs, homeWin: hw / runs, draw: d / runs, awayWin: aw / runs, over25: o25 / runs, expectedGoals: base.expectedGoals };
 }
 
 export default {
   async fetch(request: Request, env: Env) {
-    if (request.method === "OPTIONS") return json({ ok: true });
-
+    if (request.method === 'OPTIONS') return json({ ok: true });
     const u = new URL(request.url);
-
     try {
-      if (u.pathname === "/api/health") {
-        return json({
-          ok: true,
-          service: "match-probability-ai",
-          version: "1.1.0",
-        });
+      if (u.pathname === '/api/health') return json({ ok: true, service: 'match-probability-ai', version: '1.2.0' });
+      if (u.pathname === '/api/provider/test') return json({ ok: true, provider: 'API-Football', configured: Boolean(env.API_FOOTBALL_KEY), mode: 'scheduled-github-collector' });
+      if (u.pathname === '/api/data/status') {
+        const r = await env.DB.prepare('SELECT COUNT(*) AS matches FROM matches WHERE home_goals IS NOT NULL AND away_goals IS NOT NULL').first<any>();
+        const t = await env.DB.prepare('SELECT COUNT(*) AS teams_with_stats FROM team_stats WHERE matches > 0').first<any>();
+        return json({ ok: true, matches: Number(r?.matches || 0), teamsWithStats: Number(t?.teams_with_stats || 0) });
       }
-
-      if (u.pathname === "/api/provider/test") {
-        const season = Number(u.searchParams.get("season")) || 2026;
-        const data = await footballApi(
-          env,
-          `/leagues?search=Serie%20A&season=${season}`
-        );
-
-        const leagues = Array.isArray(data?.response)
-          ? data.response.map((item: any) => ({
-              leagueId: item?.league?.id ?? null,
-              name: item?.league?.name ?? null,
-              country: item?.country?.name ?? null,
-              season: item?.seasons?.find((s: any) => s.year === season)?.year ?? season,
-            }))
-          : [];
-
-        return json({
-          ok: true,
-          provider: "API-Football",
-          season,
-          results: leagues,
-        });
-      }
-
-      if (u.pathname === "/api/leagues") {
-        const r = await env.DB.prepare(
-          "SELECT id,name,country FROM leagues ORDER BY name"
-        ).all();
+      if (u.pathname === '/api/leagues') {
+        const r = await env.DB.prepare('SELECT id,name,country FROM leagues ORDER BY name').all();
         return json(r.results);
       }
-
-      if (u.pathname === "/api/teams") {
-        const league = u.searchParams.get("league");
+      if (u.pathname === '/api/teams') {
+        const league = u.searchParams.get('league');
         const r = league
-          ? await env.DB.prepare(
-              "SELECT t.id,t.name,l.name league FROM teams t JOIN leagues l ON l.id=t.league_id WHERE l.name=? ORDER BY t.name"
-            ).bind(league).all()
-          : await env.DB.prepare("SELECT id,name FROM teams ORDER BY name").all();
+          ? await env.DB.prepare('SELECT t.id,t.name,l.name league FROM teams t JOIN leagues l ON l.id=t.league_id WHERE l.name=? ORDER BY t.name').bind(league).all()
+          : await env.DB.prepare('SELECT id,name FROM teams ORDER BY name').all();
         return json(r.results);
       }
-
-      if (u.pathname === "/api/predict" && request.method === "POST") {
+      if (u.pathname === '/api/predict' && request.method === 'POST') {
         const b = await request.json() as any;
-        const h = await stats(env, Number(b.homeTeamId));
-        const a = await stats(env, Number(b.awayTeamId));
-        if (!h || !a) return json({ error: "Statistiche squadra non disponibili" }, 404);
+        const h = await stats(env, Number(b.homeTeamId)), a = await stats(env, Number(b.awayTeamId));
+        if (!h || !a) return json({ error: 'Statistiche squadra non disponibili' }, 404);
         return json(predict(h, a));
       }
-
-      if (u.pathname === "/api/simulate" && request.method === "POST") {
+      if (u.pathname === '/api/simulate' && request.method === 'POST') {
         const b = await request.json() as any;
         const runs = clamp(Number(b.runs) || 10000, 1000, 100000);
         return json(await simulate(env, Number(b.homeTeamId), Number(b.awayTeamId), runs));
       }
-
-      return json({ error: "Endpoint non trovato" }, 404);
+      return json({ error: 'Endpoint non trovato' }, 404);
     } catch (e: any) {
-      return json({ error: e?.message || "Errore interno" }, 500);
+      return json({ error: e?.message || 'Errore interno' }, 500);
     }
+  },
+
+  async scheduled(_controller: ScheduledController, env: Env) {
+    await importSnapshot(env);
   },
 };
