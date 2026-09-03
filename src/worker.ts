@@ -6,6 +6,11 @@ interface Env {
 }
 
 async function rebuildTeamStats(env: Env) {
+  // Rebuild from scratch. This avoids SQLite/D1 parser ambiguity around
+  // INSERT ... SELECT ... ON CONFLICT and is safe because team_stats is a
+  // derived table rebuilt entirely from matches.
+  await env.DB.exec('DELETE FROM team_stats;');
+
   await env.DB.exec(`
     INSERT INTO team_stats (
       team_id,matches,goals_for,goals_against,shots_for,shots_on_target_for,
@@ -34,24 +39,8 @@ async function rebuildTeamStats(env: Env) {
       ON (m.home_team_id=t.id OR m.away_team_id=t.id)
       AND m.home_goals IS NOT NULL
       AND m.away_goals IS NOT NULL
-    WHERE 1=1
-    GROUP BY t.id
-    ON CONFLICT(team_id) DO UPDATE SET
-      matches=excluded.matches,
-      goals_for=excluded.goals_for,
-      goals_against=excluded.goals_against,
-      shots_for=excluded.shots_for,
-      shots_on_target_for=excluded.shots_on_target_for,
-      corners_for=excluded.corners_for,
-      fouls_for=excluded.fouls_for,
-      saves_for=excluded.saves_for,
-      cards_for=excluded.cards_for,
-      home_matches=excluded.home_matches,
-      home_goals_for=excluded.home_goals_for,
-      home_goals_against=excluded.home_goals_against,
-      away_matches=excluded.away_matches,
-      away_goals_for=excluded.away_goals_for,
-      away_goals_against=excluded.away_goals_against;
+    WHERE m.id IS NOT NULL
+    GROUP BY t.id;
   `);
 }
 
@@ -61,9 +50,8 @@ export default {
   async scheduled(controller: ScheduledController, env: Env, _ctx: ExecutionContext) {
     try {
       // Keep the existing snapshot importer as the source of match data.
-      // The current importer can fail only at its final aggregate rebuild;
-      // in that case the matches have already been written, so rebuild them
-      // with the SQLite parser-safe query below.
+      // If its own derived-stats rebuild fails, matches are already imported;
+      // the clean rebuild below reconstructs team_stats from matches.
       await (base as any).scheduled(controller, env);
     } catch (error) {
       console.log('Snapshot import completed/failed before stats rebuild:', error);
