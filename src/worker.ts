@@ -59,7 +59,31 @@ async function rebuildTeamStats(env: Env) {
 }
 
 export default {
-  fetch: base.fetch,
+  async fetch(request: Request, env: Env, ctx: ExecutionContext) {
+    const u = new URL(request.url);
+
+    // Browser-friendly GET wrapper for quick backend verification.
+    // The real Android API remains POST /api/predict and POST /api/simulate.
+    if (request.method === 'GET' && u.pathname === '/api/predict') {
+      const homeTeamId = Number(u.searchParams.get('home'));
+      const awayTeamId = Number(u.searchParams.get('away'));
+      if (!Number.isInteger(homeTeamId) || !Number.isInteger(awayTeamId) || homeTeamId <= 0 || awayTeamId <= 0) {
+        return new Response(JSON.stringify({ error: 'Usa /api/predict?home=ID&away=ID' }), {
+          status: 400,
+          headers: { 'content-type': 'application/json;charset=UTF-8', 'access-control-allow-origin': '*' },
+        });
+      }
+
+      const body = JSON.stringify({ homeTeamId, awayTeamId });
+      return base.fetch(new Request(request.url, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body,
+      }), env, ctx);
+    }
+
+    return base.fetch(request, env, ctx);
+  },
 
   async scheduled(_controller: ScheduledController, env: Env, _ctx: ExecutionContext) {
     await rebuildTeamStats(env);
