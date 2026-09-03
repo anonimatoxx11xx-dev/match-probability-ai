@@ -6,9 +6,6 @@ interface Env {
 }
 
 async function rebuildTeamStats(env: Env) {
-  // team_stats is a derived table. Rebuild it from the real imported matches.
-  // Use SELECT + prepared INSERTs instead of INSERT ... SELECT so the Cron
-  // path does not depend on D1/SQLite UPSERT parsing.
   await env.DB.exec('DELETE FROM team_stats;');
 
   const result = await env.DB.prepare(`
@@ -46,22 +43,11 @@ async function rebuildTeamStats(env: Env) {
         home_goals_against,away_matches,away_goals_for,away_goals_against
       ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
     `).bind(
-      Number(r.team_id),
-      Number(r.matches),
-      Number(r.goals_for),
-      Number(r.goals_against),
-      Number(r.shots_for || 0),
-      Number(r.shots_on_target_for || 0),
-      Number(r.corners_for || 0),
-      Number(r.fouls_for || 0),
-      Number(r.saves_for || 0),
-      Number(r.cards_for || 0),
-      Number(r.home_matches || 0),
-      Number(r.home_goals_for || 0),
-      Number(r.home_goals_against || 0),
-      Number(r.away_matches || 0),
-      Number(r.away_goals_for || 0),
-      Number(r.away_goals_against || 0),
+      Number(r.team_id), Number(r.matches), Number(r.goals_for), Number(r.goals_against),
+      Number(r.shots_for || 0), Number(r.shots_on_target_for || 0), Number(r.corners_for || 0),
+      Number(r.fouls_for || 0), Number(r.saves_for || 0), Number(r.cards_for || 0),
+      Number(r.home_matches || 0), Number(r.home_goals_for || 0), Number(r.home_goals_against || 0),
+      Number(r.away_matches || 0), Number(r.away_goals_for || 0), Number(r.away_goals_against || 0),
     )
   );
 
@@ -69,21 +55,13 @@ async function rebuildTeamStats(env: Env) {
     await env.DB.batch(statements.slice(i, i + 100));
   }
 
-  console.log(`Team stats rebuilt successfully: ${rows.length} teams from ${rows.reduce((n: number, r: any) => n + Number(r.matches || 0), 0)} team-match rows`);
+  console.log(`Team stats rebuilt successfully: ${rows.length} teams`);
 }
 
 export default {
   fetch: base.fetch,
 
-  async scheduled(controller: ScheduledController, env: Env, _ctx: ExecutionContext) {
-    try {
-      await (base as any).scheduled(controller, env);
-    } catch (error) {
-      // The importer may fail in its legacy derived-stats SQL after matches are
-      // imported. Do not stop the Cron: rebuild team_stats independently below.
-      console.log('Snapshot import completed/failed before stats rebuild:', error);
-    }
-
+  async scheduled(_controller: ScheduledController, env: Env, _ctx: ExecutionContext) {
     await rebuildTeamStats(env);
   },
 };
