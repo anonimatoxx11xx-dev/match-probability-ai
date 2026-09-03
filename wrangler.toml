@@ -2,6 +2,9 @@ name = "match-probability-ai"
 main = "src/index.ts"
 compatibility_date = "2026-09-03"
 
+[triggers]
+crons = ["17 3 * * *"]
+
 [[d1_databases]]
 binding = "DB"
 database_name = "match-probability-ai-db"
