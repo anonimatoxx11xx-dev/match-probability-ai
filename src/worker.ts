@@ -6,42 +6,70 @@ interface Env {
 }
 
 async function rebuildTeamStats(env: Env) {
-  // Rebuild from scratch. This avoids SQLite/D1 parser ambiguity around
-  // INSERT ... SELECT ... ON CONFLICT and is safe because team_stats is a
-  // derived table rebuilt entirely from matches.
+  // team_stats is a derived table. Rebuild it from the real imported matches.
+  // Use SELECT + prepared INSERTs instead of INSERT ... SELECT so the Cron
+  // path does not depend on D1/SQLite UPSERT parsing.
   await env.DB.exec('DELETE FROM team_stats;');
 
-  await env.DB.exec(`
-    INSERT INTO team_stats (
-      team_id,matches,goals_for,goals_against,shots_for,shots_on_target_for,
-      corners_for,fouls_for,saves_for,cards_for,home_matches,home_goals_for,
-      home_goals_against,away_matches,away_goals_for,away_goals_against
-    )
+  const result = await env.DB.prepare(`
     SELECT
-      t.id,
-      COUNT(m.id),
-      COALESCE(AVG(CASE WHEN m.home_team_id=t.id THEN m.home_goals ELSE m.away_goals END),0),
-      COALESCE(AVG(CASE WHEN m.home_team_id=t.id THEN m.away_goals ELSE m.home_goals END),0),
-      COALESCE(AVG(CASE WHEN m.home_team_id=t.id THEN m.home_shots ELSE m.away_shots END),0),
-      COALESCE(AVG(CASE WHEN m.home_team_id=t.id THEN m.home_sot ELSE m.away_sot END),0),
-      COALESCE(AVG(CASE WHEN m.home_team_id=t.id THEN m.home_corners ELSE m.away_corners END),0),
-      COALESCE(AVG(CASE WHEN m.home_team_id=t.id THEN m.home_fouls ELSE m.away_fouls END),0),
-      COALESCE(AVG(CASE WHEN m.home_team_id=t.id THEN m.home_saves ELSE m.away_saves END),0),
-      COALESCE(AVG(CASE WHEN m.home_team_id=t.id THEN m.home_cards ELSE m.away_cards END),0),
-      COALESCE(SUM(CASE WHEN m.home_team_id=t.id THEN 1 ELSE 0 END),0),
-      COALESCE(AVG(CASE WHEN m.home_team_id=t.id THEN m.home_goals END),0),
-      COALESCE(AVG(CASE WHEN m.home_team_id=t.id THEN m.away_goals END),0),
-      COALESCE(SUM(CASE WHEN m.away_team_id=t.id THEN 1 ELSE 0 END),0),
-      COALESCE(AVG(CASE WHEN m.away_team_id=t.id THEN m.away_goals END),0),
-      COALESCE(AVG(CASE WHEN m.away_team_id=t.id THEN m.home_goals END),0)
+      t.id AS team_id,
+      COUNT(m.id) AS matches,
+      COALESCE(AVG(CASE WHEN m.home_team_id=t.id THEN m.home_goals ELSE m.away_goals END),0) AS goals_for,
+      COALESCE(AVG(CASE WHEN m.home_team_id=t.id THEN m.away_goals ELSE m.home_goals END),0) AS goals_against,
+      COALESCE(AVG(CASE WHEN m.home_team_id=t.id THEN m.home_shots ELSE m.away_shots END),0) AS shots_for,
+      COALESCE(AVG(CASE WHEN m.home_team_id=t.id THEN m.home_sot ELSE m.away_sot END),0) AS shots_on_target_for,
+      COALESCE(AVG(CASE WHEN m.home_team_id=t.id THEN m.home_corners ELSE m.away_corners END),0) AS corners_for,
+      COALESCE(AVG(CASE WHEN m.home_team_id=t.id THEN m.home_fouls ELSE m.away_fouls END),0) AS fouls_for,
+      COALESCE(AVG(CASE WHEN m.home_team_id=t.id THEN m.home_saves ELSE m.away_saves END),0) AS saves_for,
+      COALESCE(AVG(CASE WHEN m.home_team_id=t.id THEN m.home_cards ELSE m.away_cards END),0) AS cards_for,
+      COALESCE(SUM(CASE WHEN m.home_team_id=t.id THEN 1 ELSE 0 END),0) AS home_matches,
+      COALESCE(AVG(CASE WHEN m.home_team_id=t.id THEN m.home_goals END),0) AS home_goals_for,
+      COALESCE(AVG(CASE WHEN m.home_team_id=t.id THEN m.away_goals END),0) AS home_goals_against,
+      COALESCE(SUM(CASE WHEN m.away_team_id=t.id THEN 1 ELSE 0 END),0) AS away_matches,
+      COALESCE(AVG(CASE WHEN m.away_team_id=t.id THEN m.away_goals END),0) AS away_goals_for,
+      COALESCE(AVG(CASE WHEN m.away_team_id=t.id THEN m.home_goals END),0) AS away_goals_against
     FROM teams t
-    LEFT JOIN matches m
+    JOIN matches m
       ON (m.home_team_id=t.id OR m.away_team_id=t.id)
-      AND m.home_goals IS NOT NULL
-      AND m.away_goals IS NOT NULL
-    WHERE m.id IS NOT NULL
-    GROUP BY t.id;
-  `);
+     AND m.home_goals IS NOT NULL
+     AND m.away_goals IS NOT NULL
+    GROUP BY t.id
+  `).all<any>();
+
+  const rows = result.results || [];
+  const statements: D1PreparedStatement[] = rows.map((r: any) =>
+    env.DB.prepare(`
+      INSERT OR REPLACE INTO team_stats (
+        team_id,matches,goals_for,goals_against,shots_for,shots_on_target_for,
+        corners_for,fouls_for,saves_for,cards_for,home_matches,home_goals_for,
+        home_goals_against,away_matches,away_goals_for,away_goals_against
+      ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+    `).bind(
+      Number(r.team_id),
+      Number(r.matches),
+      Number(r.goals_for),
+      Number(r.goals_against),
+      Number(r.shots_for || 0),
+      Number(r.shots_on_target_for || 0),
+      Number(r.corners_for || 0),
+      Number(r.fouls_for || 0),
+      Number(r.saves_for || 0),
+      Number(r.cards_for || 0),
+      Number(r.home_matches || 0),
+      Number(r.home_goals_for || 0),
+      Number(r.home_goals_against || 0),
+      Number(r.away_matches || 0),
+      Number(r.away_goals_for || 0),
+      Number(r.away_goals_against || 0),
+    )
+  );
+
+  for (let i = 0; i < statements.length; i += 100) {
+    await env.DB.batch(statements.slice(i, i + 100));
+  }
+
+  console.log(`Team stats rebuilt successfully: ${rows.length} teams from ${rows.reduce((n: number, r: any) => n + Number(r.matches || 0), 0)} team-match rows`);
 }
 
 export default {
@@ -49,15 +77,13 @@ export default {
 
   async scheduled(controller: ScheduledController, env: Env, _ctx: ExecutionContext) {
     try {
-      // Keep the existing snapshot importer as the source of match data.
-      // If its own derived-stats rebuild fails, matches are already imported;
-      // the clean rebuild below reconstructs team_stats from matches.
       await (base as any).scheduled(controller, env);
     } catch (error) {
+      // The importer may fail in its legacy derived-stats SQL after matches are
+      // imported. Do not stop the Cron: rebuild team_stats independently below.
       console.log('Snapshot import completed/failed before stats rebuild:', error);
     }
 
     await rebuildTeamStats(env);
-    console.log('Team stats rebuilt successfully');
   },
 };
