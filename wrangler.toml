@@ -1,5 +1,5 @@
 name = "match-probability-ai"
-main = "src/index.ts"
+main = "src/worker.ts"
 compatibility_date = "2026-09-03"
 
 [triggers]
