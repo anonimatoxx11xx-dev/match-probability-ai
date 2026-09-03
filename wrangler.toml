@@ -4,5 +4,5 @@ compatibility_date = "2026-09-03"
 
 [[d1_databases]]
 binding = "DB"
-database_name = "match-probability-db"
-database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+database_name = "match-probability-ai-db"
+database_id = "6da97357-a6cc-471b-86e7-21db19e67d98"
