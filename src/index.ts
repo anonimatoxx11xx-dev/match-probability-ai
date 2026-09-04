@@ -51,8 +51,6 @@ type Stats = {
 };
 
 function weightedSplit(splitMatches: number, splitFor: number, splitAgainst: number, overallFor: number, overallAgainst: number) {
-  // Small samples are shrunk toward the team's overall rate instead of being
-  // allowed to dominate the prediction.
   const weight = splitMatches <= 0 ? 0 : splitMatches / (splitMatches + 8);
   return {
     goalsFor: splitFor * weight + overallFor * (1 - weight),
@@ -63,119 +61,55 @@ function weightedSplit(splitMatches: number, splitFor: number, splitAgainst: num
 function predict(h: Stats, a: Stats) {
   const homeSplit = weightedSplit(h.homeMatches, h.homeGoalsFor, h.homeGoalsAgainst, h.goalsFor, h.goalsAgainst);
   const awaySplit = weightedSplit(a.awayMatches, a.awayGoalsFor, a.awayGoalsAgainst, a.goalsFor, a.goalsAgainst);
-
-  // Home prediction uses the home team's home scoring/conceding profile and the
-  // away team's road profile, then applies a modest home advantage.
   const hg = clamp((homeSplit.goalsFor * 0.55 + awaySplit.goalsAgainst * 0.45) * 1.05, 0.20, 3.80);
   const ag = clamp((awaySplit.goalsFor * 0.55 + homeSplit.goalsAgainst * 0.45) * 0.95, 0.15, 3.50);
-
   const hd = distribution(hg, 8), ad = distribution(ag, 8);
   const score: number[][] = Array.from({ length: 9 }, () => Array(9).fill(0));
   let home = 0, draw = 0, away = 0;
-
-  for (let i = 0; i < 9; i++) {
-    for (let j = 0; j < 9; j++) {
-      const p = hd[i] * ad[j];
-      score[i][j] = p;
-      if (i > j) home += p;
-      else if (i === j) draw += p;
-      else away += p;
-    }
+  for (let i = 0; i < 9; i++) for (let j = 0; j < 9; j++) {
+    const p = hd[i] * ad[j]; score[i][j] = p;
+    if (i > j) home += p; else if (i === j) draw += p; else away += p;
   }
-
   const sum = (fn: (i: number, j: number) => boolean) => {
-    let x = 0;
-    for (let i = 0; i < 9; i++) for (let j = 0; j < 9; j++) if (fn(i, j)) x += score[i][j];
-    return x;
+    let x = 0; for (let i = 0; i < 9; i++) for (let j = 0; j < 9; j++) if (fn(i, j)) x += score[i][j]; return x;
   };
-
   const over = (line: number) => sum((i, j) => i + j > line);
   const under = (line: number) => sum((i, j) => i + j < line);
   const bttsYes = sum((i, j) => i >= 1 && j >= 1);
-
   const correctScores: Array<{ score: string; probability: number }> = [];
-  for (let i = 0; i <= 5; i++) for (let j = 0; j <= 5; j++) {
-    correctScores.push({ score: `${i}-${j}`, probability: score[i][j] });
-  }
+  for (let i = 0; i <= 5; i++) for (let j = 0; j <= 5; j++) correctScores.push({ score: `${i}-${j}`, probability: score[i][j] });
   correctScores.sort((x, y) => y.probability - x.probability);
-
   const minMatches = Math.min(h.matches, a.matches);
   const dataQuality = minMatches >= 20 ? 'high' : minMatches >= 8 ? 'medium' : 'low';
   const reliability = clamp(0.35 + Math.min(minMatches, 30) / 30 * 0.65, 0.35, 1);
-
   return {
     expectedGoals: { home: hg, away: ag, total: hg + ag },
     result: { home, draw, away },
     doubleChance: { '1X': home + draw, 'X2': draw + away, '12': home + away },
-    drawNoBet: {
-      home: home + away > 0 ? home / (home + away) : 0,
-      away: home + away > 0 ? away / (home + away) : 0,
-      drawRefund: draw,
-    },
-    markets: {
-      over05: over(0), under05: under(1),
-      over15: over(1), under15: under(2),
-      over25: over(2), under25: under(3),
-      over35: over(3), under35: under(4),
-      over45: over(4), under45: under(5),
-      bttsYes, bttsNo: 1 - bttsYes,
-    },
+    drawNoBet: { home: home + away > 0 ? home / (home + away) : 0, away: home + away > 0 ? away / (home + away) : 0, drawRefund: draw },
+    markets: { over05: over(0), under05: under(1), over15: over(1), under15: under(2), over25: over(2), under25: under(3), over35: over(3), under35: under(4), over45: over(4), under45: under(5), bttsYes, bttsNo: 1 - bttsYes },
     correctScores: correctScores.slice(0, 10),
-    expectedStats: {
-      shots: h.shots + a.shots,
-      sot: h.sot + a.sot,
-      corners: h.corners + a.corners,
-      fouls: h.fouls + a.fouls,
-      saves: h.saves + a.saves,
-      cards: h.cards + a.cards,
-    },
-    dataQuality: {
-      homeMatches: h.matches,
-      awayMatches: a.matches,
-      minMatches,
-      level: dataQuality,
-      reliability,
-    },
+    expectedStats: { shots: h.shots + a.shots, sot: h.sot + a.sot, corners: h.corners + a.corners, fouls: h.fouls + a.fouls, saves: h.saves + a.saves, cards: h.cards + a.cards },
+    dataQuality: { homeMatches: h.matches, awayMatches: a.matches, minMatches, level: dataQuality, reliability },
     model: 'Poisson + home/away splits + historical team averages + home advantage',
   };
 }
 
 async function stats(env: Env, id: number): Promise<Stats | null> {
-  const r = await env.DB.prepare(`
-    SELECT matches,goals_for,goals_against,shots_for,shots_on_target_for,corners_for,fouls_for,saves_for,cards_for,
-           home_matches,home_goals_for,home_goals_against,away_matches,away_goals_for,away_goals_against
-    FROM team_stats WHERE team_id=?
-  `).bind(id).first<any>();
+  const r = await env.DB.prepare(`SELECT matches,goals_for,goals_against,shots_for,shots_on_target_for,corners_for,fouls_for,saves_for,cards_for,home_matches,home_goals_for,home_goals_against,away_matches,away_goals_for,away_goals_against FROM team_stats WHERE team_id=?`).bind(id).first<any>();
   if (!r) return null;
   return {
-    matches: Number(r.matches || 0),
-    goalsFor: Number(r.goals_for || 0),
-    goalsAgainst: Number(r.goals_against || 0),
-    shots: Number(r.shots_for || 0),
-    sot: Number(r.shots_on_target_for || 0),
-    corners: Number(r.corners_for || 0),
-    fouls: Number(r.fouls_for || 0),
-    saves: Number(r.saves_for || 0),
-    cards: Number(r.cards_for || 0),
-    homeMatches: Number(r.home_matches || 0),
-    homeGoalsFor: Number(r.home_goals_for || 0),
-    homeGoalsAgainst: Number(r.home_goals_against || 0),
-    awayMatches: Number(r.away_matches || 0),
-    awayGoalsFor: Number(r.away_goals_for || 0),
-    awayGoalsAgainst: Number(r.away_goals_against || 0),
+    matches: Number(r.matches || 0), goalsFor: Number(r.goals_for || 0), goalsAgainst: Number(r.goals_against || 0),
+    shots: Number(r.shots_for || 0), sot: Number(r.shots_on_target_for || 0), corners: Number(r.corners_for || 0), fouls: Number(r.fouls_for || 0), saves: Number(r.saves_for || 0), cards: Number(r.cards_for || 0),
+    homeMatches: Number(r.home_matches || 0), homeGoalsFor: Number(r.home_goals_for || 0), homeGoalsAgainst: Number(r.home_goals_against || 0),
+    awayMatches: Number(r.away_matches || 0), awayGoalsFor: Number(r.away_goals_for || 0), awayGoalsAgainst: Number(r.away_goals_against || 0),
   };
 }
 
 function canonical(name: string) {
   const n = String(name || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
   const aliases: Record<string, string> = {
-    'bayern munich': 'fc bayern munchen',
-    'bayern munchen': 'fc bayern munchen',
-    'inter milan': 'inter',
-    'internazionale': 'inter',
-    'ac milan': 'milan',
-    'as roma': 'roma',
-    'ssc napoli': 'napoli',
+    'bayern munich': 'fc bayern munchen', 'bayern munchen': 'fc bayern munchen', 'inter milan': 'inter', 'internazionale': 'inter', 'ac milan': 'milan', 'as roma': 'roma', 'ssc napoli': 'napoli',
   };
   return aliases[n] || n;
 }
@@ -183,9 +117,7 @@ function canonical(name: string) {
 async function resolveTeam(env: Env, value: string | null) {
   if (!value) return null;
   const id = Number(value);
-  if (Number.isInteger(id) && id > 0) {
-    return await env.DB.prepare('SELECT id,name FROM teams WHERE id=?').bind(id).first<any>();
-  }
+  if (Number.isInteger(id) && id > 0) return await env.DB.prepare('SELECT id,name FROM teams WHERE id=?').bind(id).first<any>();
   const wanted = canonical(value);
   const rows = await env.DB.prepare('SELECT id,name FROM teams').all<any>();
   return (rows.results || []).find((r: any) => canonical(r.name) === wanted) || null;
@@ -211,9 +143,8 @@ async function importSnapshot(env: Env) {
     if (row.api_football_id != null) localLeagueByApi.set(Number(row.api_football_id), Number(row.id));
     localLeagueByName.set(String(row.name), Number(row.id));
   }
-
   const leagueStatements = snapshot.leagues.map(l => {
-    const localId = localLeagueByName.get(l.localLeague);
+    const localId = localLeagueByName.get(l.localLeague || l.name);
     return localId ? env.DB.prepare('UPDATE leagues SET api_football_id=? WHERE id=?').bind(l.id, localId) : null;
   }).filter(Boolean) as D1PreparedStatement[];
   if (leagueStatements.length) await env.DB.batch(leagueStatements);
@@ -248,7 +179,11 @@ async function importSnapshot(env: Env) {
 
   const refreshedTeams = await env.DB.prepare('SELECT id,name,api_football_id FROM teams').all<any>();
   teamIdByApi.clear();
-  for (const row of refreshedTeams.results || []) if (row.api_football_id != null) teamIdByApi.set(Number(row.api_football_id), Number(row.id));
+  teamByCanonical.clear();
+  for (const row of refreshedTeams.results || []) {
+    if (row.api_football_id != null) teamIdByApi.set(Number(row.api_football_id), Number(row.id));
+    teamByCanonical.set(canonical(row.name), row);
+  }
 
   const matchStatements: D1PreparedStatement[] = [];
   let imported = 0, skipped = 0;
@@ -256,15 +191,11 @@ async function importSnapshot(env: Env) {
     if (!f.fixtureId || !['FT','AET','P'].includes(String(f.status))) continue;
     if (f.goals?.home == null || f.goals?.away == null) continue;
     const leagueId = localLeagueByApi.get(Number(f.league?.id));
-    const homeId = teamIdByApi.get(Number(f.home?.id));
-    const awayId = teamIdByApi.get(Number(f.away?.id));
+    const homeId = teamIdByApi.get(Number(f.home?.id)) || teamByCanonical.get(canonical(f.home?.name))?.id;
+    const awayId = teamIdByApi.get(Number(f.away?.id)) || teamByCanonical.get(canonical(f.away?.name))?.id;
     if (!leagueId || !homeId || !awayId) { skipped++; continue; }
     const hs = f.stats?.home || {}, as = f.stats?.away || {};
-    matchStatements.push(env.DB.prepare(`
-      INSERT INTO matches (league_id,home_team_id,away_team_id,kickoff,home_goals,away_goals,home_shots,away_shots,home_sot,away_sot,home_corners,away_corners,home_fouls,away_fouls,home_saves,away_saves,home_cards,away_cards,api_football_id)
-      VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-      ON CONFLICT(api_football_id) DO UPDATE SET league_id=excluded.league_id,home_team_id=excluded.home_team_id,away_team_id=excluded.away_team_id,kickoff=excluded.kickoff,home_goals=excluded.home_goals,away_goals=excluded.away_goals,home_shots=excluded.home_shots,away_shots=excluded.away_shots,home_sot=excluded.home_sot,away_sot=excluded.away_sot,home_corners=excluded.home_corners,away_corners=excluded.away_corners,home_fouls=excluded.home_fouls,away_fouls=excluded.away_fouls,home_saves=excluded.home_saves,away_saves=excluded.away_saves,home_cards=excluded.home_cards,away_cards=excluded.away_cards
-    `).bind(leagueId,homeId,awayId,f.kickoff,f.goals.home,f.goals.away,hs.shots,as.shots,hs.sot,as.sot,hs.corners,as.corners,hs.fouls,as.fouls,hs.saves,as.saves,hs.cards,as.cards,f.fixtureId));
+    matchStatements.push(env.DB.prepare(`INSERT INTO matches (league_id,home_team_id,away_team_id,kickoff,home_goals,away_goals,home_shots,away_shots,home_sot,away_sot,home_corners,away_corners,home_fouls,away_fouls,home_saves,away_saves,home_cards,away_cards,api_football_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(api_football_id) DO UPDATE SET league_id=excluded.league_id,home_team_id=excluded.home_team_id,away_team_id=excluded.away_team_id,kickoff=excluded.kickoff,home_goals=excluded.home_goals,away_goals=excluded.away_goals,home_shots=excluded.home_shots,away_shots=excluded.away_shots,home_sot=excluded.home_sot,away_sot=excluded.away_sot,home_corners=excluded.home_corners,away_corners=excluded.away_corners,home_fouls=excluded.home_fouls,away_fouls=excluded.away_fouls,home_saves=excluded.home_saves,away_saves=excluded.away_saves,home_cards=excluded.home_cards,away_cards=excluded.away_cards`).bind(leagueId,homeId,awayId,f.kickoff,f.goals.home,f.goals.away,hs.shots,as.shots,hs.sot,as.sot,hs.corners,as.corners,hs.fouls,as.fouls,hs.saves,as.saves,hs.cards,as.cards,f.fixtureId));
     imported++;
   }
   for (let i = 0; i < matchStatements.length; i += 100) await env.DB.batch(matchStatements.slice(i, i + 100));
@@ -305,19 +236,13 @@ export default {
       if (u.pathname === '/api/leagues') return json((await env.DB.prepare('SELECT id,name,country FROM leagues ORDER BY name').all()).results);
       if (u.pathname === '/api/teams') {
         const league = u.searchParams.get('league');
-        const r = league
-          ? await env.DB.prepare('SELECT t.id,t.name,l.name league FROM teams t JOIN leagues l ON l.id=t.league_id WHERE l.name=? ORDER BY t.name').bind(league).all()
-          : await env.DB.prepare('SELECT id,name FROM teams ORDER BY name').all();
+        const r = league ? await env.DB.prepare('SELECT t.id,t.name,l.name league FROM teams t JOIN leagues l ON l.id=t.league_id WHERE l.name=? ORDER BY t.name').bind(league).all() : await env.DB.prepare('SELECT id,name FROM teams ORDER BY name').all();
         return json(r.results);
       }
       if (u.pathname === '/api/predict') {
         let homeValue: string | null = u.searchParams.get('home');
         let awayValue: string | null = u.searchParams.get('away');
-        if (request.method === 'POST') {
-          const b = await request.json() as any;
-          homeValue = String(b.homeTeamId ?? b.home ?? '');
-          awayValue = String(b.awayTeamId ?? b.away ?? '');
-        }
+        if (request.method === 'POST') { const b = await request.json() as any; homeValue = String(b.homeTeamId ?? b.home ?? ''); awayValue = String(b.awayTeamId ?? b.away ?? ''); }
         const homeTeam = await resolveTeam(env, homeValue), awayTeam = await resolveTeam(env, awayValue);
         if (!homeTeam || !awayTeam || homeTeam.id === awayTeam.id) return json({ error: 'Squadre home/away non valide' }, 400);
         const h = await stats(env, Number(homeTeam.id)), a = await stats(env, Number(awayTeam.id));
@@ -329,16 +254,16 @@ export default {
         const homeTeam = await resolveTeam(env, String(b.homeTeamId ?? b.home ?? ''));
         const awayTeam = await resolveTeam(env, String(b.awayTeamId ?? b.away ?? ''));
         if (!homeTeam || !awayTeam || homeTeam.id === awayTeam.id) return json({ error: 'Squadre home/away non valide' }, 400);
-        const runs = clamp(Number(b.runs) || 10000, 1000, 100000);
-        return json({ homeTeam: homeTeam.name, awayTeam: awayTeam.name, ...(await simulate(env, Number(homeTeam.id), Number(awayTeam.id), runs)) });
+        const runs = clamp(Number(b.runs || 10000), 1000, 100000);
+        return json({ homeTeam: homeTeam.name, awayTeam: awayTeam.name, ...await simulate(env, Number(homeTeam.id), Number(awayTeam.id), Math.round(runs)) });
       }
-      return json({ error: 'Endpoint non trovato' }, 404);
-    } catch (e: any) {
-      return json({ error: e?.message || 'Errore interno' }, 500);
+      if (request.method === 'POST' && u.pathname === '/api/import') return json(await importSnapshot(env));
+      return json({ error: 'Not found' }, 404);
+    } catch (error) {
+      return json({ error: String(error instanceof Error ? error.message : error) }, 500);
     }
   },
-
-  async scheduled(_controller: ScheduledController, env: Env) {
+  async scheduled(controller: ScheduledController, env: Env, ctx: ExecutionContext) {
     await importSnapshot(env);
   },
 };
