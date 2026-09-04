@@ -1,0 +1,65 @@
+name: Football-Data.org Sync
+
+on:
+  workflow_dispatch:
+    inputs:
+      season:
+        description: 'Stagione football-data.org (es. 2026)'
+        required: true
+        default: '2026'
+        type: string
+  schedule:
+    - cron: '47 4 * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: football-data-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      FOOTBALL_DATA_API_KEY: ${{ secrets.FOOTBALL_DATA_API_KEY }}
+      SEASON: ${{ inputs.season || '2026' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Check secret
+        run: |
+          if [ -z "$FOOTBALL_DATA_API_KEY" ]; then
+            echo "FOOTBALL_DATA_API_KEY non configurata nei Secrets del repository"
+            exit 1
+          fi
+
+      - name: Validate season
+        run: |
+          if ! [[ "$SEASON" =~ ^20[0-9]{2}$ ]]; then
+            echo "SEASON non valida: $SEASON"
+            exit 1
+          fi
+
+      - name: Collect football-data.org data
+        run: node scripts/football-data-sync.mjs > data/api-football/latest.json
+
+      - name: Validate merged snapshot
+        run: |
+          node -e "const fs=require('fs'); const x=JSON.parse(fs.readFileSync('data/api-football/latest.json','utf8')); if(!x.generatedAt || !Array.isArray(x.fixtures) || !Array.isArray(x.teams)) process.exit(1); console.log('fixtures='+x.fixtures.length,'teams='+x.teams.length,'mode='+x.mode,'generatedAt='+x.generatedAt);"
+
+      - name: Commit snapshot
+        run: |
+          git config user.name 'match-probability-ai-bot'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/api-football/latest.json
+          if git diff --cached --quiet; then
+            echo 'Nessun cambiamento dati.'
+            exit 0
+          fi
+          git commit -m "chore: update football-data.org snapshot season $SEASON"
+          git push
