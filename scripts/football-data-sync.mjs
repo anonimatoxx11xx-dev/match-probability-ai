@@ -11,7 +11,21 @@ const competitions = [
 const BASE = new URL('../data/api-football/latest.json', import.meta.url); const fs = await import('node:fs/promises');
 const norm = s => String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim();
 const teamKey = s => { const a={ 'fc internazionale milano':'inter','internazionale milano':'inter','inter milano':'inter' }; const t=norm(s).split(' ').filter(x=>!['fc','acf','as','ss','us','ac','bc','cfc','calcio','football','club','1907','1909','1913','1893'].includes(x)); return a[t.join(' ')]||t.join(' '); };
-async function api(path){const r=await fetch(`${API}${path}`,{headers:{'X-Auth-Token':API_KEY,accept:'application/json'}});const text=await r.text();let d;try{d=JSON.parse(text)}catch{throw new Error(`football-data HTTP ${r.status}: ${text.slice(0,300)}`)}if(!r.ok)throw new Error(`football-data HTTP ${r.status}: ${JSON.stringify(d)}`);return d;}
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+async function api(path, attempt=0){
+  const r=await fetch(`${API}${path}`,{headers:{'X-Auth-Token':API_KEY,accept:'application/json'}});
+  const text=await r.text();
+  let d; try{d=JSON.parse(text)}catch{d={message:text}};
+  if(r.status===429 && attempt<5){
+    const retryAfter=Number(r.headers.get('retry-after'))||65;
+    const waitMs=Math.max(1000,(retryAfter+1)*1000);
+    console.error(`football-data 429 on ${path}; waiting ${Math.ceil(waitMs/1000)}s (retry ${attempt+1}/5)`);
+    await sleep(waitMs);
+    return api(path,attempt+1);
+  }
+  if(!r.ok)throw new Error(`football-data HTTP ${r.status}: ${JSON.stringify(d)}`);
+  return d;
+}
 let base={generatedAt:null,season:currentSeason,mode:'merged',leagues:[],teams:[],fixtures:[]};try{base=JSON.parse(await fs.readFile(new URL(BASE),'utf8'))}catch{console.error('Snapshot precedente non presente: creo football-data-only.');}
 const fixtures=[...(Array.isArray(base.fixtures)?base.fixtures:[])];
 const teamsByKey=new Map();
@@ -34,6 +48,7 @@ for(const season of seasons){
       fixtures.push({fixtureId:matchId,kickoff,status:'FT',league:{id:comp.apiFootballLeagueId,name:comp.name,country:comp.country,season},home:{id:ht.apiId,name:ht.name},away:{id:at.apiId,name:at.name},goals:{home:Number(m.score.fullTime.home),away:Number(m.score.fullTime.away)},stats:{home:{shots:null,sot:null,corners:null,fouls:null,saves:null,cards:null},away:{shots:null,sot:null,corners:null,fouls:null,saves:null,cards:null}},source:'football-data.org',sourceMatchId:m.id,sourceSeason:season});
       existingKeys.add(key);imported++;
     }
+    await sleep(1500);
   }
 }
 fixtures.sort((a,b)=>String(a.kickoff).localeCompare(String(b.kickoff)));
