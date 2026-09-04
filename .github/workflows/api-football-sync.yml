@@ -2,6 +2,12 @@ name: API-Football Data Sync
 
 on:
   workflow_dispatch:
+    inputs:
+      season:
+        description: 'Stagione API-Football (es. 2024, 2023, 2022)'
+        required: true
+        default: '2024'
+        type: string
   schedule:
     - cron: '17 3 * * *'
 
@@ -18,9 +24,9 @@ jobs:
     timeout-minutes: 20
     env:
       API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
-      SEASON: '2024'
-      REQUEST_DELAY_MS: '7000'
-      MAX_DETAIL_FIXTURES: '60'
+      SEASON: ${{ inputs.season || '2024' }}
+      REQUEST_DELAY_MS: '6500'
+      MAX_DETAIL_FIXTURES: '90'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -31,6 +37,13 @@ jobs:
         run: |
           if [ -z "$API_FOOTBALL_KEY" ]; then
             echo "API_FOOTBALL_KEY non configurata nei Secrets del repository"
+            exit 1
+          fi
+
+      - name: Validate season
+        run: |
+          if ! [[ "$SEASON" =~ ^20[0-9]{2}$ ]]; then
+            echo "SEASON non valida: $SEASON"
             exit 1
           fi
 
@@ -50,5 +63,5 @@ jobs:
             echo 'Nessun cambiamento dati.'
             exit 0
           fi
-          git commit -m 'chore: update API-Football snapshot'
+          git commit -m "chore: update API-Football snapshot season $SEASON"
           git push
