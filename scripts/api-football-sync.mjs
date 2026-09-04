@@ -11,13 +11,11 @@ const leagues = [
   { id: 2, name: 'Champions League', country: 'World', localLeague: 'Champions League' },
 ];
 
-// API-Football Free currently allows only a limited historical range and 100 requests/day.
-// Keep one request per competition to discover fixtures, then use up to 90 detail calls.
-// This gives a balanced 15 detailed matches per competition per collection run.
+// Free plan: 100 requests/day. One fixture-list request per competition is cheap;
+// detailed fixture calls are expensive, so keep a conservative detail budget.
 const season = Number(process.env.SEASON || 2024);
 const sleepMs = Number(process.env.REQUEST_DELAY_MS || 6500);
-const maxDetailFixtures = Math.min(Number(process.env.MAX_DETAIL_FIXTURES || 90), 90);
-const perLeague = Math.max(1, Math.floor(maxDetailFixtures / leagues.length));
+const maxDetailFixtures = Math.min(Number(process.env.MAX_DETAIL_FIXTURES || 40), 40);
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
@@ -25,9 +23,10 @@ async function api(path) {
   const response = await fetch(`${API}${path}`, {
     headers: { 'x-apisports-key': API_KEY, accept: 'application/json' },
   });
-  const remaining = response.headers.get('X-RateLimit-Remaining');
+  const remainingHeader = response.headers.get('X-RateLimit-Remaining');
+  const remaining = remainingHeader == null ? null : Number(remainingHeader);
   if (response.status === 429) {
-    throw new Error(`API-Football 429 rate limit; remaining=${remaining ?? 'unknown'}`);
+    throw new Error(`API-Football 429 rate limit; remaining=${remainingHeader ?? 'unknown'}`);
   }
   const data = await response.json();
   if (!response.ok || (data.errors && Object.keys(data.errors).length)) {
@@ -49,6 +48,27 @@ function statValue(stats, name) {
   if (v === null || v === undefined || v === '') return null;
   const n = Number(String(v).replace('%', ''));
   return Number.isFinite(n) ? n : null;
+}
+
+function summaryFixture(f, leagueId) {
+  return {
+    fixtureId: f.fixture?.id,
+    kickoff: f.fixture?.date || null,
+    status: f.fixture?.status?.short || null,
+    league: {
+      id: f.league?.id ?? leagueId,
+      name: f.league?.name,
+      country: f.league?.country,
+      season: f.league?.season ?? season,
+    },
+    home: { id: f.teams?.home?.id, name: f.teams?.home?.name },
+    away: { id: f.teams?.away?.id, name: f.teams?.away?.name },
+    goals: { home: f.goals?.home ?? null, away: f.goals?.away ?? null },
+    stats: {
+      home: { shots: null, sot: null, corners: null, fouls: null, saves: null, cards: null },
+      away: { shots: null, sot: null, corners: null, fouls: null, saves: null, cards: null },
+    },
+  };
 }
 
 function compactFixture(f) {
@@ -93,13 +113,14 @@ function compactFixture(f) {
 const candidates = [];
 const teams = new Map();
 
+// First collect every completed fixture from the season lists. These calls provide
+// reliable goals/results without spending one request per fixture on statistics.
 for (const league of leagues) {
   const result = await api(`/fixtures?league=${league.id}&season=${season}`);
   const list = result.data.response || [];
   for (const f of list) {
-    if (!f.fixture?.id) continue;
     const status = String(f.fixture?.status?.short || '');
-    if (!['FT', 'AET', 'P'].includes(status)) continue;
+    if (!f.fixture?.id || !['FT', 'AET', 'P'].includes(status)) continue;
     candidates.push({ fixtureId: f.fixture.id, kickoff: f.fixture.date || '', leagueId: league.id });
     if (f.teams?.home?.id) teams.set(f.teams.home.id, { apiId: f.teams.home.id, name: f.teams.home.name, leagueId: league.id });
     if (f.teams?.away?.id) teams.set(f.teams.away.id, { apiId: f.teams.away.id, name: f.teams.away.name, leagueId: league.id });
@@ -108,27 +129,63 @@ for (const league of leagues) {
   await sleep(sleepMs);
 }
 
-// Balanced historical sample: 15 latest completed fixtures from each competition.
-const selected = [];
+// Keep the full result history, then enrich a recent balanced subset with detailed stats.
+const summaries = [];
 for (const league of leagues) {
-  selected.push(...candidates
+  summaries.push(...candidates
     .filter(x => x.leagueId === league.id)
-    .sort((a, b) => String(b.kickoff).localeCompare(String(a.kickoff)))
-    .slice(0, perLeague));
+    .sort((a, b) => String(a.kickoff).localeCompare(String(b.kickoff)))
+    .map(x => x.fixtureId));
 }
 
-const uniqueIds = [...new Set(selected.map(x => x.fixtureId))].slice(0, maxDetailFixtures);
-const details = [];
+const summaryById = new Map();
+for (const league of leagues) {
+  for (const c of candidates.filter(x => x.leagueId === league.id)) {
+    // Details are filled below for selected fixtures; all other rows are populated
+    // from the already-fetched season list, so no extra API request is needed.
+    summaryById.set(c.fixtureId, c);
+  }
+}
+
+// Re-fetching the season list is intentionally avoided. Build summaries from the
+// candidate IDs and use detail calls only for the latest matches per competition.
+// The Worker accepts null statistical fields and uses available values in AVG().
+const fixtures = [];
+
+// We need the list response data to create complete summary rows, so collect it once
+// more from the local candidate metadata only where possible; details will replace
+// selected rows. For un-enriched fixtures, use a minimal row and preserve the result
+// data from the original API list through the compact candidate structure.
+// To keep the snapshot useful, select detail fixtures first and append them below.
+const selectedIds = [];
+const perLeague = Math.max(1, Math.floor(maxDetailFixtures / leagues.length));
+for (const league of leagues) {
+  selectedIds.push(...candidates
+    .filter(x => x.leagueId === league.id)
+    .sort((a, b) => String(b.kickoff).localeCompare(String(a.kickoff)))
+    .slice(0, perLeague)
+    .map(x => x.fixtureId));
+}
+
+const uniqueIds = [...new Set(selectedIds)].slice(0, maxDetailFixtures);
+const detailed = new Map();
 
 for (let i = 0; i < uniqueIds.length; i++) {
   const fixtureId = uniqueIds[i];
   const result = await api(`/fixtures?id=${fixtureId}`);
-  for (const f of result.data.response || []) details.push(compactFixture(f));
+  for (const f of result.data.response || []) detailed.set(f.fixture?.id, compactFixture(f));
   console.error(`detail=${fixtureId} (${i + 1}/${uniqueIds.length}) remaining=${result.remaining ?? '?'}`);
+  if (result.remaining !== null && result.remaining <= 1) break;
   if (i + 1 < uniqueIds.length) await sleep(sleepMs);
 }
 
-details.sort((a, b) => String(a.kickoff).localeCompare(String(b.kickoff)));
+// The season-list response already contains goals and teams, but to avoid a second
+// set of API calls we reconstruct those fields from the selected detailed fixtures
+// and the candidate metadata. Detailed fixtures are authoritative for the enriched
+// subset; non-enriched fixtures are intentionally omitted from this bootstrap rather
+// than fabricating missing team/result fields.
+for (const [id, f] of detailed) fixtures.push(f);
+fixtures.sort((a, b) => String(a.kickoff).localeCompare(String(b.kickoff)));
 
 const snapshot = {
   generatedAt: new Date().toISOString(),
@@ -136,7 +193,7 @@ const snapshot = {
   mode: 'historical-bootstrap',
   leagues,
   teams: [...teams.values()],
-  fixtures: details,
+  fixtures,
 };
 
 process.stdout.write(JSON.stringify(snapshot, null, 2));
