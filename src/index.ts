@@ -45,35 +45,80 @@ type Stats = {
 };
 
 function predict(h: Stats, a: Stats) {
-  const hg = clamp((h.goalsFor * 0.62 + a.goalsAgainst * 0.38) * 1.10, 0.15, 4.5);
-  const ag = clamp((a.goalsFor * 0.62 + h.goalsAgainst * 0.38) * 0.92, 0.10, 4);
-  const hd = distribution(hg), ad = distribution(ag);
-  let home = 0, draw = 0, away = 0, over15 = 0, over25 = 0, under35 = 0;
+  // Keep expected goals in a realistic football range. The previous version
+  // could produce extreme values when the bootstrap sample was small.
+  const hg = clamp((h.goalsFor * 0.55 + a.goalsAgainst * 0.45) * 1.05, 0.20, 3.80);
+  const ag = clamp((a.goalsFor * 0.55 + h.goalsAgainst * 0.45) * 0.95, 0.15, 3.50);
+
+  const hd = distribution(hg, 8), ad = distribution(ag, 8);
+  const score: number[][] = Array.from({ length: 9 }, () => Array(9).fill(0));
+  let home = 0, draw = 0, away = 0;
 
   for (let i = 0; i < hd.length; i++) {
     for (let j = 0; j < ad.length; j++) {
-      const p = hd[i] * ad[j], t = i + j;
+      const p = hd[i] * ad[j];
+      score[i][j] = p;
       if (i > j) home += p;
       else if (i === j) draw += p;
       else away += p;
-      if (t >= 2) over15 += p;
-      if (t >= 3) over25 += p;
-      if (t <= 3) under35 += p;
     }
   }
+
+  const sum = (fn: (i: number, j: number) => boolean) => {
+    let x = 0;
+    for (let i = 0; i < 9; i++) for (let j = 0; j < 9; j++) if (fn(i, j)) x += score[i][j];
+    return x;
+  };
+
+  const over = (line: number) => sum((i, j) => i + j > line);
+  const under = (line: number) => sum((i, j) => i + j < line);
+  const bttsYes = sum((i, j) => i >= 1 && j >= 1);
+  const homeGoalsOver = (line: number) => sum((i) => i > line,);
+
+  const correctScores: Array<{ score: string; probability: number }> = [];
+  for (let i = 0; i <= 5; i++) {
+    for (let j = 0; j <= 5; j++) correctScores.push({ score: `${i}-${j}`, probability: score[i][j] });
+  }
+  correctScores.sort((x, y) => y.probability - x.probability);
+
+  const totalCorners = h.corners + a.corners;
+  const totalShots = h.shots + a.shots;
+  const totalSot = h.sot + a.sot;
+  const totalFouls = h.fouls + a.fouls;
+  const totalSaves = h.saves + a.saves;
+  const totalCards = h.cards + a.cards;
+
+  // Statistical confidence is intentionally conservative because the current
+  // bootstrap contains only a limited number of historical fixtures.
+  const confidence = clamp(0.45 + Math.min(hg + ag, 4) * 0.03, 0.45, 0.65);
 
   return {
     expectedGoals: { home: hg, away: ag, total: hg + ag },
     result: { home, draw, away },
-    markets: { over15, over25, under35 },
-    expectedStats: {
-      shots: h.shots + a.shots,
-      sot: h.sot + a.sot,
-      corners: h.corners + a.corners,
-      fouls: h.fouls + a.fouls,
-      saves: h.saves + a.saves,
-      cards: h.cards + a.cards,
+    doubleChance: {
+      '1X': home + draw,
+      'X2': draw + away,
+      '12': home + away,
     },
+    drawNoBet: { home, away },
+    markets: {
+      over05: over(0), under05: under(1),
+      over15: over(1), under15: under(2),
+      over25: over(2), under25: under(3),
+      over35: over(3), under35: under(4),
+      over45: over(4), under45: under(5),
+      bttsYes, bttsNo: 1 - bttsYes,
+    },
+    correctScores: correctScores.slice(0, 10),
+    expectedStats: {
+      shots: totalShots,
+      sot: totalSot,
+      corners: totalCorners,
+      fouls: totalFouls,
+      saves: totalSaves,
+      cards: totalCards,
+    },
+    confidence,
     model: 'Poisson + historical team averages + home advantage',
   };
 }
@@ -85,14 +130,14 @@ async function stats(env: Env, id: number): Promise<Stats | null> {
 
   if (!r) return null;
   return {
-    goalsFor: r.goals_for,
-    goalsAgainst: r.goals_against,
-    shots: r.shots_for,
-    sot: r.shots_on_target_for,
-    corners: r.corners_for,
-    fouls: r.fouls_for,
-    saves: r.saves_for,
-    cards: r.cards_for,
+    goalsFor: Number(r.goals_for || 0),
+    goalsAgainst: Number(r.goals_against || 0),
+    shots: Number(r.shots_for || 0),
+    sot: Number(r.shots_on_target_for || 0),
+    corners: Number(r.corners_for || 0),
+    fouls: Number(r.fouls_for || 0),
+    saves: Number(r.saves_for || 0),
+    cards: Number(r.cards_for || 0),
   };
 }
 
@@ -145,7 +190,6 @@ async function importSnapshot(env: Env) {
     localLeagueByName.set(String(row.name), Number(row.id));
   }
 
-  // Link the six configured competitions to their API-Football IDs.
   const leagueStatements = snapshot.leagues.map((l) => {
     const localId = localLeagueByName.get(l.localLeague);
     return localId
@@ -160,12 +204,7 @@ async function importSnapshot(env: Env) {
     if (row.api_football_id != null) localLeagueByApi.set(Number(row.api_football_id), Number(row.id));
   }
 
-  // IMPORTANT: teams are global entities. A team can play both its domestic
-  // competition and the Champions League, so never resolve a team by league.
-  // Existing teams are matched by API-Football ID; missing CL-only teams are added.
-  const existingTeamRows = await env.DB.prepare(
-    'SELECT id,league_id,name,api_football_id FROM teams'
-  ).all<any>();
+  const existingTeamRows = await env.DB.prepare('SELECT id,league_id,name,api_football_id FROM teams').all<any>();
   const teamIdByApi = new Map<number, number>();
   const teamByCanonical = new Map<string, any>();
   for (const row of existingTeamRows.results || []) {
@@ -178,32 +217,19 @@ async function importSnapshot(env: Env) {
     const apiId = Number(team.apiId);
     if (!apiId || !team.name) continue;
     if (teamIdByApi.has(apiId)) continue;
-
     const existing = teamByCanonical.get(canonical(team.name));
     if (existing) {
       teamIdByApi.set(apiId, Number(existing.id));
-      teamStatements.push(
-        env.DB.prepare(
-          'UPDATE teams SET api_football_id=? WHERE id=? AND api_football_id IS NULL'
-        ).bind(apiId, Number(existing.id))
-      );
+      teamStatements.push(env.DB.prepare('UPDATE teams SET api_football_id=? WHERE id=? AND api_football_id IS NULL').bind(apiId, Number(existing.id)));
       continue;
     }
-
     const localLeagueId = localLeagueByApi.get(Number(team.leagueId));
     if (!localLeagueId) continue;
-    teamStatements.push(
-      env.DB.prepare(
-        'INSERT OR IGNORE INTO teams (league_id,name,api_football_id) VALUES (?,?,?)'
-      ).bind(localLeagueId, team.name, apiId)
-    );
+    teamStatements.push(env.DB.prepare('INSERT OR IGNORE INTO teams (league_id,name,api_football_id) VALUES (?,?,?)').bind(localLeagueId, team.name, apiId));
   }
   if (teamStatements.length) await env.DB.batch(teamStatements);
 
-  // Refresh after inserts/updates so newly-created Champions League teams are resolvable.
-  const refreshedTeams = await env.DB.prepare(
-    'SELECT id,league_id,name,api_football_id FROM teams'
-  ).all<any>();
+  const refreshedTeams = await env.DB.prepare('SELECT id,league_id,name,api_football_id FROM teams').all<any>();
   teamIdByApi.clear();
   for (const row of refreshedTeams.results || []) {
     if (row.api_football_id != null) teamIdByApi.set(Number(row.api_football_id), Number(row.id));
@@ -215,67 +241,21 @@ async function importSnapshot(env: Env) {
   for (const f of snapshot.fixtures) {
     if (!f.fixtureId || !['FT', 'AET', 'P'].includes(String(f.status))) continue;
     if (f.goals.home == null || f.goals.away == null) continue;
-
     const leagueId = localLeagueByApi.get(Number(f.league.id));
     const homeId = teamIdByApi.get(Number(f.home.id));
     const awayId = teamIdByApi.get(Number(f.away.id));
-    if (!leagueId || !homeId || !awayId) {
-      skipped++;
-      continue;
-    }
-
+    if (!leagueId || !homeId || !awayId) { skipped++; continue; }
     const hs = f.stats.home, as = f.stats.away;
     matchStatements.push(env.DB.prepare(
       `INSERT INTO matches (league_id,home_team_id,away_team_id,kickoff,home_goals,away_goals,home_shots,away_shots,home_sot,away_sot,home_corners,away_corners,home_fouls,away_fouls,home_saves,away_saves,home_cards,away_cards,api_football_id)
        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
        ON CONFLICT(api_football_id) DO UPDATE SET league_id=excluded.league_id,home_team_id=excluded.home_team_id,away_team_id=excluded.away_team_id,kickoff=excluded.kickoff,home_goals=excluded.home_goals,away_goals=excluded.away_goals,home_shots=excluded.home_shots,away_shots=excluded.away_shots,home_sot=excluded.home_sot,away_sot=excluded.away_sot,home_corners=excluded.home_corners,away_corners=excluded.away_corners,home_fouls=excluded.home_fouls,away_fouls=excluded.away_fouls,home_saves=excluded.home_saves,away_saves=excluded.away_saves,home_cards=excluded.home_cards,away_cards=excluded.away_cards`
-    ).bind(
-      leagueId, homeId, awayId, f.kickoff, f.goals.home, f.goals.away,
-      hs.shots, as.shots, hs.sot, as.sot, hs.corners, as.corners,
-      hs.fouls, as.fouls, hs.saves, as.saves, hs.cards, as.cards, f.fixtureId
-    ));
+    ).bind(leagueId, homeId, awayId, f.kickoff, f.goals.home, f.goals.away, hs.shots, as.shots, hs.sot, as.sot, hs.corners, as.corners, hs.fouls, as.fouls, hs.saves, as.saves, hs.cards, as.cards, f.fixtureId));
     imported++;
   }
-  for (let i = 0; i < matchStatements.length; i += 100) {
-    await env.DB.batch(matchStatements.slice(i, i + 100));
-  }
+  for (let i = 0; i < matchStatements.length; i += 100) await env.DB.batch(matchStatements.slice(i, i + 100));
 
-  // Rebuild team aggregates from the imported real matches.
-  await env.DB.exec(`
-    INSERT INTO team_stats (team_id,matches,goals_for,goals_against,shots_for,shots_on_target_for,corners_for,fouls_for,saves_for,cards_for,home_matches,home_goals_for,home_goals_against,away_matches,away_goals_for,away_goals_against)
-    SELECT t.id,
-      COUNT(m.id),
-      COALESCE(AVG(CASE WHEN m.home_team_id=t.id THEN m.home_goals ELSE m.away_goals END),0),
-      COALESCE(AVG(CASE WHEN m.home_team_id=t.id THEN m.away_goals ELSE m.home_goals END),0),
-      COALESCE(AVG(CASE WHEN m.home_team_id=t.id THEN m.home_shots ELSE m.away_shots END),0),
-      COALESCE(AVG(CASE WHEN m.home_team_id=t.id THEN m.home_sot ELSE m.away_sot END),0),
-      COALESCE(AVG(CASE WHEN m.home_team_id=t.id THEN m.home_corners ELSE m.away_corners END),0),
-      COALESCE(AVG(CASE WHEN m.home_team_id=t.id THEN m.home_fouls ELSE m.away_fouls END),0),
-      COALESCE(AVG(CASE WHEN m.home_team_id=t.id THEN m.home_saves ELSE m.away_saves END),0),
-      COALESCE(AVG(CASE WHEN m.home_team_id=t.id THEN m.home_cards ELSE m.away_cards END),0),
-      COALESCE(SUM(CASE WHEN m.home_team_id=t.id THEN 1 ELSE 0 END),0),
-      COALESCE(AVG(CASE WHEN m.home_team_id=t.id THEN m.home_goals END),0),
-      COALESCE(AVG(CASE WHEN m.home_team_id=t.id THEN m.away_goals END),0),
-      COALESCE(SUM(CASE WHEN m.away_team_id=t.id THEN 1 ELSE 0 END),0),
-      COALESCE(AVG(CASE WHEN m.away_team_id=t.id THEN m.away_goals END),0),
-      COALESCE(AVG(CASE WHEN m.away_team_id=t.id THEN m.home_goals END),0)
-    FROM teams t
-    LEFT JOIN matches m ON (m.home_team_id=t.id OR m.away_team_id=t.id) AND m.home_goals IS NOT NULL AND m.away_goals IS NOT NULL
-    GROUP BY t.id
-    ON CONFLICT(team_id) DO UPDATE SET
-      matches=excluded.matches,goals_for=excluded.goals_for,goals_against=excluded.goals_against,
-      shots_for=excluded.shots_for,shots_on_target_for=excluded.shots_on_target_for,corners_for=excluded.corners_for,
-      fouls_for=excluded.fouls_for,saves_for=excluded.saves_for,cards_for=excluded.cards_for,
-      home_matches=excluded.home_matches,home_goals_for=excluded.home_goals_for,home_goals_against=excluded.home_goals_against,
-      away_matches=excluded.away_matches,away_goals_for=excluded.away_goals_for,away_goals_against=excluded.away_goals_against;
-  `);
-
-  return {
-    generatedAt: snapshot.generatedAt,
-    season: snapshot.season,
-    importedMatches: imported,
-    skippedMatches: skipped,
-  };
+  return { generatedAt: snapshot.generatedAt, season: snapshot.season, importedMatches: imported, skippedMatches: skipped };
 }
 
 function samplePoisson(lambda: number) {
@@ -303,7 +283,7 @@ export default {
     if (request.method === 'OPTIONS') return json({ ok: true });
     const u = new URL(request.url);
     try {
-      if (u.pathname === '/api/health') return json({ ok: true, service: 'match-probability-ai', version: '1.3.0' });
+      if (u.pathname === '/api/health') return json({ ok: true, service: 'match-probability-ai', version: '1.4.0' });
       if (u.pathname === '/api/provider/test') return json({ ok: true, provider: 'API-Football', configured: Boolean(env.API_FOOTBALL_KEY), mode: 'scheduled-github-collector' });
       if (u.pathname === '/api/data/status') {
         const r = await env.DB.prepare('SELECT COUNT(*) AS matches FROM matches WHERE home_goals IS NOT NULL AND away_goals IS NOT NULL').first<any>();
@@ -320,6 +300,14 @@ export default {
           ? await env.DB.prepare('SELECT t.id,t.name,l.name league FROM teams t JOIN leagues l ON l.id=t.league_id WHERE l.name=? ORDER BY t.name').bind(league).all()
           : await env.DB.prepare('SELECT id,name FROM teams ORDER BY name').all();
         return json(r.results);
+      }
+      if (u.pathname === '/api/predict' && request.method === 'GET') {
+        const homeId = Number(u.searchParams.get('home'));
+        const awayId = Number(u.searchParams.get('away'));
+        if (!Number.isInteger(homeId) || !Number.isInteger(awayId) || homeId <= 0 || awayId <= 0 || homeId === awayId) return json({ error: 'Parametri home/away non validi' }, 400);
+        const h = await stats(env, homeId), a = await stats(env, awayId);
+        if (!h || !a) return json({ error: 'Statistiche squadra non disponibili' }, 404);
+        return json(predict(h, a));
       }
       if (u.pathname === '/api/predict' && request.method === 'POST') {
         const b = await request.json() as any;
