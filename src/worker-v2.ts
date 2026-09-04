@@ -1,4 +1,4 @@
-import base from './worker';
+import base from './index';
 import { todayMatches } from './today';
 
 interface Env { DB: D1Database; API_FOOTBALL_KEY: string; }
@@ -9,7 +9,7 @@ const json = (data: unknown, status = 200) => new Response(JSON.stringify(data, 
     'content-type': 'application/json;charset=UTF-8',
     'access-control-allow-origin': '*',
     'access-control-allow-headers': 'content-type',
-    'access-control-allow-methods': 'GET,OPTIONS',
+    'access-control-allow-methods': 'GET,POST,OPTIONS',
   },
 });
 
@@ -18,11 +18,8 @@ export default {
     const u = new URL(request.url);
     if (request.method === 'OPTIONS') return json({ ok: true });
     if (request.method === 'GET' && u.pathname === '/api/today') {
-      try {
-        return json(await todayMatches(env, u.searchParams.get('date')));
-      } catch (e) {
-        return json({ ok: false, error: e instanceof Error ? e.message : String(e) }, 502);
-      }
+      try { return json(await todayMatches(env, u.searchParams.get('date'))); }
+      catch (e) { return json({ ok: false, error: e instanceof Error ? e.message : String(e) }, 502); }
     }
     return (base as any).fetch(request, env, ctx);
   },
