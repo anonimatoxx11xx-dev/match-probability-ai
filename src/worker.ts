@@ -85,7 +85,10 @@ export default {
     return base.fetch(request, env, ctx);
   },
 
-  async scheduled(_controller: ScheduledController, env: Env, _ctx: ExecutionContext) {
+  async scheduled(controller: ScheduledController, env: Env, ctx: ExecutionContext) {
+    // index.ts imports the latest GitHub snapshot. The prepared-statement
+    // rebuild stays here to keep D1 aggregation reliable on the Cron path.
+    await (base as any).scheduled(controller, env, ctx);
     await rebuildTeamStats(env);
   },
 };
