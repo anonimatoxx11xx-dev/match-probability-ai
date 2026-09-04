@@ -1,0 +1,10 @@
+{
+  "name": "Match Probability AI",
+  "short_name": "Match AI",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#08101f",
+  "theme_color": "#0b1220",
+  "lang": "it",
+  "description": "Probabilità calcistiche basate su dati storici e modello Poisson."
+}
