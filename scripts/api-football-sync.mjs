@@ -11,12 +11,12 @@ const leagues = [
   { id: 2, name: 'Champions League', country: 'World', localLeague: 'Champions League' },
 ];
 
-// The Free API-Football plan currently exposes historical seasons through 2024.
-// We use 2024 as the real-data bootstrap season; current-season data will be added
-// through a second source rather than fabricating statistics.
+// API-Football Free currently allows only a limited historical range and 100 requests/day.
+// Keep one request per competition to discover fixtures, then use up to 90 detail calls.
+// This gives a balanced 15 detailed matches per competition per collection run.
 const season = Number(process.env.SEASON || 2024);
-const sleepMs = Number(process.env.REQUEST_DELAY_MS || 7000);
-const maxDetailFixtures = Number(process.env.MAX_DETAIL_FIXTURES || 60);
+const sleepMs = Number(process.env.REQUEST_DELAY_MS || 6500);
+const maxDetailFixtures = Math.min(Number(process.env.MAX_DETAIL_FIXTURES || 90), 90);
 const perLeague = Math.max(1, Math.floor(maxDetailFixtures / leagues.length));
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -93,8 +93,6 @@ function compactFixture(f) {
 const candidates = [];
 const teams = new Map();
 
-// One request per competition: retrieve the season fixture list, then keep the
-// most recent completed fixtures. This stays comfortably below the 100/day quota.
 for (const league of leagues) {
   const result = await api(`/fixtures?league=${league.id}&season=${season}`);
   const list = result.data.response || [];
@@ -110,7 +108,7 @@ for (const league of leagues) {
   await sleep(sleepMs);
 }
 
-// Keep a balanced sample: the latest completed fixtures from each competition.
+// Balanced historical sample: 15 latest completed fixtures from each competition.
 const selected = [];
 for (const league of leagues) {
   selected.push(...candidates
@@ -122,9 +120,6 @@ for (const league of leagues) {
 const uniqueIds = [...new Set(selected.map(x => x.fixtureId))].slice(0, maxDetailFixtures);
 const details = [];
 
-// IMPORTANT: the Free API-Football plan rejects the `ids` parameter.
-// Use the single-fixture `id` parameter instead. It costs one request per match,
-// but keeps the collector compatible with the Free plan and avoids fabricated data.
 for (let i = 0; i < uniqueIds.length; i++) {
   const fixtureId = uniqueIds[i];
   const result = await api(`/fixtures?id=${fixtureId}`);
