@@ -26,7 +26,7 @@ jobs:
       API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
       SEASON: ${{ inputs.season || '2024' }}
       REQUEST_DELAY_MS: '6500'
-      MAX_DETAIL_FIXTURES: '90'
+      MAX_DETAIL_FIXTURES: '40'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
