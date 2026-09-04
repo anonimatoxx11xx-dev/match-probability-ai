@@ -34,6 +34,7 @@ function clamp(x: number, a: number, b: number) {
 }
 
 type Stats = {
+  matches: number;
   goalsFor: number;
   goalsAgainst: number;
   shots: number;
@@ -45,8 +46,8 @@ type Stats = {
 };
 
 function predict(h: Stats, a: Stats) {
-  // Keep expected goals in a realistic football range. The previous version
-  // could produce extreme values when the bootstrap sample was small.
+  // Conservative goal-rate blend. This avoids the extreme 5+ total-goal
+  // outputs produced by the first small bootstrap sample.
   const hg = clamp((h.goalsFor * 0.55 + a.goalsAgainst * 0.45) * 1.05, 0.20, 3.80);
   const ag = clamp((a.goalsFor * 0.55 + h.goalsAgainst * 0.45) * 0.95, 0.15, 3.50);
 
@@ -54,8 +55,8 @@ function predict(h: Stats, a: Stats) {
   const score: number[][] = Array.from({ length: 9 }, () => Array(9).fill(0));
   let home = 0, draw = 0, away = 0;
 
-  for (let i = 0; i < hd.length; i++) {
-    for (let j = 0; j < ad.length; j++) {
+  for (let i = 0; i < 9; i++) {
+    for (let j = 0; j < 9; j++) {
       const p = hd[i] * ad[j];
       score[i][j] = p;
       if (i > j) home += p;
@@ -73,24 +74,18 @@ function predict(h: Stats, a: Stats) {
   const over = (line: number) => sum((i, j) => i + j > line);
   const under = (line: number) => sum((i, j) => i + j < line);
   const bttsYes = sum((i, j) => i >= 1 && j >= 1);
-  const homeGoalsOver = (line: number) => sum((i) => i > line,);
 
   const correctScores: Array<{ score: string; probability: number }> = [];
   for (let i = 0; i <= 5; i++) {
-    for (let j = 0; j <= 5; j++) correctScores.push({ score: `${i}-${j}`, probability: score[i][j] });
+    for (let j = 0; j <= 5; j++) {
+      correctScores.push({ score: `${i}-${j}`, probability: score[i][j] });
+    }
   }
   correctScores.sort((x, y) => y.probability - x.probability);
 
-  const totalCorners = h.corners + a.corners;
-  const totalShots = h.shots + a.shots;
-  const totalSot = h.sot + a.sot;
-  const totalFouls = h.fouls + a.fouls;
-  const totalSaves = h.saves + a.saves;
-  const totalCards = h.cards + a.cards;
-
-  // Statistical confidence is intentionally conservative because the current
-  // bootstrap contains only a limited number of historical fixtures.
-  const confidence = clamp(0.45 + Math.min(hg + ag, 4) * 0.03, 0.45, 0.65);
+  const nonDraw = home + away;
+  const minMatches = Math.min(h.matches, a.matches);
+  const dataQuality = minMatches >= 20 ? 'high' : minMatches >= 8 ? 'medium' : 'low';
 
   return {
     expectedGoals: { home: hg, away: ag, total: hg + ag },
@@ -100,7 +95,11 @@ function predict(h: Stats, a: Stats) {
       'X2': draw + away,
       '12': home + away,
     },
-    drawNoBet: { home, away },
+    drawNoBet: {
+      home: nonDraw > 0 ? home / nonDraw : 0,
+      away: nonDraw > 0 ? away / nonDraw : 0,
+      drawRefund: draw,
+    },
     markets: {
       over05: over(0), under05: under(1),
       over15: over(1), under15: under(2),
@@ -111,25 +110,31 @@ function predict(h: Stats, a: Stats) {
     },
     correctScores: correctScores.slice(0, 10),
     expectedStats: {
-      shots: totalShots,
-      sot: totalSot,
-      corners: totalCorners,
-      fouls: totalFouls,
-      saves: totalSaves,
-      cards: totalCards,
+      shots: h.shots + a.shots,
+      sot: h.sot + a.sot,
+      corners: h.corners + a.corners,
+      fouls: h.fouls + a.fouls,
+      saves: h.saves + a.saves,
+      cards: h.cards + a.cards,
     },
-    confidence,
+    dataQuality: {
+      homeMatches: h.matches,
+      awayMatches: a.matches,
+      minMatches,
+      level: dataQuality,
+    },
     model: 'Poisson + historical team averages + home advantage',
   };
 }
 
 async function stats(env: Env, id: number): Promise<Stats | null> {
   const r = await env.DB.prepare(
-    'SELECT goals_for,goals_against,shots_for,shots_on_target_for,corners_for,fouls_for,saves_for,cards_for FROM team_stats WHERE team_id=?'
+    'SELECT matches,goals_for,goals_against,shots_for,shots_on_target_for,corners_for,fouls_for,saves_for,cards_for FROM team_stats WHERE team_id=?'
   ).bind(id).first<any>();
 
   if (!r) return null;
   return {
+    matches: Number(r.matches || 0),
     goalsFor: Number(r.goals_for || 0),
     goalsAgainst: Number(r.goals_against || 0),
     shots: Number(r.shots_for || 0),
@@ -192,9 +197,7 @@ async function importSnapshot(env: Env) {
 
   const leagueStatements = snapshot.leagues.map((l) => {
     const localId = localLeagueByName.get(l.localLeague);
-    return localId
-      ? env.DB.prepare('UPDATE leagues SET api_football_id=? WHERE id=?').bind(l.id, localId)
-      : null;
+    return localId ? env.DB.prepare('UPDATE leagues SET api_football_id=? WHERE id=?').bind(l.id, localId) : null;
   }).filter(Boolean) as D1PreparedStatement[];
   if (leagueStatements.length) await env.DB.batch(leagueStatements);
 
@@ -215,8 +218,7 @@ async function importSnapshot(env: Env) {
   const teamStatements: D1PreparedStatement[] = [];
   for (const team of snapshot.teams) {
     const apiId = Number(team.apiId);
-    if (!apiId || !team.name) continue;
-    if (teamIdByApi.has(apiId)) continue;
+    if (!apiId || !team.name || teamIdByApi.has(apiId)) continue;
     const existing = teamByCanonical.get(canonical(team.name));
     if (existing) {
       teamIdByApi.set(apiId, Number(existing.id));
@@ -283,7 +285,7 @@ export default {
     if (request.method === 'OPTIONS') return json({ ok: true });
     const u = new URL(request.url);
     try {
-      if (u.pathname === '/api/health') return json({ ok: true, service: 'match-probability-ai', version: '1.4.0' });
+      if (u.pathname === '/api/health') return json({ ok: true, service: 'match-probability-ai', version: '1.5.0' });
       if (u.pathname === '/api/provider/test') return json({ ok: true, provider: 'API-Football', configured: Boolean(env.API_FOOTBALL_KEY), mode: 'scheduled-github-collector' });
       if (u.pathname === '/api/data/status') {
         const r = await env.DB.prepare('SELECT COUNT(*) AS matches FROM matches WHERE home_goals IS NOT NULL AND away_goals IS NOT NULL').first<any>();
