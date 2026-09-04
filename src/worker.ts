@@ -7,7 +7,7 @@ function canonical(name: string) {
   const aliases: Record<string,string> = {
     'fc internazionale milano':'inter','internazionale milano':'inter','inter milano':'inter',
   };
-  const tokens = n.split(' ').filter(Boolean).filter(x => !['fc','acf','as','ss','us','ac','calcio','football','club','1907','1909','1913','1893'].includes(x));
+  const tokens = n.split(' ').filter(Boolean).filter(x => !['fc','acf','as','ss','us','ac','bc','cfc','calcio','football','club','1907','1909','1913','1893'].includes(x));
   return aliases[tokens.join(' ')] || tokens.join(' ');
 }
 
