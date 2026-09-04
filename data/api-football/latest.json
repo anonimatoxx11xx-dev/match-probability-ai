@@ -1,7 +1,11 @@
 {
-  "generatedAt": "2026-09-04T03:37:19.861Z",
-  "season": 2024,
-  "mode": "historical-bootstrap",
+  "generatedAt": "2026-09-04T22:03:59.536Z",
+  "season": 2026,
+  "mode": "merged-api-football-plus-football-data",
+  "providers": [
+    "api-football",
+    "football-data.org"
+  ],
   "leagues": [
     {
       "id": 135,
@@ -36,938 +40,596 @@
     {
       "id": 2,
       "name": "Champions League",
-      "country": "World",
+      "country": "Europe",
       "localLeague": "Champions League"
     }
   ],
   "teams": [
     {
-      "apiId": 495,
-      "name": "Genoa",
+      "apiId": 100000115,
+      "name": "Udinese Calcio",
       "leagueId": 135
     },
     {
-      "apiId": 505,
-      "name": "Inter",
-      "leagueId": 2
-    },
-    {
-      "apiId": 523,
-      "name": "Parma",
+      "apiId": 100007397,
+      "name": "Como 1907",
       "leagueId": 135
     },
     {
-      "apiId": 502,
-      "name": "Fiorentina",
+      "apiId": 100000108,
+      "name": "FC Internazionale Milano",
       "leagueId": 135
     },
     {
-      "apiId": 489,
+      "apiId": 100005911,
+      "name": "AC Monza",
+      "leagueId": 135
+    },
+    {
+      "apiId": 100000107,
+      "name": "Genoa CFC",
+      "leagueId": 135
+    },
+    {
+      "apiId": 100000113,
+      "name": "SSC Napoli",
+      "leagueId": 135
+    },
+    {
+      "apiId": 100000112,
+      "name": "Parma Calcio 1913",
+      "leagueId": 135
+    },
+    {
+      "apiId": 100000104,
+      "name": "Cagliari Calcio",
+      "leagueId": 135
+    },
+    {
+      "apiId": 100000470,
+      "name": "Frosinone Calcio",
+      "leagueId": 135
+    },
+    {
+      "apiId": 100000109,
+      "name": "Juventus FC",
+      "leagueId": 135
+    },
+    {
+      "apiId": 100000454,
+      "name": "Venezia FC",
+      "leagueId": 135
+    },
+    {
+      "apiId": 100005890,
+      "name": "US Lecce",
+      "leagueId": 135
+    },
+    {
+      "apiId": 100000102,
+      "name": "Atalanta BC",
+      "leagueId": 135
+    },
+    {
+      "apiId": 100000471,
+      "name": "US Sassuolo Calcio",
+      "leagueId": 135
+    },
+    {
+      "apiId": 100000586,
+      "name": "Torino FC",
+      "leagueId": 135
+    },
+    {
+      "apiId": 100000098,
       "name": "AC Milan",
-      "leagueId": 2
-    },
-    {
-      "apiId": 503,
-      "name": "Torino",
       "leagueId": 135
     },
     {
-      "apiId": 511,
-      "name": "Empoli",
+      "apiId": 100000103,
+      "name": "Bologna FC 1909",
       "leagueId": 135
     },
     {
-      "apiId": 1579,
-      "name": "Monza",
+      "apiId": 100000110,
+      "name": "SS Lazio",
       "leagueId": 135
     },
     {
-      "apiId": 500,
-      "name": "Bologna",
-      "leagueId": 2
-    },
-    {
-      "apiId": 494,
-      "name": "Udinese",
-      "leagueId": 135
-    },
-    {
-      "apiId": 504,
-      "name": "Hellas Verona",
-      "leagueId": 135
-    },
-    {
-      "apiId": 492,
-      "name": "Napoli",
-      "leagueId": 135
-    },
-    {
-      "apiId": 487,
-      "name": "Lazio",
-      "leagueId": 135
-    },
-    {
-      "apiId": 517,
-      "name": "Venezia",
-      "leagueId": 135
-    },
-    {
-      "apiId": 490,
-      "name": "Cagliari",
-      "leagueId": 135
-    },
-    {
-      "apiId": 497,
+      "apiId": 100000100,
       "name": "AS Roma",
       "leagueId": 135
     },
     {
-      "apiId": 867,
-      "name": "Lecce",
+      "apiId": 100000099,
+      "name": "ACF Fiorentina",
       "leagueId": 135
     },
     {
-      "apiId": 499,
-      "name": "Atalanta",
-      "leagueId": 2
-    },
-    {
-      "apiId": 496,
-      "name": "Juventus",
-      "leagueId": 2
-    },
-    {
-      "apiId": 895,
-      "name": "Como",
-      "leagueId": 135
-    },
-    {
-      "apiId": 33,
-      "name": "Manchester United",
+      "apiId": 100000057,
+      "name": "Arsenal FC",
       "leagueId": 39
     },
     {
-      "apiId": 36,
-      "name": "Fulham",
+      "apiId": 100001076,
+      "name": "Coventry City FC",
       "leagueId": 39
     },
     {
-      "apiId": 57,
-      "name": "Ipswich",
+      "apiId": 100000322,
+      "name": "Hull City AFC",
       "leagueId": 39
     },
     {
-      "apiId": 40,
-      "name": "Liverpool",
-      "leagueId": 2
-    },
-    {
-      "apiId": 34,
-      "name": "Newcastle",
+      "apiId": 100000066,
+      "name": "Manchester United FC",
       "leagueId": 39
     },
     {
-      "apiId": 41,
-      "name": "Southampton",
+      "apiId": 100000349,
+      "name": "Ipswich Town FC",
       "leagueId": 39
     },
     {
-      "apiId": 42,
-      "name": "Arsenal",
-      "leagueId": 2
-    },
-    {
-      "apiId": 39,
-      "name": "Wolves",
+      "apiId": 100000071,
+      "name": "Sunderland AFC",
       "leagueId": 39
     },
     {
-      "apiId": 45,
-      "name": "Everton",
+      "apiId": 100000351,
+      "name": "Nottingham Forest FC",
       "leagueId": 39
     },
     {
-      "apiId": 51,
-      "name": "Brighton",
+      "apiId": 100000341,
+      "name": "Leeds United FC",
       "leagueId": 39
     },
     {
-      "apiId": 65,
-      "name": "Nottingham Forest",
+      "apiId": 100000062,
+      "name": "Everton FC",
       "leagueId": 39
     },
     {
-      "apiId": 35,
-      "name": "Bournemouth",
+      "apiId": 100000354,
+      "name": "Crystal Palace FC",
       "leagueId": 39
     },
     {
-      "apiId": 48,
-      "name": "West Ham",
+      "apiId": 100000402,
+      "name": "Brentford FC",
       "leagueId": 39
     },
     {
-      "apiId": 66,
-      "name": "Aston Villa",
-      "leagueId": 2
-    },
-    {
-      "apiId": 55,
-      "name": "Brentford",
+      "apiId": 100000073,
+      "name": "Tottenham Hotspur FC",
       "leagueId": 39
     },
     {
-      "apiId": 52,
-      "name": "Crystal Palace",
+      "apiId": 100000065,
+      "name": "Manchester City FC",
       "leagueId": 39
     },
     {
-      "apiId": 49,
-      "name": "Chelsea",
+      "apiId": 100001044,
+      "name": "AFC Bournemouth",
       "leagueId": 39
     },
     {
-      "apiId": 50,
-      "name": "Manchester City",
-      "leagueId": 2
-    },
-    {
-      "apiId": 46,
-      "name": "Leicester",
+      "apiId": 100000397,
+      "name": "Brighton & Hove Albion FC",
       "leagueId": 39
     },
     {
-      "apiId": 47,
-      "name": "Tottenham",
+      "apiId": 100000058,
+      "name": "Aston Villa FC",
       "leagueId": 39
     },
     {
-      "apiId": 531,
+      "apiId": 100000067,
+      "name": "Newcastle United FC",
+      "leagueId": 39
+    },
+    {
+      "apiId": 100000064,
+      "name": "Liverpool FC",
+      "leagueId": 39
+    },
+    {
+      "apiId": 100000063,
+      "name": "Fulham FC",
+      "leagueId": 39
+    },
+    {
+      "apiId": 100000061,
+      "name": "Chelsea FC",
+      "leagueId": 39
+    },
+    {
+      "apiId": 100000263,
+      "name": "Deportivo Alavés",
+      "leagueId": 140
+    },
+    {
+      "apiId": 100000082,
+      "name": "Getafe CF",
+      "leagueId": 140
+    },
+    {
+      "apiId": 100000559,
+      "name": "Sevilla FC",
+      "leagueId": 140
+    },
+    {
+      "apiId": 100000087,
+      "name": "Rayo Vallecano de Madrid",
+      "leagueId": 140
+    },
+    {
+      "apiId": 100005335,
+      "name": "Real Racing Club de Santander",
+      "leagueId": 140
+    },
+    {
+      "apiId": 100000094,
+      "name": "Villarreal CF",
+      "leagueId": 140
+    },
+    {
+      "apiId": 100000080,
+      "name": "RCD Espanyol de Barcelona",
+      "leagueId": 140
+    },
+    {
+      "apiId": 100000088,
+      "name": "Levante UD",
+      "leagueId": 140
+    },
+    {
+      "apiId": 100000560,
+      "name": "RC Deportivo La Coruña",
+      "leagueId": 140
+    },
+    {
+      "apiId": 100000285,
+      "name": "Elche CF",
+      "leagueId": 140
+    },
+    {
+      "apiId": 100000078,
+      "name": "Club Atlético de Madrid",
+      "leagueId": 140
+    },
+    {
+      "apiId": 100000084,
+      "name": "Málaga CF",
+      "leagueId": 140
+    },
+    {
+      "apiId": 100000090,
+      "name": "Real Betis Balompié",
+      "leagueId": 140
+    },
+    {
+      "apiId": 100000092,
+      "name": "Real Sociedad de Fútbol",
+      "leagueId": 140
+    },
+    {
+      "apiId": 100000077,
       "name": "Athletic Club",
       "leagueId": 140
     },
     {
-      "apiId": 546,
-      "name": "Getafe",
+      "apiId": 100000095,
+      "name": "Valencia CF",
       "leagueId": 140
     },
     {
-      "apiId": 543,
-      "name": "Real Betis",
+      "apiId": 100000558,
+      "name": "RC Celta de Vigo",
       "leagueId": 140
     },
     {
-      "apiId": 547,
-      "name": "Girona",
-      "leagueId": 2
-    },
-    {
-      "apiId": 538,
-      "name": "Celta Vigo",
+      "apiId": 100000086,
+      "name": "Real Madrid CF",
       "leagueId": 140
     },
     {
-      "apiId": 542,
-      "name": "Alaves",
+      "apiId": 100000081,
+      "name": "FC Barcelona",
       "leagueId": 140
     },
     {
-      "apiId": 534,
-      "name": "Las Palmas",
+      "apiId": 100000079,
+      "name": "CA Osasuna",
       "leagueId": 140
     },
     {
-      "apiId": 536,
-      "name": "Sevilla",
-      "leagueId": 140
+      "apiId": 100000005,
+      "name": "FC Bayern München",
+      "leagueId": 78
     },
     {
-      "apiId": 727,
-      "name": "Osasuna",
-      "leagueId": 140
+      "apiId": 100000010,
+      "name": "VfB Stuttgart",
+      "leagueId": 78
     },
     {
-      "apiId": 537,
-      "name": "Leganes",
-      "leagueId": 140
+      "apiId": 100000721,
+      "name": "RB Leipzig",
+      "leagueId": 78
     },
     {
-      "apiId": 532,
-      "name": "Valencia",
-      "leagueId": 140
-    },
-    {
-      "apiId": 529,
-      "name": "Barcelona",
-      "leagueId": 2
-    },
-    {
-      "apiId": 548,
-      "name": "Real Sociedad",
-      "leagueId": 140
-    },
-    {
-      "apiId": 728,
-      "name": "Rayo Vallecano",
-      "leagueId": 140
-    },
-    {
-      "apiId": 798,
-      "name": "Mallorca",
-      "leagueId": 140
-    },
-    {
-      "apiId": 541,
-      "name": "Real Madrid",
-      "leagueId": 2
-    },
-    {
-      "apiId": 720,
-      "name": "Valladolid",
-      "leagueId": 140
-    },
-    {
-      "apiId": 540,
-      "name": "Espanyol",
-      "leagueId": 140
-    },
-    {
-      "apiId": 533,
-      "name": "Villarreal",
-      "leagueId": 140
-    },
-    {
-      "apiId": 530,
-      "name": "Atletico Madrid",
-      "leagueId": 2
-    },
-    {
-      "apiId": 163,
+      "apiId": 100000018,
       "name": "Borussia Mönchengladbach",
       "leagueId": 78
     },
     {
-      "apiId": 168,
-      "name": "Bayer Leverkusen",
-      "leagueId": 2
-    },
-    {
-      "apiId": 160,
-      "name": "SC Freiburg",
+      "apiId": 100000015,
+      "name": "1. FSV Mainz 05",
       "leagueId": 78
     },
     {
-      "apiId": 172,
-      "name": "VfB Stuttgart",
-      "leagueId": 2
-    },
-    {
-      "apiId": 164,
-      "name": "FSV Mainz 05",
+      "apiId": 100000029,
+      "name": "SC Paderborn 07",
       "leagueId": 78
     },
     {
-      "apiId": 182,
-      "name": "Union Berlin",
+      "apiId": 100000028,
+      "name": "1. FC Union Berlin",
       "leagueId": 78
     },
     {
-      "apiId": 167,
-      "name": "1899 Hoffenheim",
-      "leagueId": 78
-    },
-    {
-      "apiId": 191,
-      "name": "Holstein Kiel",
-      "leagueId": 78
-    },
-    {
-      "apiId": 170,
-      "name": "FC Augsburg",
-      "leagueId": 78
-    },
-    {
-      "apiId": 162,
-      "name": "Werder Bremen",
-      "leagueId": 78
-    },
-    {
-      "apiId": 173,
-      "name": "RB Leipzig",
-      "leagueId": 2
-    },
-    {
-      "apiId": 176,
-      "name": "VfL Bochum",
-      "leagueId": 78
-    },
-    {
-      "apiId": 165,
-      "name": "Borussia Dortmund",
-      "leagueId": 2
-    },
-    {
-      "apiId": 169,
+      "apiId": 100000019,
       "name": "Eintracht Frankfurt",
       "leagueId": 78
     },
     {
-      "apiId": 161,
-      "name": "VfL Wolfsburg",
+      "apiId": 100000719,
+      "name": "SV 07 Elversberg",
       "leagueId": 78
     },
     {
-      "apiId": 157,
-      "name": "Bayern München",
-      "leagueId": 2
-    },
-    {
-      "apiId": 186,
-      "name": "FC St. Pauli",
+      "apiId": 100000003,
+      "name": "Bayer 04 Leverkusen",
       "leagueId": 78
     },
     {
-      "apiId": 180,
-      "name": "1. FC Heidenheim",
+      "apiId": 100000001,
+      "name": "1. FC Köln",
       "leagueId": 78
     },
     {
-      "apiId": 1660,
-      "name": "SV Elversberg",
+      "apiId": 100000002,
+      "name": "TSG 1899 Hoffenheim",
       "leagueId": 78
     },
     {
-      "apiId": 111,
-      "name": "Le Havre",
+      "apiId": 100000004,
+      "name": "Borussia Dortmund",
+      "leagueId": 78
+    },
+    {
+      "apiId": 100000007,
+      "name": "Hamburger SV",
+      "leagueId": 78
+    },
+    {
+      "apiId": 100000017,
+      "name": "SC Freiburg",
+      "leagueId": 78
+    },
+    {
+      "apiId": 100000012,
+      "name": "SV Werder Bremen",
+      "leagueId": 78
+    },
+    {
+      "apiId": 100000016,
+      "name": "FC Augsburg",
+      "leagueId": 78
+    },
+    {
+      "apiId": 100000006,
+      "name": "FC Schalke 04",
+      "leagueId": 78
+    },
+    {
+      "apiId": 100000516,
+      "name": "Olympique de Marseille",
       "leagueId": 61
     },
     {
-      "apiId": 85,
-      "name": "Paris Saint Germain",
-      "leagueId": 2
+      "apiId": 100000576,
+      "name": "RC Strasbourg Alsace",
+      "leagueId": 61
     },
     {
-      "apiId": 106,
+      "apiId": 100000546,
+      "name": "Racing Club de Lens",
+      "leagueId": 61
+    },
+    {
+      "apiId": 100000519,
+      "name": "AJ Auxerre",
+      "leagueId": 61
+    },
+    {
+      "apiId": 100000535,
+      "name": "Le Mans FC",
+      "leagueId": 61
+    },
+    {
+      "apiId": 100000512,
       "name": "Stade Brestois 29",
-      "leagueId": 2
-    },
-    {
-      "apiId": 81,
-      "name": "Marseille",
       "leagueId": 61
     },
     {
-      "apiId": 93,
-      "name": "Reims",
+      "apiId": 100000531,
+      "name": "ES Troyes AC",
       "leagueId": 61
     },
     {
-      "apiId": 79,
-      "name": "Lille",
-      "leagueId": 2
-    },
-    {
-      "apiId": 91,
-      "name": "Monaco",
-      "leagueId": 2
-    },
-    {
-      "apiId": 1063,
-      "name": "Saint Etienne",
+      "apiId": 100001045,
+      "name": "Paris FC",
       "leagueId": 61
     },
     {
-      "apiId": 108,
-      "name": "Auxerre",
+      "apiId": 100000522,
+      "name": "OGC Nice",
       "leagueId": 61
     },
     {
-      "apiId": 84,
-      "name": "Nice",
+      "apiId": 100000525,
+      "name": "FC Lorient",
       "leagueId": 61
     },
     {
-      "apiId": 77,
-      "name": "Angers",
+      "apiId": 100000511,
+      "name": "Toulouse FC",
       "leagueId": 61
     },
     {
-      "apiId": 116,
-      "name": "Lens",
+      "apiId": 100000523,
+      "name": "Olympique Lyonnais",
       "leagueId": 61
     },
     {
-      "apiId": 82,
-      "name": "Montpellier",
+      "apiId": 100000532,
+      "name": "Angers SCO",
       "leagueId": 61
     },
     {
-      "apiId": 95,
-      "name": "Strasbourg",
+      "apiId": 100000521,
+      "name": "Lille OSC",
       "leagueId": 61
     },
     {
-      "apiId": 96,
-      "name": "Toulouse",
+      "apiId": 100000533,
+      "name": "Le Havre AC",
       "leagueId": 61
     },
     {
-      "apiId": 83,
-      "name": "Nantes",
+      "apiId": 100000548,
+      "name": "AS Monaco FC",
       "leagueId": 61
     },
     {
-      "apiId": 94,
-      "name": "Rennes",
+      "apiId": 100000529,
+      "name": "Stade Rennais FC 1901",
       "leagueId": 61
     },
     {
-      "apiId": 80,
-      "name": "Lyon",
+      "apiId": 100000524,
+      "name": "Paris Saint-Germain FC",
       "leagueId": 61
-    },
-    {
-      "apiId": 112,
-      "name": "Metz",
-      "leagueId": 61
-    },
-    {
-      "apiId": 3874,
-      "name": "Panevėžys",
-      "leagueId": 2
-    },
-    {
-      "apiId": 649,
-      "name": "HJK Helsinki",
-      "leagueId": 2
-    },
-    {
-      "apiId": 4626,
-      "name": "Hamrun Spartans",
-      "leagueId": 2
-    },
-    {
-      "apiId": 667,
-      "name": "Lincoln Red Imps FC",
-      "leagueId": 2
-    },
-    {
-      "apiId": 354,
-      "name": "The New Saints",
-      "leagueId": 2
-    },
-    {
-      "apiId": 3745,
-      "name": "Dečić",
-      "leagueId": 2
-    },
-    {
-      "apiId": 703,
-      "name": "UE Santa Coloma",
-      "leagueId": 2
-    },
-    {
-      "apiId": 12733,
-      "name": "Ballkani",
-      "leagueId": 2
-    },
-    {
-      "apiId": 278,
-      "name": "Vikingur Reykjavik",
-      "leagueId": 2
-    },
-    {
-      "apiId": 652,
-      "name": "Shamrock Rovers",
-      "leagueId": 2
-    },
-    {
-      "apiId": 5308,
-      "name": "Virtus",
-      "leagueId": 2
-    },
-    {
-      "apiId": 559,
-      "name": "FCSB",
-      "leagueId": 2
-    },
-    {
-      "apiId": 692,
-      "name": "Ordabasy",
-      "leagueId": 2
-    },
-    {
-      "apiId": 2271,
-      "name": "Petrocub",
-      "leagueId": 2
-    },
-    {
-      "apiId": 687,
-      "name": "Flora Tallinn",
-      "leagueId": 2
-    },
-    {
-      "apiId": 4360,
-      "name": "Celje",
-      "leagueId": 2
-    },
-    {
-      "apiId": 656,
-      "name": "Slovan Bratislava",
-      "leagueId": 2
-    },
-    {
-      "apiId": 4346,
-      "name": "Struga",
-      "leagueId": 2
-    },
-    {
-      "apiId": 4160,
-      "name": "Rīgas FS",
-      "leagueId": 2
-    },
-    {
-      "apiId": 5354,
-      "name": "Larne",
-      "leagueId": 2
-    },
-    {
-      "apiId": 566,
-      "name": "Ludogorets",
-      "leagueId": 2
-    },
-    {
-      "apiId": 705,
-      "name": "Dinamo Batumi",
-      "leagueId": 2
-    },
-    {
-      "apiId": 701,
-      "name": "KI Klaksvik",
-      "leagueId": 2
-    },
-    {
-      "apiId": 684,
-      "name": "FC Differdange 03",
-      "leagueId": 2
-    },
-    {
-      "apiId": 394,
-      "name": "Dinamo Minsk",
-      "leagueId": 2
-    },
-    {
-      "apiId": 709,
-      "name": "Pyunik Yerevan",
-      "leagueId": 2
-    },
-    {
-      "apiId": 3364,
-      "name": "Borac Banja Luka",
-      "leagueId": 2
-    },
-    {
-      "apiId": 3327,
-      "name": "Egnatia Rrogozhinë",
-      "leagueId": 2
-    },
-    {
-      "apiId": 327,
-      "name": "Bodo/Glimt",
-      "leagueId": 2
-    },
-    {
-      "apiId": 336,
-      "name": "Jagiellonia",
-      "leagueId": 2
-    },
-    {
-      "apiId": 556,
-      "name": "Qarabag",
-      "leagueId": 2
-    },
-    {
-      "apiId": 375,
-      "name": "Malmo FF",
-      "leagueId": 2
-    },
-    {
-      "apiId": 2247,
-      "name": "Apoel Nicosia",
-      "leagueId": 2
-    },
-    {
-      "apiId": 604,
-      "name": "Maccabi Tel Aviv",
-      "leagueId": 2
-    },
-    {
-      "apiId": 572,
-      "name": "Dynamo Kyiv",
-      "leagueId": 2
-    },
-    {
-      "apiId": 573,
-      "name": "FK Partizan",
-      "leagueId": 2
-    },
-    {
-      "apiId": 651,
-      "name": "Ferencvarosi TC",
-      "leagueId": 2
-    },
-    {
-      "apiId": 397,
-      "name": "FC Midtjylland",
-      "leagueId": 2
-    },
-    {
-      "apiId": 606,
-      "name": "FC Lugano",
-      "leagueId": 2
-    },
-    {
-      "apiId": 611,
-      "name": "Fenerbahçe",
-      "leagueId": 2
-    },
-    {
-      "apiId": 628,
-      "name": "Sparta Praha",
-      "leagueId": 2
-    },
-    {
-      "apiId": 619,
-      "name": "PAOK",
-      "leagueId": 2
-    },
-    {
-      "apiId": 257,
-      "name": "Rangers",
-      "leagueId": 2
-    },
-    {
-      "apiId": 571,
-      "name": "Red Bull Salzburg",
-      "leagueId": 2
-    },
-    {
-      "apiId": 415,
-      "name": "Twente",
-      "leagueId": 2
-    },
-    {
-      "apiId": 560,
-      "name": "Slavia Praha",
-      "leagueId": 2
-    },
-    {
-      "apiId": 1393,
-      "name": "Union St. Gilloise",
-      "leagueId": 2
-    },
-    {
-      "apiId": 598,
-      "name": "FK Crvena Zvezda",
-      "leagueId": 2
-    },
-    {
-      "apiId": 620,
-      "name": "Dinamo Zagreb",
-      "leagueId": 2
-    },
-    {
-      "apiId": 565,
-      "name": "BSC Young Boys",
-      "leagueId": 2
-    },
-    {
-      "apiId": 645,
-      "name": "Galatasaray",
-      "leagueId": 2
-    },
-    {
-      "apiId": 197,
-      "name": "PSV Eindhoven",
-      "leagueId": 2
-    },
-    {
-      "apiId": 228,
-      "name": "Sporting CP",
-      "leagueId": 2
-    },
-    {
-      "apiId": 550,
-      "name": "Shakhtar Donetsk",
-      "leagueId": 2
-    },
-    {
-      "apiId": 247,
-      "name": "Celtic",
-      "leagueId": 2
-    },
-    {
-      "apiId": 569,
-      "name": "Club Brugge KV",
-      "leagueId": 2
-    },
-    {
-      "apiId": 209,
-      "name": "Feyenoord",
-      "leagueId": 2
-    },
-    {
-      "apiId": 211,
-      "name": "Benfica",
-      "leagueId": 2
-    },
-    {
-      "apiId": 637,
-      "name": "Sturm Graz",
-      "leagueId": 2
     }
   ],
   "fixtures": [
     {
-      "fixtureId": 1360762,
-      "kickoff": "2025-04-09T19:00:00+00:00",
+      "fixtureId": 200564634,
+      "kickoff": "2026-08-15T17:30:00Z",
       "status": "FT",
       "league": {
-        "id": 2,
-        "name": "UEFA Champions League",
-        "country": "World",
-        "season": 2024
+        "id": 140,
+        "name": "La Liga",
+        "country": "Spain",
+        "season": 2026
       },
       "home": {
-        "id": 85,
-        "name": "Paris Saint Germain"
+        "id": 100000263,
+        "name": "Deportivo Alavés"
       },
       "away": {
-        "id": 66,
-        "name": "Aston Villa"
+        "id": 100000082,
+        "name": "Getafe CF"
       },
       "goals": {
         "home": 3,
+        "away": 0
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 564634
+    },
+    {
+      "fixtureId": 200564633,
+      "kickoff": "2026-08-15T19:30:00Z",
+      "status": "FT",
+      "league": {
+        "id": 140,
+        "name": "La Liga",
+        "country": "Spain",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000559,
+        "name": "Sevilla FC"
+      },
+      "away": {
+        "id": 100000087,
+        "name": "Rayo Vallecano de Madrid"
+      },
+      "goals": {
+        "home": 2,
         "away": 1
       },
       "stats": {
         "home": {
-          "shots": 29,
-          "sot": 10,
-          "corners": 9,
-          "fouls": 9,
-          "saves": 1,
-          "cards": 0
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
         },
         "away": {
-          "shots": 7,
-          "sot": 2,
-          "corners": 1,
-          "fouls": 8,
-          "saves": 8,
-          "cards": 1
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
         }
-      }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 564633
     },
     {
-      "fixtureId": 1360763,
-      "kickoff": "2025-04-15T19:00:00+00:00",
+      "fixtureId": 200564629,
+      "kickoff": "2026-08-16T15:00:00Z",
       "status": "FT",
       "league": {
-        "id": 2,
-        "name": "UEFA Champions League",
-        "country": "World",
-        "season": 2024
+        "id": 140,
+        "name": "La Liga",
+        "country": "Spain",
+        "season": 2026
       },
       "home": {
-        "id": 66,
-        "name": "Aston Villa"
+        "id": 100005335,
+        "name": "Real Racing Club de Santander"
       },
       "away": {
-        "id": 85,
-        "name": "Paris Saint Germain"
-      },
-      "goals": {
-        "home": 3,
-        "away": 2
-      },
-      "stats": {
-        "home": {
-          "shots": 17,
-          "sot": 9,
-          "corners": 5,
-          "fouls": 15,
-          "saves": 5,
-          "cards": 1
-        },
-        "away": {
-          "shots": 14,
-          "sot": 7,
-          "corners": 5,
-          "fouls": 3,
-          "saves": 5,
-          "cards": 0
-        }
-      }
-    },
-    {
-      "fixtureId": 1360767,
-      "kickoff": "2025-04-15T19:00:00+00:00",
-      "status": "FT",
-      "league": {
-        "id": 2,
-        "name": "UEFA Champions League",
-        "country": "World",
-        "season": 2024
-      },
-      "home": {
-        "id": 165,
-        "name": "Borussia Dortmund"
-      },
-      "away": {
-        "id": 529,
-        "name": "Barcelona"
-      },
-      "goals": {
-        "home": 3,
-        "away": 1
-      },
-      "stats": {
-        "home": {
-          "shots": 18,
-          "sot": 11,
-          "corners": 8,
-          "fouls": 14,
-          "saves": 2,
-          "cards": 1
-        },
-        "away": {
-          "shots": 7,
-          "sot": 2,
-          "corners": 4,
-          "fouls": 11,
-          "saves": 8,
-          "cards": 1
-        }
-      }
-    },
-    {
-      "fixtureId": 1360334,
-      "kickoff": "2025-04-16T19:00:00+00:00",
-      "status": "FT",
-      "league": {
-        "id": 2,
-        "name": "UEFA Champions League",
-        "country": "World",
-        "season": 2024
-      },
-      "home": {
-        "id": 505,
-        "name": "Inter"
-      },
-      "away": {
-        "id": 157,
-        "name": "Bayern München"
+        "id": 100000094,
+        "name": "Villarreal CF"
       },
       "goals": {
         "home": 2,
@@ -975,368 +637,257 @@
       },
       "stats": {
         "home": {
-          "shots": 15,
-          "sot": 6,
-          "corners": 5,
-          "fouls": 10,
-          "saves": 4,
-          "cards": 2
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
         },
         "away": {
-          "shots": 20,
-          "sot": 6,
-          "corners": 6,
-          "fouls": 16,
-          "saves": 4,
-          "cards": 2
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
         }
-      }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 564629
     },
     {
-      "fixtureId": 1360765,
-      "kickoff": "2025-04-16T19:00:00+00:00",
+      "fixtureId": 200564632,
+      "kickoff": "2026-08-16T17:00:00Z",
       "status": "FT",
       "league": {
-        "id": 2,
-        "name": "UEFA Champions League",
-        "country": "World",
-        "season": 2024
+        "id": 140,
+        "name": "La Liga",
+        "country": "Spain",
+        "season": 2026
       },
       "home": {
-        "id": 541,
-        "name": "Real Madrid"
+        "id": 100000080,
+        "name": "RCD Espanyol de Barcelona"
       },
       "away": {
-        "id": 42,
-        "name": "Arsenal"
+        "id": 100000088,
+        "name": "Levante UD"
       },
       "goals": {
-        "home": 1,
-        "away": 2
+        "home": 3,
+        "away": 0
       },
       "stats": {
         "home": {
-          "shots": 18,
-          "sot": 3,
-          "corners": 10,
-          "fouls": 18,
-          "saves": 4,
-          "cards": 3
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
         },
         "away": {
-          "shots": 11,
-          "sot": 6,
-          "corners": 4,
-          "fouls": 15,
-          "saves": 2,
-          "cards": 2
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
         }
-      }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 564632
     },
     {
-      "fixtureId": 1371730,
-      "kickoff": "2025-04-29T19:00:00+00:00",
+      "fixtureId": 200564635,
+      "kickoff": "2026-08-17T19:00:00Z",
       "status": "FT",
       "league": {
-        "id": 2,
-        "name": "UEFA Champions League",
-        "country": "World",
-        "season": 2024
+        "id": 140,
+        "name": "La Liga",
+        "country": "Spain",
+        "season": 2026
       },
       "home": {
-        "id": 42,
-        "name": "Arsenal"
+        "id": 100000560,
+        "name": "RC Deportivo La Coruña"
       },
       "away": {
-        "id": 85,
-        "name": "Paris Saint Germain"
+        "id": 100000285,
+        "name": "Elche CF"
       },
       "goals": {
-        "home": 0,
+        "home": 1,
         "away": 1
       },
       "stats": {
         "home": {
-          "shots": 10,
-          "sot": 5,
-          "corners": 3,
-          "fouls": 15,
-          "saves": 3,
-          "cards": 2
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
         },
         "away": {
-          "shots": 11,
-          "sot": 4,
-          "corners": 1,
-          "fouls": 15,
-          "saves": 5,
-          "cards": 2
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
         }
-      }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 564635
     },
     {
-      "fixtureId": 1371732,
-      "kickoff": "2025-04-30T19:00:00+00:00",
+      "fixtureId": 200564628,
+      "kickoff": "2026-08-19T19:00:00Z",
       "status": "FT",
       "league": {
-        "id": 2,
-        "name": "UEFA Champions League",
-        "country": "World",
-        "season": 2024
+        "id": 140,
+        "name": "La Liga",
+        "country": "Spain",
+        "season": 2026
       },
       "home": {
-        "id": 529,
-        "name": "Barcelona"
+        "id": 100000078,
+        "name": "Club Atlético de Madrid"
       },
       "away": {
-        "id": 505,
-        "name": "Inter"
+        "id": 100000084,
+        "name": "Málaga CF"
       },
       "goals": {
-        "home": 3,
-        "away": 3
+        "home": 2,
+        "away": 0
       },
       "stats": {
         "home": {
-          "shots": 19,
-          "sot": 9,
-          "corners": 7,
-          "fouls": 10,
-          "saves": 0,
-          "cards": 1
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
         },
         "away": {
-          "shots": 7,
-          "sot": 3,
-          "corners": 2,
-          "fouls": 11,
-          "saves": 7,
-          "cards": 1
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
         }
-      }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 564628
     },
     {
-      "fixtureId": 1371733,
-      "kickoff": "2025-05-06T19:00:00+00:00",
-      "status": "AET",
+      "fixtureId": 200564638,
+      "kickoff": "2026-08-20T19:00:00Z",
+      "status": "FT",
       "league": {
-        "id": 2,
-        "name": "UEFA Champions League",
-        "country": "World",
-        "season": 2024
+        "id": 140,
+        "name": "La Liga",
+        "country": "Spain",
+        "season": 2026
       },
       "home": {
-        "id": 505,
-        "name": "Inter"
+        "id": 100000087,
+        "name": "Rayo Vallecano de Madrid"
       },
       "away": {
-        "id": 529,
-        "name": "Barcelona"
+        "id": 100000263,
+        "name": "Deportivo Alavés"
+      },
+      "goals": {
+        "home": 1,
+        "away": 1
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 564638
+    },
+    {
+      "fixtureId": 200559715,
+      "kickoff": "2026-08-21T18:45:00Z",
+      "status": "FT",
+      "league": {
+        "id": 61,
+        "name": "Ligue 1",
+        "country": "France",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000516,
+        "name": "Olympique de Marseille"
+      },
+      "away": {
+        "id": 100000576,
+        "name": "RC Strasbourg Alsace"
       },
       "goals": {
         "home": 4,
-        "away": 3
+        "away": 0
       },
       "stats": {
         "home": {
-          "shots": 13,
-          "sot": 7,
-          "corners": 5,
-          "fouls": 14,
-          "saves": 7,
-          "cards": 5
-        },
-        "away": {
-          "shots": 22,
-          "sot": 10,
-          "corners": 7,
-          "fouls": 10,
-          "saves": 3,
-          "cards": 2
-        }
-      }
-    },
-    {
-      "fixtureId": 1371731,
-      "kickoff": "2025-05-07T19:00:00+00:00",
-      "status": "FT",
-      "league": {
-        "id": 2,
-        "name": "UEFA Champions League",
-        "country": "World",
-        "season": 2024
-      },
-      "home": {
-        "id": 85,
-        "name": "Paris Saint Germain"
-      },
-      "away": {
-        "id": 42,
-        "name": "Arsenal"
-      },
-      "goals": {
-        "home": 2,
-        "away": 1
-      },
-      "stats": {
-        "home": {
-          "shots": 11,
-          "sot": 6,
-          "corners": 2,
-          "fouls": 11,
-          "saves": 3,
-          "cards": 2
-        },
-        "away": {
-          "shots": 19,
-          "sot": 4,
-          "corners": 6,
-          "fouls": 11,
-          "saves": 4,
-          "cards": 4
-        }
-      }
-    },
-    {
-      "fixtureId": 1224276,
-      "kickoff": "2025-05-17T13:30:00+00:00",
-      "status": "FT",
-      "league": {
-        "id": 78,
-        "name": "Bundesliga",
-        "country": "Germany",
-        "season": 2024
-      },
-      "home": {
-        "id": 160,
-        "name": "SC Freiburg"
-      },
-      "away": {
-        "id": 169,
-        "name": "Eintracht Frankfurt"
-      },
-      "goals": {
-        "home": 1,
-        "away": 3
-      },
-      "stats": {
-        "home": {
-          "shots": 8,
-          "sot": 1,
-          "corners": 4,
-          "fouls": 13,
-          "saves": 3,
-          "cards": 2
-        },
-        "away": {
-          "shots": 11,
-          "sot": 6,
-          "corners": 7,
-          "fouls": 16,
-          "saves": 0,
-          "cards": 4
-        }
-      }
-    },
-    {
-      "fixtureId": 1224279,
-      "kickoff": "2025-05-17T13:30:00+00:00",
-      "status": "FT",
-      "league": {
-        "id": 78,
-        "name": "Bundesliga",
-        "country": "Germany",
-        "season": 2024
-      },
-      "home": {
-        "id": 163,
-        "name": "Borussia Mönchengladbach"
-      },
-      "away": {
-        "id": 161,
-        "name": "VfL Wolfsburg"
-      },
-      "goals": {
-        "home": 0,
-        "away": 1
-      },
-      "stats": {
-        "home": {
-          "shots": 16,
-          "sot": 3,
-          "corners": 7,
-          "fouls": 6,
-          "saves": 5,
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
           "cards": null
         },
         "away": {
-          "shots": 17,
-          "sot": 6,
-          "corners": 10,
-          "fouls": 4,
-          "saves": 4,
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
           "cards": null
         }
-      }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 559715
     },
     {
-      "fixtureId": 1224278,
-      "kickoff": "2025-05-17T13:30:00+00:00",
+      "fixtureId": 200560542,
+      "kickoff": "2026-08-21T19:00:00Z",
       "status": "FT",
       "league": {
-        "id": 78,
-        "name": "Bundesliga",
-        "country": "Germany",
-        "season": 2024
+        "id": 39,
+        "name": "Premier League",
+        "country": "England",
+        "season": 2026
       },
       "home": {
-        "id": 164,
-        "name": "FSV Mainz 05"
+        "id": 100000057,
+        "name": "Arsenal FC"
       },
       "away": {
-        "id": 168,
-        "name": "Bayer Leverkusen"
-      },
-      "goals": {
-        "home": 2,
-        "away": 2
-      },
-      "stats": {
-        "home": {
-          "shots": 20,
-          "sot": 6,
-          "corners": 8,
-          "fouls": 14,
-          "saves": 2,
-          "cards": 2
-        },
-        "away": {
-          "shots": 7,
-          "sot": 4,
-          "corners": 3,
-          "fouls": 13,
-          "saves": 4,
-          "cards": 6
-        }
-      }
-    },
-    {
-      "fixtureId": 1224273,
-      "kickoff": "2025-05-17T13:30:00+00:00",
-      "status": "FT",
-      "league": {
-        "id": 78,
-        "name": "Bundesliga",
-        "country": "Germany",
-        "season": 2024
-      },
-      "home": {
-        "id": 165,
-        "name": "Borussia Dortmund"
-      },
-      "away": {
-        "id": 191,
-        "name": "Holstein Kiel"
+        "id": 100001076,
+        "name": "Coventry City FC"
       },
       "goals": {
         "home": 3,
@@ -1344,245 +895,85 @@
       },
       "stats": {
         "home": {
-          "shots": 19,
-          "sot": 6,
-          "corners": 7,
-          "fouls": 12,
-          "saves": 2,
-          "cards": 3
-        },
-        "away": {
-          "shots": 4,
-          "sot": 2,
-          "corners": 1,
-          "fouls": 6,
-          "saves": 3,
-          "cards": 1
-        }
-      }
-    },
-    {
-      "fixtureId": 1224274,
-      "kickoff": "2025-05-17T13:30:00+00:00",
-      "status": "FT",
-      "league": {
-        "id": 78,
-        "name": "Bundesliga",
-        "country": "Germany",
-        "season": 2024
-      },
-      "home": {
-        "id": 167,
-        "name": "1899 Hoffenheim"
-      },
-      "away": {
-        "id": 157,
-        "name": "Bayern München"
-      },
-      "goals": {
-        "home": 0,
-        "away": 4
-      },
-      "stats": {
-        "home": {
-          "shots": 6,
-          "sot": 2,
-          "corners": 1,
-          "fouls": 9,
-          "saves": 1,
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
           "cards": null
         },
         "away": {
-          "shots": 14,
-          "sot": 5,
-          "corners": 4,
-          "fouls": 7,
-          "saves": 2,
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
           "cards": null
         }
-      }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 560542
     },
     {
-      "fixtureId": 1224277,
-      "kickoff": "2025-05-17T13:30:00+00:00",
+      "fixtureId": 200564647,
+      "kickoff": "2026-08-21T19:00:00Z",
       "status": "FT",
       "league": {
-        "id": 78,
-        "name": "Bundesliga",
-        "country": "Germany",
-        "season": 2024
+        "id": 140,
+        "name": "La Liga",
+        "country": "Spain",
+        "season": 2026
       },
       "home": {
-        "id": 170,
-        "name": "FC Augsburg"
+        "id": 100000090,
+        "name": "Real Betis Balompié"
       },
       "away": {
-        "id": 182,
-        "name": "Union Berlin"
+        "id": 100000092,
+        "name": "Real Sociedad de Fútbol"
       },
       "goals": {
         "home": 1,
-        "away": 2
+        "away": 0
       },
       "stats": {
         "home": {
-          "shots": 19,
-          "sot": 4,
-          "corners": 4,
-          "fouls": 6,
-          "saves": 1,
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
           "cards": null
         },
         "away": {
-          "shots": 5,
-          "sot": 3,
-          "corners": 0,
-          "fouls": 5,
-          "saves": 3,
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
           "cards": null
         }
-      }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 564647
     },
     {
-      "fixtureId": 1224272,
-      "kickoff": "2025-05-17T13:30:00+00:00",
+      "fixtureId": 200560543,
+      "kickoff": "2026-08-22T11:30:00Z",
       "status": "FT",
       "league": {
-        "id": 78,
-        "name": "Bundesliga",
-        "country": "Germany",
-        "season": 2024
+        "id": 39,
+        "name": "Premier League",
+        "country": "England",
+        "season": 2026
       },
       "home": {
-        "id": 173,
-        "name": "RB Leipzig"
+        "id": 100000322,
+        "name": "Hull City AFC"
       },
       "away": {
-        "id": 172,
-        "name": "VfB Stuttgart"
-      },
-      "goals": {
-        "home": 2,
-        "away": 3
-      },
-      "stats": {
-        "home": {
-          "shots": 8,
-          "sot": 5,
-          "corners": 5,
-          "fouls": 9,
-          "saves": 4,
-          "cards": 1
-        },
-        "away": {
-          "shots": 15,
-          "sot": 7,
-          "corners": 8,
-          "fouls": 9,
-          "saves": 3,
-          "cards": 0
-        }
-      }
-    },
-    {
-      "fixtureId": 1224275,
-      "kickoff": "2025-05-17T13:30:00+00:00",
-      "status": "FT",
-      "league": {
-        "id": 78,
-        "name": "Bundesliga",
-        "country": "Germany",
-        "season": 2024
-      },
-      "home": {
-        "id": 180,
-        "name": "1. FC Heidenheim"
-      },
-      "away": {
-        "id": 162,
-        "name": "Werder Bremen"
-      },
-      "goals": {
-        "home": 1,
-        "away": 4
-      },
-      "stats": {
-        "home": {
-          "shots": 21,
-          "sot": 8,
-          "corners": 6,
-          "fouls": 11,
-          "saves": 2,
-          "cards": 3
-        },
-        "away": {
-          "shots": 13,
-          "sot": 7,
-          "corners": 4,
-          "fouls": 11,
-          "saves": 7,
-          "cards": 2
-        }
-      }
-    },
-    {
-      "fixtureId": 1214048,
-      "kickoff": "2025-05-17T19:00:00+00:00",
-      "status": "FT",
-      "league": {
-        "id": 61,
-        "name": "Ligue 1",
-        "country": "France",
-        "season": 2024
-      },
-      "home": {
-        "id": 79,
-        "name": "Lille"
-      },
-      "away": {
-        "id": 93,
-        "name": "Reims"
-      },
-      "goals": {
-        "home": 2,
-        "away": 1
-      },
-      "stats": {
-        "home": {
-          "shots": 21,
-          "sot": 5,
-          "corners": 10,
-          "fouls": 11,
-          "saves": 1,
-          "cards": 0
-        },
-        "away": {
-          "shots": 5,
-          "sot": 2,
-          "corners": 3,
-          "fouls": 7,
-          "saves": 3,
-          "cards": 1
-        }
-      }
-    },
-    {
-      "fixtureId": 1214045,
-      "kickoff": "2025-05-17T19:00:00+00:00",
-      "status": "FT",
-      "league": {
-        "id": 61,
-        "name": "Ligue 1",
-        "country": "France",
-        "season": 2024
-      },
-      "home": {
-        "id": 80,
-        "name": "Lyon"
-      },
-      "away": {
-        "id": 77,
-        "name": "Angers"
+        "id": 100000066,
+        "name": "Manchester United FC"
       },
       "goals": {
         "home": 2,
@@ -1590,81 +981,343 @@
       },
       "stats": {
         "home": {
-          "shots": 21,
-          "sot": 4,
-          "corners": 8,
-          "fouls": 10,
-          "saves": 3,
-          "cards": 1
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
         },
         "away": {
-          "shots": 13,
-          "sot": 3,
-          "corners": 8,
-          "fouls": 13,
-          "saves": 2,
-          "cards": 3
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
         }
-      }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 560543
     },
     {
-      "fixtureId": 1214044,
-      "kickoff": "2025-05-17T19:00:00+00:00",
+      "fixtureId": 200560544,
+      "kickoff": "2026-08-22T14:00:00Z",
+      "status": "FT",
+      "league": {
+        "id": 39,
+        "name": "Premier League",
+        "country": "England",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000349,
+        "name": "Ipswich Town FC"
+      },
+      "away": {
+        "id": 100000071,
+        "name": "Sunderland AFC"
+      },
+      "goals": {
+        "home": 2,
+        "away": 1
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 560544
+    },
+    {
+      "fixtureId": 200560545,
+      "kickoff": "2026-08-22T14:00:00Z",
+      "status": "FT",
+      "league": {
+        "id": 39,
+        "name": "Premier League",
+        "country": "England",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000351,
+        "name": "Nottingham Forest FC"
+      },
+      "away": {
+        "id": 100000341,
+        "name": "Leeds United FC"
+      },
+      "goals": {
+        "home": 0,
+        "away": 1
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 560545
+    },
+    {
+      "fixtureId": 200560546,
+      "kickoff": "2026-08-22T14:00:00Z",
+      "status": "FT",
+      "league": {
+        "id": 39,
+        "name": "Premier League",
+        "country": "England",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000062,
+        "name": "Everton FC"
+      },
+      "away": {
+        "id": 100000354,
+        "name": "Crystal Palace FC"
+      },
+      "goals": {
+        "home": 2,
+        "away": 0
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 560546
+    },
+    {
+      "fixtureId": 200564641,
+      "kickoff": "2026-08-22T15:00:00Z",
+      "status": "FT",
+      "league": {
+        "id": 140,
+        "name": "La Liga",
+        "country": "Spain",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000077,
+        "name": "Athletic Club"
+      },
+      "away": {
+        "id": 100000559,
+        "name": "Sevilla FC"
+      },
+      "goals": {
+        "home": 1,
+        "away": 3
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 564641
+    },
+    {
+      "fixtureId": 200559712,
+      "kickoff": "2026-08-22T15:15:00Z",
       "status": "FT",
       "league": {
         "id": 61,
         "name": "Ligue 1",
         "country": "France",
-        "season": 2024
+        "season": 2026
       },
       "home": {
-        "id": 81,
-        "name": "Marseille"
+        "id": 100000546,
+        "name": "Racing Club de Lens"
       },
       "away": {
-        "id": 94,
-        "name": "Rennes"
+        "id": 100000519,
+        "name": "AJ Auxerre"
+      },
+      "goals": {
+        "home": 5,
+        "away": 2
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 559712
+    },
+    {
+      "fixtureId": 200558629,
+      "kickoff": "2026-08-22T16:30:00Z",
+      "status": "FT",
+      "league": {
+        "id": 135,
+        "name": "Serie A",
+        "country": "Italy",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000115,
+        "name": "Udinese Calcio"
+      },
+      "away": {
+        "id": 100007397,
+        "name": "Como 1907"
+      },
+      "goals": {
+        "home": 1,
+        "away": 1
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 558629
+    },
+    {
+      "fixtureId": 200558632,
+      "kickoff": "2026-08-22T16:30:00Z",
+      "status": "FT",
+      "league": {
+        "id": 135,
+        "name": "Serie A",
+        "country": "Italy",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000108,
+        "name": "FC Internazionale Milano"
+      },
+      "away": {
+        "id": 100005911,
+        "name": "AC Monza"
       },
       "goals": {
         "home": 4,
-        "away": 2
+        "away": 1
       },
       "stats": {
         "home": {
-          "shots": 17,
-          "sot": 10,
-          "corners": 5,
-          "fouls": 8,
-          "saves": 1,
-          "cards": 3
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
         },
         "away": {
-          "shots": 9,
-          "sot": 3,
-          "corners": 5,
-          "fouls": 12,
-          "saves": 6,
-          "cards": 3
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
         }
-      }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 558632
     },
     {
-      "fixtureId": 1214050,
-      "kickoff": "2025-05-17T19:00:00+00:00",
+      "fixtureId": 200560547,
+      "kickoff": "2026-08-22T16:30:00Z",
       "status": "FT",
       "league": {
-        "id": 61,
-        "name": "Ligue 1",
-        "country": "France",
-        "season": 2024
+        "id": 39,
+        "name": "Premier League",
+        "country": "England",
+        "season": 2026
       },
       "home": {
-        "id": 83,
-        "name": "Nantes"
+        "id": 100000402,
+        "name": "Brentford FC"
       },
       "away": {
-        "id": 82,
-        "name": "Montpellier"
+        "id": 100000073,
+        "name": "Tottenham Hotspur FC"
       },
       "goals": {
         "home": 3,
@@ -1672,163 +1325,429 @@
       },
       "stats": {
         "home": {
-          "shots": 18,
-          "sot": 6,
-          "corners": 7,
-          "fouls": 14,
-          "saves": 0,
-          "cards": 3
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
         },
         "away": {
-          "shots": 9,
-          "sot": 0,
-          "corners": 2,
-          "fouls": 9,
-          "saves": 2,
-          "cards": 1
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
         }
-      }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 560547
     },
     {
-      "fixtureId": 1214046,
-      "kickoff": "2025-05-17T19:00:00+00:00",
+      "fixtureId": 200564643,
+      "kickoff": "2026-08-22T17:30:00Z",
+      "status": "FT",
+      "league": {
+        "id": 140,
+        "name": "La Liga",
+        "country": "Spain",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000095,
+        "name": "Valencia CF"
+      },
+      "away": {
+        "id": 100000558,
+        "name": "RC Celta de Vigo"
+      },
+      "goals": {
+        "home": 0,
+        "away": 0
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 564643
+    },
+    {
+      "fixtureId": 200558631,
+      "kickoff": "2026-08-22T18:45:00Z",
+      "status": "FT",
+      "league": {
+        "id": 135,
+        "name": "Serie A",
+        "country": "Italy",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000107,
+        "name": "Genoa CFC"
+      },
+      "away": {
+        "id": 100000113,
+        "name": "SSC Napoli"
+      },
+      "goals": {
+        "home": 0,
+        "away": 2
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 558631
+    },
+    {
+      "fixtureId": 200558636,
+      "kickoff": "2026-08-22T18:45:00Z",
+      "status": "FT",
+      "league": {
+        "id": 135,
+        "name": "Serie A",
+        "country": "Italy",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000112,
+        "name": "Parma Calcio 1913"
+      },
+      "away": {
+        "id": 100000104,
+        "name": "Cagliari Calcio"
+      },
+      "goals": {
+        "home": 0,
+        "away": 1
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 558636
+    },
+    {
+      "fixtureId": 200559711,
+      "kickoff": "2026-08-22T18:45:00Z",
       "status": "FT",
       "league": {
         "id": 61,
         "name": "Ligue 1",
         "country": "France",
-        "season": 2024
+        "season": 2026
       },
       "home": {
-        "id": 84,
-        "name": "Nice"
+        "id": 100000535,
+        "name": "Le Mans FC"
       },
       "away": {
-        "id": 106,
+        "id": 100000512,
         "name": "Stade Brestois 29"
       },
       "goals": {
-        "home": 6,
+        "home": 2,
+        "away": 2
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 559711
+    },
+    {
+      "fixtureId": 200559714,
+      "kickoff": "2026-08-22T18:45:00Z",
+      "status": "FT",
+      "league": {
+        "id": 61,
+        "name": "Ligue 1",
+        "country": "France",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000531,
+        "name": "ES Troyes AC"
+      },
+      "away": {
+        "id": 100001045,
+        "name": "Paris FC"
+      },
+      "goals": {
+        "home": 0,
         "away": 0
       },
       "stats": {
         "home": {
-          "shots": 18,
-          "sot": 9,
-          "corners": 5,
-          "fouls": 13,
-          "saves": 1,
-          "cards": 0
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
         },
         "away": {
-          "shots": 10,
-          "sot": 1,
-          "corners": 2,
-          "fouls": 12,
-          "saves": 3,
-          "cards": 5
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
         }
-      }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 559714
     },
     {
-      "fixtureId": 1214052,
-      "kickoff": "2025-05-17T19:00:00+00:00",
+      "fixtureId": 200559716,
+      "kickoff": "2026-08-22T18:45:00Z",
       "status": "FT",
       "league": {
         "id": 61,
         "name": "Ligue 1",
         "country": "France",
-        "season": 2024
+        "season": 2026
       },
       "home": {
-        "id": 85,
-        "name": "Paris Saint Germain"
+        "id": 100000522,
+        "name": "OGC Nice"
       },
       "away": {
-        "id": 108,
-        "name": "Auxerre"
+        "id": 100000525,
+        "name": "FC Lorient"
       },
       "goals": {
-        "home": 3,
+        "home": 0,
+        "away": 0
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 559716
+    },
+    {
+      "fixtureId": 200559718,
+      "kickoff": "2026-08-22T18:45:00Z",
+      "status": "FT",
+      "league": {
+        "id": 61,
+        "name": "Ligue 1",
+        "country": "France",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000511,
+        "name": "Toulouse FC"
+      },
+      "away": {
+        "id": 100000523,
+        "name": "Olympique Lyonnais"
+      },
+      "goals": {
+        "home": 0,
+        "away": 2
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 559718
+    },
+    {
+      "fixtureId": 200564645,
+      "kickoff": "2026-08-22T19:30:00Z",
+      "status": "FT",
+      "league": {
+        "id": 140,
+        "name": "La Liga",
+        "country": "Spain",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000080,
+        "name": "RCD Espanyol de Barcelona"
+      },
+      "away": {
+        "id": 100000086,
+        "name": "Real Madrid CF"
+      },
+      "goals": {
+        "home": 1,
+        "away": 2
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 564645
+    },
+    {
+      "fixtureId": 200560548,
+      "kickoff": "2026-08-23T13:00:00Z",
+      "status": "FT",
+      "league": {
+        "id": 39,
+        "name": "Premier League",
+        "country": "England",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000065,
+        "name": "Manchester City FC"
+      },
+      "away": {
+        "id": 100001044,
+        "name": "AFC Bournemouth"
+      },
+      "goals": {
+        "home": 2,
         "away": 1
       },
       "stats": {
         "home": {
-          "shots": 21,
-          "sot": 9,
-          "corners": 5,
-          "fouls": 10,
-          "saves": 1,
-          "cards": 1
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
         },
         "away": {
-          "shots": 7,
-          "sot": 2,
-          "corners": 2,
-          "fouls": 9,
-          "saves": 6,
-          "cards": 2
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
         }
-      }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 560548
     },
     {
-      "fixtureId": 1214049,
-      "kickoff": "2025-05-17T19:00:00+00:00",
+      "fixtureId": 200560549,
+      "kickoff": "2026-08-23T13:00:00Z",
       "status": "FT",
       "league": {
-        "id": 61,
-        "name": "Ligue 1",
-        "country": "France",
-        "season": 2024
+        "id": 39,
+        "name": "Premier League",
+        "country": "England",
+        "season": 2026
       },
       "home": {
-        "id": 95,
-        "name": "Strasbourg"
+        "id": 100000397,
+        "name": "Brighton & Hove Albion FC"
       },
       "away": {
-        "id": 111,
-        "name": "Le Havre"
-      },
-      "goals": {
-        "home": 2,
-        "away": 3
-      },
-      "stats": {
-        "home": {
-          "shots": 6,
-          "sot": 4,
-          "corners": 4,
-          "fouls": 18,
-          "saves": 2,
-          "cards": 3
-        },
-        "away": {
-          "shots": 10,
-          "sot": 5,
-          "corners": 3,
-          "fouls": 8,
-          "saves": 2,
-          "cards": 0
-        }
-      }
-    },
-    {
-      "fixtureId": 1214051,
-      "kickoff": "2025-05-17T19:00:00+00:00",
-      "status": "FT",
-      "league": {
-        "id": 61,
-        "name": "Ligue 1",
-        "country": "France",
-        "season": 2024
-      },
-      "home": {
-        "id": 116,
-        "name": "Lens"
-      },
-      "away": {
-        "id": 91,
-        "name": "Monaco"
+        "id": 100000058,
+        "name": "Aston Villa FC"
       },
       "goals": {
         "home": 4,
@@ -1836,40 +1755,687 @@
       },
       "stats": {
         "home": {
-          "shots": 15,
-          "sot": 5,
-          "corners": 5,
-          "fouls": 14,
-          "saves": 4,
-          "cards": 1
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
         },
         "away": {
-          "shots": 6,
-          "sot": 4,
-          "corners": 4,
-          "fouls": 9,
-          "saves": 1,
-          "cards": 1
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
         }
-      }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 560549
     },
     {
-      "fixtureId": 1375858,
-      "kickoff": "2025-05-21T18:00:00+00:00",
+      "fixtureId": 200559717,
+      "kickoff": "2026-08-23T13:00:00Z",
       "status": "FT",
       "league": {
         "id": 61,
         "name": "Ligue 1",
         "country": "France",
-        "season": 2024
+        "season": 2026
       },
       "home": {
-        "id": 112,
-        "name": "Metz"
+        "id": 100000532,
+        "name": "Angers SCO"
       },
       "away": {
-        "id": 93,
-        "name": "Reims"
+        "id": 100000521,
+        "name": "Lille OSC"
+      },
+      "goals": {
+        "home": 0,
+        "away": 2
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 559717
+    },
+    {
+      "fixtureId": 200564646,
+      "kickoff": "2026-08-23T15:00:00Z",
+      "status": "FT",
+      "league": {
+        "id": 140,
+        "name": "La Liga",
+        "country": "Spain",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000078,
+        "name": "Club Atlético de Madrid"
+      },
+      "away": {
+        "id": 100000094,
+        "name": "Villarreal CF"
+      },
+      "goals": {
+        "home": 2,
+        "away": 2
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 564646
+    },
+    {
+      "fixtureId": 200559719,
+      "kickoff": "2026-08-23T15:15:00Z",
+      "status": "FT",
+      "league": {
+        "id": 61,
+        "name": "Ligue 1",
+        "country": "France",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000533,
+        "name": "Le Havre AC"
+      },
+      "away": {
+        "id": 100000548,
+        "name": "AS Monaco FC"
+      },
+      "goals": {
+        "home": 0,
+        "away": 1
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 559719
+    },
+    {
+      "fixtureId": 200560550,
+      "kickoff": "2026-08-23T15:30:00Z",
+      "status": "FT",
+      "league": {
+        "id": 39,
+        "name": "Premier League",
+        "country": "England",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000067,
+        "name": "Newcastle United FC"
+      },
+      "away": {
+        "id": 100000064,
+        "name": "Liverpool FC"
+      },
+      "goals": {
+        "home": 2,
+        "away": 2
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 560550
+    },
+    {
+      "fixtureId": 200558635,
+      "kickoff": "2026-08-23T16:30:00Z",
+      "status": "FT",
+      "league": {
+        "id": 135,
+        "name": "Serie A",
+        "country": "Italy",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000470,
+        "name": "Frosinone Calcio"
+      },
+      "away": {
+        "id": 100000109,
+        "name": "Juventus FC"
+      },
+      "goals": {
+        "home": 0,
+        "away": 1
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 558635
+    },
+    {
+      "fixtureId": 200558637,
+      "kickoff": "2026-08-23T16:30:00Z",
+      "status": "FT",
+      "league": {
+        "id": 135,
+        "name": "Serie A",
+        "country": "Italy",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000454,
+        "name": "Venezia FC"
+      },
+      "away": {
+        "id": 100005890,
+        "name": "US Lecce"
+      },
+      "goals": {
+        "home": 0,
+        "away": 2
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 558637
+    },
+    {
+      "fixtureId": 200564644,
+      "kickoff": "2026-08-23T17:30:00Z",
+      "status": "FT",
+      "league": {
+        "id": 140,
+        "name": "La Liga",
+        "country": "Spain",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000082,
+        "name": "Getafe CF"
+      },
+      "away": {
+        "id": 100005335,
+        "name": "Real Racing Club de Santander"
+      },
+      "goals": {
+        "home": 1,
+        "away": 0
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 564644
+    },
+    {
+      "fixtureId": 200558633,
+      "kickoff": "2026-08-23T18:45:00Z",
+      "status": "FT",
+      "league": {
+        "id": 135,
+        "name": "Serie A",
+        "country": "Italy",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000102,
+        "name": "Atalanta BC"
+      },
+      "away": {
+        "id": 100000471,
+        "name": "US Sassuolo Calcio"
+      },
+      "goals": {
+        "home": 2,
+        "away": 1
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 558633
+    },
+    {
+      "fixtureId": 200558634,
+      "kickoff": "2026-08-23T18:45:00Z",
+      "status": "FT",
+      "league": {
+        "id": 135,
+        "name": "Serie A",
+        "country": "Italy",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000586,
+        "name": "Torino FC"
+      },
+      "away": {
+        "id": 100000098,
+        "name": "AC Milan"
+      },
+      "goals": {
+        "home": 1,
+        "away": 2
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 558634
+    },
+    {
+      "fixtureId": 200559713,
+      "kickoff": "2026-08-23T18:45:00Z",
+      "status": "FT",
+      "league": {
+        "id": 61,
+        "name": "Ligue 1",
+        "country": "France",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000529,
+        "name": "Stade Rennais FC 1901"
+      },
+      "away": {
+        "id": 100000524,
+        "name": "Paris Saint-Germain FC"
+      },
+      "goals": {
+        "home": 2,
+        "away": 2
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 559713
+    },
+    {
+      "fixtureId": 200564642,
+      "kickoff": "2026-08-23T19:30:00Z",
+      "status": "FT",
+      "league": {
+        "id": 140,
+        "name": "La Liga",
+        "country": "Spain",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000285,
+        "name": "Elche CF"
+      },
+      "away": {
+        "id": 100000081,
+        "name": "FC Barcelona"
+      },
+      "goals": {
+        "home": 0,
+        "away": 5
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 564642
+    },
+    {
+      "fixtureId": 200558630,
+      "kickoff": "2026-08-24T16:30:00Z",
+      "status": "FT",
+      "league": {
+        "id": 135,
+        "name": "Serie A",
+        "country": "Italy",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000103,
+        "name": "Bologna FC 1909"
+      },
+      "away": {
+        "id": 100000110,
+        "name": "SS Lazio"
+      },
+      "goals": {
+        "home": 0,
+        "away": 1
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 558630
+    },
+    {
+      "fixtureId": 200564639,
+      "kickoff": "2026-08-24T17:30:00Z",
+      "status": "FT",
+      "league": {
+        "id": 140,
+        "name": "La Liga",
+        "country": "Spain",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000079,
+        "name": "CA Osasuna"
+      },
+      "away": {
+        "id": 100000088,
+        "name": "Levante UD"
+      },
+      "goals": {
+        "home": 0,
+        "away": 0
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 564639
+    },
+    {
+      "fixtureId": 200558638,
+      "kickoff": "2026-08-24T18:45:00Z",
+      "status": "FT",
+      "league": {
+        "id": 135,
+        "name": "Serie A",
+        "country": "Italy",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000100,
+        "name": "AS Roma"
+      },
+      "away": {
+        "id": 100000099,
+        "name": "ACF Fiorentina"
+      },
+      "goals": {
+        "home": 4,
+        "away": 0
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 558638
+    },
+    {
+      "fixtureId": 200560551,
+      "kickoff": "2026-08-24T19:00:00Z",
+      "status": "FT",
+      "league": {
+        "id": 39,
+        "name": "Premier League",
+        "country": "England",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000063,
+        "name": "Fulham FC"
+      },
+      "away": {
+        "id": 100000061,
+        "name": "Chelsea FC"
+      },
+      "goals": {
+        "home": 2,
+        "away": 3
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 560551
+    },
+    {
+      "fixtureId": 200564640,
+      "kickoff": "2026-08-24T19:30:00Z",
+      "status": "FT",
+      "league": {
+        "id": 140,
+        "name": "La Liga",
+        "country": "Spain",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000084,
+        "name": "Málaga CF"
+      },
+      "away": {
+        "id": 100000560,
+        "name": "RC Deportivo La Coruña"
       },
       "goals": {
         "home": 1,
@@ -1877,204 +2443,300 @@
       },
       "stats": {
         "home": {
-          "shots": 12,
-          "sot": 3,
-          "corners": 6,
-          "fouls": 13,
-          "saves": 0,
-          "cards": 1
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
         },
         "away": {
-          "shots": 10,
-          "sot": 1,
-          "corners": 6,
-          "fouls": 15,
-          "saves": 2,
-          "cards": 3
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
         }
-      }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 564640
     },
     {
-      "fixtureId": 1375862,
-      "kickoff": "2025-05-22T18:30:00+00:00",
+      "fixtureId": 200564637,
+      "kickoff": "2026-08-25T19:00:00Z",
+      "status": "FT",
+      "league": {
+        "id": 140,
+        "name": "La Liga",
+        "country": "Spain",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000095,
+        "name": "Valencia CF"
+      },
+      "away": {
+        "id": 100000090,
+        "name": "Real Betis Balompié"
+      },
+      "goals": {
+        "home": 0,
+        "away": 1
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 564637
+    },
+    {
+      "fixtureId": 200564631,
+      "kickoff": "2026-08-26T19:00:00Z",
+      "status": "FT",
+      "league": {
+        "id": 140,
+        "name": "La Liga",
+        "country": "Spain",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000086,
+        "name": "Real Madrid CF"
+      },
+      "away": {
+        "id": 100000092,
+        "name": "Real Sociedad de Fútbol"
+      },
+      "goals": {
+        "home": 4,
+        "away": 1
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 564631
+    },
+    {
+      "fixtureId": 200564636,
+      "kickoff": "2026-08-27T18:30:00Z",
+      "status": "FT",
+      "league": {
+        "id": 140,
+        "name": "La Liga",
+        "country": "Spain",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000558,
+        "name": "RC Celta de Vigo"
+      },
+      "away": {
+        "id": 100000079,
+        "name": "CA Osasuna"
+      },
+      "goals": {
+        "home": 1,
+        "away": 2
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 564636
+    },
+    {
+      "fixtureId": 200564630,
+      "kickoff": "2026-08-27T19:00:00Z",
+      "status": "FT",
+      "league": {
+        "id": 140,
+        "name": "La Liga",
+        "country": "Spain",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000081,
+        "name": "FC Barcelona"
+      },
+      "away": {
+        "id": 100000077,
+        "name": "Athletic Club"
+      },
+      "goals": {
+        "home": 2,
+        "away": 0
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 564630
+    },
+    {
+      "fixtureId": 200564654,
+      "kickoff": "2026-08-28T17:00:00Z",
+      "status": "FT",
+      "league": {
+        "id": 140,
+        "name": "La Liga",
+        "country": "Spain",
+        "season": 2026
+      },
+      "home": {
+        "id": 100005335,
+        "name": "Real Racing Club de Santander"
+      },
+      "away": {
+        "id": 100000285,
+        "name": "Elche CF"
+      },
+      "goals": {
+        "home": 3,
+        "away": 2
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 564654
+    },
+    {
+      "fixtureId": 200565776,
+      "kickoff": "2026-08-28T18:30:00Z",
       "status": "FT",
       "league": {
         "id": 78,
         "name": "Bundesliga",
         "country": "Germany",
-        "season": 2024
+        "season": 2026
       },
       "home": {
-        "id": 180,
-        "name": "1. FC Heidenheim"
+        "id": 100000005,
+        "name": "FC Bayern München"
       },
       "away": {
-        "id": 1660,
-        "name": "SV Elversberg"
+        "id": 100000010,
+        "name": "VfB Stuttgart"
       },
       "goals": {
-        "home": 2,
-        "away": 2
-      },
-      "stats": {
-        "home": {
-          "shots": 22,
-          "sot": 8,
-          "corners": 4,
-          "fouls": 11,
-          "saves": 2,
-          "cards": 1
-        },
-        "away": {
-          "shots": 13,
-          "sot": 4,
-          "corners": 4,
-          "fouls": 11,
-          "saves": 6,
-          "cards": 0
-        }
-      }
-    },
-    {
-      "fixtureId": 1223971,
-      "kickoff": "2025-05-23T18:45:00+00:00",
-      "status": "FT",
-      "league": {
-        "id": 135,
-        "name": "Serie A",
-        "country": "Italy",
-        "season": 2024
-      },
-      "home": {
-        "id": 492,
-        "name": "Napoli"
-      },
-      "away": {
-        "id": 490,
-        "name": "Cagliari"
-      },
-      "goals": {
-        "home": 2,
-        "away": 0
-      },
-      "stats": {
-        "home": {
-          "shots": 18,
-          "sot": 6,
-          "corners": 8,
-          "fouls": 14,
-          "saves": 1,
-          "cards": 2
-        },
-        "away": {
-          "shots": 4,
-          "sot": 1,
-          "corners": 3,
-          "fouls": 14,
-          "saves": 4,
-          "cards": 1
-        }
-      }
-    },
-    {
-      "fixtureId": 1223967,
-      "kickoff": "2025-05-23T18:45:00+00:00",
-      "status": "FT",
-      "league": {
-        "id": 135,
-        "name": "Serie A",
-        "country": "Italy",
-        "season": 2024
-      },
-      "home": {
-        "id": 895,
-        "name": "Como"
-      },
-      "away": {
-        "id": 505,
-        "name": "Inter"
-      },
-      "goals": {
-        "home": 0,
-        "away": 2
-      },
-      "stats": {
-        "home": {
-          "shots": 18,
-          "sot": 4,
-          "corners": 1,
-          "fouls": 10,
-          "saves": 4,
-          "cards": 1
-        },
-        "away": {
-          "shots": 11,
-          "sot": 7,
-          "corners": 4,
-          "fouls": 9,
-          "saves": 4,
-          "cards": 3
-        }
-      }
-    },
-    {
-      "fixtureId": 1208828,
-      "kickoff": "2025-05-23T19:00:00+00:00",
-      "status": "FT",
-      "league": {
-        "id": 140,
-        "name": "La Liga",
-        "country": "Spain",
-        "season": 2024
-      },
-      "home": {
-        "id": 543,
-        "name": "Real Betis"
-      },
-      "away": {
-        "id": 532,
-        "name": "Valencia"
-      },
-      "goals": {
-        "home": 1,
+        "home": 5,
         "away": 1
       },
       "stats": {
         "home": {
-          "shots": 14,
-          "sot": 4,
-          "corners": 3,
-          "fouls": 8,
-          "saves": 1,
-          "cards": 1
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
         },
         "away": {
-          "shots": 9,
-          "sot": 2,
-          "corners": 2,
-          "fouls": 12,
-          "saves": 3,
-          "cards": 3
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
         }
-      }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 565776
     },
     {
-      "fixtureId": 1208829,
-      "kickoff": "2025-05-24T14:15:00+00:00",
+      "fixtureId": 200558625,
+      "kickoff": "2026-08-28T18:45:00Z",
       "status": "FT",
       "league": {
-        "id": 140,
-        "name": "La Liga",
-        "country": "Spain",
-        "season": 2024
+        "id": 135,
+        "name": "Serie A",
+        "country": "Italy",
+        "season": 2026
       },
       "home": {
-        "id": 541,
-        "name": "Real Madrid"
+        "id": 100000098,
+        "name": "AC Milan"
       },
       "away": {
-        "id": 548,
-        "name": "Real Sociedad"
+        "id": 100000454,
+        "name": "Venezia FC"
       },
       "goals": {
         "home": 2,
@@ -2082,81 +2744,214 @@
       },
       "stats": {
         "home": {
-          "shots": 16,
-          "sot": 8,
-          "corners": 11,
-          "fouls": 5,
-          "saves": 1,
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
           "cards": null
         },
         "away": {
-          "shots": 9,
-          "sot": 1,
-          "corners": 4,
-          "fouls": 7,
-          "saves": 6,
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
           "cards": null
         }
-      }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 558625
     },
     {
-      "fixtureId": 1223966,
-      "kickoff": "2025-05-24T16:00:00+00:00",
+      "fixtureId": 200559702,
+      "kickoff": "2026-08-28T18:45:00Z",
       "status": "FT",
       "league": {
-        "id": 135,
-        "name": "Serie A",
-        "country": "Italy",
-        "season": 2024
+        "id": 61,
+        "name": "Ligue 1",
+        "country": "France",
+        "season": 2026
       },
       "home": {
-        "id": 500,
-        "name": "Bologna"
+        "id": 100000521,
+        "name": "Lille OSC"
       },
       "away": {
-        "id": 495,
-        "name": "Genoa"
+        "id": 100000524,
+        "name": "Paris Saint-Germain FC"
       },
       "goals": {
-        "home": 1,
-        "away": 3
+        "home": 2,
+        "away": 2
       },
       "stats": {
         "home": {
-          "shots": 16,
-          "sot": 5,
-          "corners": 13,
-          "fouls": 13,
-          "saves": 0,
-          "cards": 5
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
         },
         "away": {
-          "shots": 5,
-          "sot": 3,
-          "corners": 1,
-          "fouls": 23,
-          "saves": 4,
-          "cards": 2
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
         }
-      }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 559702
     },
     {
-      "fixtureId": 1208831,
-      "kickoff": "2025-05-24T16:30:00+00:00",
+      "fixtureId": 200560555,
+      "kickoff": "2026-08-28T19:00:00Z",
+      "status": "FT",
+      "league": {
+        "id": 39,
+        "name": "Premier League",
+        "country": "England",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000354,
+        "name": "Crystal Palace FC"
+      },
+      "away": {
+        "id": 100000065,
+        "name": "Manchester City FC"
+      },
+      "goals": {
+        "home": 1,
+        "away": 4
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 560555
+    },
+    {
+      "fixtureId": 200564648,
+      "kickoff": "2026-08-28T19:30:00Z",
       "status": "FT",
       "league": {
         "id": 140,
         "name": "La Liga",
         "country": "Spain",
-        "season": 2024
+        "season": 2026
       },
       "home": {
-        "id": 537,
-        "name": "Leganes"
+        "id": 100000263,
+        "name": "Deportivo Alavés"
       },
       "away": {
-        "id": 720,
-        "name": "Valladolid"
+        "id": 100000094,
+        "name": "Villarreal CF"
+      },
+      "goals": {
+        "home": 1,
+        "away": 0
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 564648
+    },
+    {
+      "fixtureId": 200560552,
+      "kickoff": "2026-08-29T11:30:00Z",
+      "status": "FT",
+      "league": {
+        "id": 39,
+        "name": "Premier League",
+        "country": "England",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000064,
+        "name": "Liverpool FC"
+      },
+      "away": {
+        "id": 100000351,
+        "name": "Nottingham Forest FC"
+      },
+      "goals": {
+        "home": 2,
+        "away": 2
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 560552
+    },
+    {
+      "fixtureId": 200565777,
+      "kickoff": "2026-08-29T13:30:00Z",
+      "status": "FT",
+      "league": {
+        "id": 78,
+        "name": "Bundesliga",
+        "country": "Germany",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000721,
+        "name": "RB Leipzig"
+      },
+      "away": {
+        "id": 100000018,
+        "name": "Borussia Mönchengladbach"
       },
       "goals": {
         "home": 3,
@@ -2164,122 +2959,214 @@
       },
       "stats": {
         "home": {
-          "shots": 16,
-          "sot": 6,
-          "corners": 3,
-          "fouls": 11,
-          "saves": 2,
-          "cards": 0
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
         },
         "away": {
-          "shots": 6,
-          "sot": 2,
-          "corners": 4,
-          "fouls": 16,
-          "saves": 3,
-          "cards": 1
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
         }
-      }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 565777
     },
     {
-      "fixtureId": 1212947,
-      "kickoff": "2025-05-24T16:30:00+00:00",
+      "fixtureId": 200565778,
+      "kickoff": "2026-08-29T13:30:00Z",
       "status": "FT",
       "league": {
-        "id": 140,
-        "name": "La Liga",
-        "country": "Spain",
-        "season": 2024
+        "id": 78,
+        "name": "Bundesliga",
+        "country": "Germany",
+        "season": 2026
       },
       "home": {
-        "id": 540,
-        "name": "Espanyol"
+        "id": 100000015,
+        "name": "1. FSV Mainz 05"
       },
       "away": {
-        "id": 534,
-        "name": "Las Palmas"
+        "id": 100000029,
+        "name": "SC Paderborn 07"
       },
       "goals": {
-        "home": 2,
+        "home": 0,
         "away": 0
       },
       "stats": {
         "home": {
-          "shots": 8,
-          "sot": 3,
-          "corners": 3,
-          "fouls": 12,
-          "saves": 4,
-          "cards": 3
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
         },
         "away": {
-          "shots": 10,
-          "sot": 4,
-          "corners": 6,
-          "fouls": 11,
-          "saves": 1,
-          "cards": 2
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
         }
-      }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 565778
     },
     {
-      "fixtureId": 1223970,
-      "kickoff": "2025-05-24T18:45:00+00:00",
+      "fixtureId": 200565779,
+      "kickoff": "2026-08-29T13:30:00Z",
       "status": "FT",
       "league": {
-        "id": 135,
-        "name": "Serie A",
-        "country": "Italy",
-        "season": 2024
+        "id": 78,
+        "name": "Bundesliga",
+        "country": "Germany",
+        "season": 2026
       },
       "home": {
-        "id": 489,
-        "name": "AC Milan"
+        "id": 100000028,
+        "name": "1. FC Union Berlin"
       },
       "away": {
-        "id": 1579,
-        "name": "Monza"
+        "id": 100000019,
+        "name": "Eintracht Frankfurt"
       },
       "goals": {
-        "home": 2,
-        "away": 0
+        "home": 3,
+        "away": 3
       },
       "stats": {
         "home": {
-          "shots": 21,
-          "sot": 6,
-          "corners": 4,
-          "fouls": 8,
-          "saves": 2,
-          "cards": 0
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
         },
         "away": {
-          "shots": 6,
-          "sot": 2,
-          "corners": 6,
-          "fouls": 9,
-          "saves": 4,
-          "cards": 1
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
         }
-      }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 565779
     },
     {
-      "fixtureId": 1208830,
-      "kickoff": "2025-05-24T19:00:00+00:00",
+      "fixtureId": 200565780,
+      "kickoff": "2026-08-29T13:30:00Z",
       "status": "FT",
       "league": {
-        "id": 140,
-        "name": "La Liga",
-        "country": "Spain",
-        "season": 2024
+        "id": 78,
+        "name": "Bundesliga",
+        "country": "Germany",
+        "season": 2026
       },
       "home": {
-        "id": 542,
-        "name": "Alaves"
+        "id": 100000719,
+        "name": "SV 07 Elversberg"
       },
       "away": {
-        "id": 727,
-        "name": "Osasuna"
+        "id": 100000003,
+        "name": "Bayer 04 Leverkusen"
+      },
+      "goals": {
+        "home": 3,
+        "away": 2
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 565780
+    },
+    {
+      "fixtureId": 200565783,
+      "kickoff": "2026-08-29T13:30:00Z",
+      "status": "FT",
+      "league": {
+        "id": 78,
+        "name": "Bundesliga",
+        "country": "Germany",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000001,
+        "name": "1. FC Köln"
+      },
+      "away": {
+        "id": 100000002,
+        "name": "TSG 1899 Hoffenheim"
+      },
+      "goals": {
+        "home": 3,
+        "away": 2
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 565783
+    },
+    {
+      "fixtureId": 200560560,
+      "kickoff": "2026-08-29T14:00:00Z",
+      "status": "FT",
+      "league": {
+        "id": 39,
+        "name": "Premier League",
+        "country": "England",
+        "season": 2026
+      },
+      "home": {
+        "id": 100001044,
+        "name": "AFC Bournemouth"
+      },
+      "away": {
+        "id": 100000062,
+        "name": "Everton FC"
       },
       "goals": {
         "home": 1,
@@ -2287,40 +3174,472 @@
       },
       "stats": {
         "home": {
-          "shots": 14,
-          "sot": 5,
-          "corners": 5,
-          "fouls": 15,
-          "saves": 4,
-          "cards": 2
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
         },
         "away": {
-          "shots": 19,
-          "sot": 5,
-          "corners": 9,
-          "fouls": 6,
-          "saves": 4,
-          "cards": 2
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
         }
-      }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 560560
     },
     {
-      "fixtureId": 1208833,
-      "kickoff": "2025-05-24T19:00:00+00:00",
+      "fixtureId": 200560561,
+      "kickoff": "2026-08-29T14:00:00Z",
+      "status": "FT",
+      "league": {
+        "id": 39,
+        "name": "Premier League",
+        "country": "England",
+        "season": 2026
+      },
+      "home": {
+        "id": 100001076,
+        "name": "Coventry City FC"
+      },
+      "away": {
+        "id": 100000322,
+        "name": "Hull City AFC"
+      },
+      "goals": {
+        "home": 0,
+        "away": 1
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 560561
+    },
+    {
+      "fixtureId": 200564655,
+      "kickoff": "2026-08-29T15:00:00Z",
       "status": "FT",
       "league": {
         "id": 140,
         "name": "La Liga",
         "country": "Spain",
-        "season": 2024
+        "season": 2026
       },
       "home": {
-        "id": 546,
-        "name": "Getafe"
+        "id": 100000088,
+        "name": "Levante UD"
       },
       "away": {
-        "id": 538,
-        "name": "Celta Vigo"
+        "id": 100000090,
+        "name": "Real Betis Balompié"
+      },
+      "goals": {
+        "home": 5,
+        "away": 2
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 564655
+    },
+    {
+      "fixtureId": 200559704,
+      "kickoff": "2026-08-29T15:15:00Z",
+      "status": "FT",
+      "league": {
+        "id": 61,
+        "name": "Ligue 1",
+        "country": "France",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000576,
+        "name": "RC Strasbourg Alsace"
+      },
+      "away": {
+        "id": 100000546,
+        "name": "Racing Club de Lens"
+      },
+      "goals": {
+        "home": 2,
+        "away": 1
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 559704
+    },
+    {
+      "fixtureId": 200558620,
+      "kickoff": "2026-08-29T16:30:00Z",
+      "status": "FT",
+      "league": {
+        "id": 135,
+        "name": "Serie A",
+        "country": "Italy",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000471,
+        "name": "US Sassuolo Calcio"
+      },
+      "away": {
+        "id": 100000586,
+        "name": "Torino FC"
+      },
+      "goals": {
+        "home": 2,
+        "away": 1
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 558620
+    },
+    {
+      "fixtureId": 200558624,
+      "kickoff": "2026-08-29T16:30:00Z",
+      "status": "FT",
+      "league": {
+        "id": 135,
+        "name": "Serie A",
+        "country": "Italy",
+        "season": 2026
+      },
+      "home": {
+        "id": 100005911,
+        "name": "AC Monza"
+      },
+      "away": {
+        "id": 100000115,
+        "name": "Udinese Calcio"
+      },
+      "goals": {
+        "home": 2,
+        "away": 3
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 558624
+    },
+    {
+      "fixtureId": 200558627,
+      "kickoff": "2026-08-29T16:30:00Z",
+      "status": "FT",
+      "league": {
+        "id": 135,
+        "name": "Serie A",
+        "country": "Italy",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000099,
+        "name": "ACF Fiorentina"
+      },
+      "away": {
+        "id": 100000470,
+        "name": "Frosinone Calcio"
+      },
+      "goals": {
+        "home": 0,
+        "away": 3
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 558627
+    },
+    {
+      "fixtureId": 200560558,
+      "kickoff": "2026-08-29T16:30:00Z",
+      "status": "FT",
+      "league": {
+        "id": 39,
+        "name": "Premier League",
+        "country": "England",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000073,
+        "name": "Tottenham Hotspur FC"
+      },
+      "away": {
+        "id": 100000067,
+        "name": "Newcastle United FC"
+      },
+      "goals": {
+        "home": 0,
+        "away": 2
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 560558
+    },
+    {
+      "fixtureId": 200565781,
+      "kickoff": "2026-08-29T16:30:00Z",
+      "status": "FT",
+      "league": {
+        "id": 78,
+        "name": "Bundesliga",
+        "country": "Germany",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000004,
+        "name": "Borussia Dortmund"
+      },
+      "away": {
+        "id": 100000007,
+        "name": "Hamburger SV"
+      },
+      "goals": {
+        "home": 2,
+        "away": 0
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 565781
+    },
+    {
+      "fixtureId": 200564653,
+      "kickoff": "2026-08-29T17:00:00Z",
+      "status": "FT",
+      "league": {
+        "id": 140,
+        "name": "La Liga",
+        "country": "Spain",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000092,
+        "name": "Real Sociedad de Fútbol"
+      },
+      "away": {
+        "id": 100000080,
+        "name": "RCD Espanyol de Barcelona"
+      },
+      "goals": {
+        "home": 2,
+        "away": 1
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 564653
+    },
+    {
+      "fixtureId": 200558619,
+      "kickoff": "2026-08-29T18:45:00Z",
+      "status": "FT",
+      "league": {
+        "id": 135,
+        "name": "Serie A",
+        "country": "Italy",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000109,
+        "name": "Juventus FC"
+      },
+      "away": {
+        "id": 100000112,
+        "name": "Parma Calcio 1913"
+      },
+      "goals": {
+        "home": 2,
+        "away": 0
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 558619
+    },
+    {
+      "fixtureId": 200559705,
+      "kickoff": "2026-08-29T18:45:00Z",
+      "status": "FT",
+      "league": {
+        "id": 61,
+        "name": "Ligue 1",
+        "country": "France",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000525,
+        "name": "FC Lorient"
+      },
+      "away": {
+        "id": 100000531,
+        "name": "ES Troyes AC"
       },
       "goals": {
         "home": 1,
@@ -2328,163 +3647,773 @@
       },
       "stats": {
         "home": {
-          "shots": 6,
-          "sot": 1,
-          "corners": 2,
-          "fouls": 13,
-          "saves": 6,
-          "cards": 3
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
         },
         "away": {
-          "shots": 15,
-          "sot": 8,
-          "corners": 6,
-          "fouls": 10,
-          "saves": 0,
-          "cards": 4
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
         }
-      }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 559705
     },
     {
-      "fixtureId": 1208834,
-      "kickoff": "2025-05-24T19:00:00+00:00",
+      "fixtureId": 200559706,
+      "kickoff": "2026-08-29T18:45:00Z",
+      "status": "FT",
+      "league": {
+        "id": 61,
+        "name": "Ligue 1",
+        "country": "France",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000523,
+        "name": "Olympique Lyonnais"
+      },
+      "away": {
+        "id": 100000533,
+        "name": "Le Havre AC"
+      },
+      "goals": {
+        "home": 1,
+        "away": 1
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 559706
+    },
+    {
+      "fixtureId": 200559708,
+      "kickoff": "2026-08-29T18:45:00Z",
+      "status": "FT",
+      "league": {
+        "id": 61,
+        "name": "Ligue 1",
+        "country": "France",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000519,
+        "name": "AJ Auxerre"
+      },
+      "away": {
+        "id": 100000532,
+        "name": "Angers SCO"
+      },
+      "goals": {
+        "home": 1,
+        "away": 3
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 559708
+    },
+    {
+      "fixtureId": 200559710,
+      "kickoff": "2026-08-29T18:45:00Z",
+      "status": "FT",
+      "league": {
+        "id": 61,
+        "name": "Ligue 1",
+        "country": "France",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000512,
+        "name": "Stade Brestois 29"
+      },
+      "away": {
+        "id": 100000511,
+        "name": "Toulouse FC"
+      },
+      "goals": {
+        "home": 2,
+        "away": 2
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 559710
+    },
+    {
+      "fixtureId": 200564649,
+      "kickoff": "2026-08-29T19:30:00Z",
       "status": "FT",
       "league": {
         "id": 140,
         "name": "La Liga",
         "country": "Spain",
-        "season": 2024
+        "season": 2026
       },
       "home": {
-        "id": 728,
-        "name": "Rayo Vallecano"
+        "id": 100000559,
+        "name": "Sevilla FC"
       },
       "away": {
-        "id": 798,
-        "name": "Mallorca"
+        "id": 100000078,
+        "name": "Club Atlético de Madrid"
       },
       "goals": {
-        "home": 0,
+        "home": 1,
+        "away": 3
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 564649
+    },
+    {
+      "fixtureId": 200560554,
+      "kickoff": "2026-08-30T13:00:00Z",
+      "status": "FT",
+      "league": {
+        "id": 39,
+        "name": "Premier League",
+        "country": "England",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000071,
+        "name": "Sunderland AFC"
+      },
+      "away": {
+        "id": 100000063,
+        "name": "Fulham FC"
+      },
+      "goals": {
+        "home": 1,
         "away": 0
       },
       "stats": {
         "home": {
-          "shots": 27,
-          "sot": 8,
-          "corners": 11,
-          "fouls": 9,
-          "saves": 2,
-          "cards": 2
-        },
-        "away": {
-          "shots": 9,
-          "sot": 2,
-          "corners": 2,
-          "fouls": 14,
-          "saves": 8,
-          "cards": 2
-        }
-      }
-    },
-    {
-      "fixtureId": 1208832,
-      "kickoff": "2025-05-25T12:00:00+00:00",
-      "status": "FT",
-      "league": {
-        "id": 140,
-        "name": "La Liga",
-        "country": "Spain",
-        "season": 2024
-      },
-      "home": {
-        "id": 547,
-        "name": "Girona"
-      },
-      "away": {
-        "id": 530,
-        "name": "Atletico Madrid"
-      },
-      "goals": {
-        "home": 0,
-        "away": 4
-      },
-      "stats": {
-        "home": {
-          "shots": 2,
-          "sot": 1,
-          "corners": 1,
-          "fouls": 13,
-          "saves": 8,
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
           "cards": null
         },
         "away": {
-          "shots": 19,
-          "sot": 11,
-          "corners": 8,
-          "fouls": 11,
-          "saves": 1,
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
           "cards": null
         }
-      }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 560554
     },
     {
-      "fixtureId": 1208835,
-      "kickoff": "2025-05-25T14:15:00+00:00",
+      "fixtureId": 200560556,
+      "kickoff": "2026-08-30T13:00:00Z",
       "status": "FT",
       "league": {
-        "id": 140,
-        "name": "La Liga",
-        "country": "Spain",
-        "season": 2024
+        "id": 39,
+        "name": "Premier League",
+        "country": "England",
+        "season": 2026
       },
       "home": {
-        "id": 533,
-        "name": "Villarreal"
+        "id": 100000061,
+        "name": "Chelsea FC"
       },
       "away": {
-        "id": 536,
-        "name": "Sevilla"
+        "id": 100000397,
+        "name": "Brighton & Hove Albion FC"
       },
       "goals": {
         "home": 4,
-        "away": 2
+        "away": 3
       },
       "stats": {
         "home": {
-          "shots": 12,
-          "sot": 7,
-          "corners": 3,
-          "fouls": 8,
-          "saves": 4,
-          "cards": 0
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
         },
         "away": {
-          "shots": 17,
-          "sot": 6,
-          "corners": 5,
-          "fouls": 14,
-          "saves": 3,
-          "cards": 1
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
         }
-      }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 560556
     },
     {
-      "fixtureId": 1208397,
-      "kickoff": "2025-05-25T15:00:00+00:00",
+      "fixtureId": 200560559,
+      "kickoff": "2026-08-30T13:00:00Z",
       "status": "FT",
       "league": {
         "id": 39,
         "name": "Premier League",
         "country": "England",
-        "season": 2024
+        "season": 2026
       },
       "home": {
-        "id": 33,
-        "name": "Manchester United"
+        "id": 100000341,
+        "name": "Leeds United FC"
       },
       "away": {
-        "id": 66,
-        "name": "Aston Villa"
+        "id": 100000402,
+        "name": "Brentford FC"
+      },
+      "goals": {
+        "home": 1,
+        "away": 1
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 560559
+    },
+    {
+      "fixtureId": 200559707,
+      "kickoff": "2026-08-30T13:00:00Z",
+      "status": "FT",
+      "league": {
+        "id": 61,
+        "name": "Ligue 1",
+        "country": "France",
+        "season": 2026
+      },
+      "home": {
+        "id": 100001045,
+        "name": "Paris FC"
+      },
+      "away": {
+        "id": 100000522,
+        "name": "OGC Nice"
+      },
+      "goals": {
+        "home": 3,
+        "away": 0
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 559707
+    },
+    {
+      "fixtureId": 200565784,
+      "kickoff": "2026-08-30T13:30:00Z",
+      "status": "FT",
+      "league": {
+        "id": 78,
+        "name": "Bundesliga",
+        "country": "Germany",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000017,
+        "name": "SC Freiburg"
+      },
+      "away": {
+        "id": 100000012,
+        "name": "SV Werder Bremen"
+      },
+      "goals": {
+        "home": 4,
+        "away": 1
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 565784
+    },
+    {
+      "fixtureId": 200564656,
+      "kickoff": "2026-08-30T15:00:00Z",
+      "status": "FT",
+      "league": {
+        "id": 140,
+        "name": "La Liga",
+        "country": "Spain",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000086,
+        "name": "Real Madrid CF"
+      },
+      "away": {
+        "id": 100000084,
+        "name": "Málaga CF"
+      },
+      "goals": {
+        "home": 4,
+        "away": 0
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 564656
+    },
+    {
+      "fixtureId": 200559709,
+      "kickoff": "2026-08-30T15:15:00Z",
+      "status": "FT",
+      "league": {
+        "id": 61,
+        "name": "Ligue 1",
+        "country": "France",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000529,
+        "name": "Stade Rennais FC 1901"
+      },
+      "away": {
+        "id": 100000535,
+        "name": "Le Mans FC"
+      },
+      "goals": {
+        "home": 3,
+        "away": 2
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 559709
+    },
+    {
+      "fixtureId": 200560553,
+      "kickoff": "2026-08-30T15:30:00Z",
+      "status": "FT",
+      "league": {
+        "id": 39,
+        "name": "Premier League",
+        "country": "England",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000066,
+        "name": "Manchester United FC"
+      },
+      "away": {
+        "id": 100000349,
+        "name": "Ipswich Town FC"
+      },
+      "goals": {
+        "home": 5,
+        "away": 2
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 560553
+    },
+    {
+      "fixtureId": 200565782,
+      "kickoff": "2026-08-30T15:30:00Z",
+      "status": "FT",
+      "league": {
+        "id": 78,
+        "name": "Bundesliga",
+        "country": "Germany",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000016,
+        "name": "FC Augsburg"
+      },
+      "away": {
+        "id": 100000006,
+        "name": "FC Schalke 04"
+      },
+      "goals": {
+        "home": 3,
+        "away": 0
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 565782
+    },
+    {
+      "fixtureId": 200558626,
+      "kickoff": "2026-08-30T16:30:00Z",
+      "status": "FT",
+      "league": {
+        "id": 135,
+        "name": "Serie A",
+        "country": "Italy",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000113,
+        "name": "SSC Napoli"
+      },
+      "away": {
+        "id": 100007397,
+        "name": "Como 1907"
+      },
+      "goals": {
+        "home": 1,
+        "away": 2
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 558626
+    },
+    {
+      "fixtureId": 200564651,
+      "kickoff": "2026-08-30T17:30:00Z",
+      "status": "FT",
+      "league": {
+        "id": 140,
+        "name": "La Liga",
+        "country": "Spain",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000560,
+        "name": "RC Deportivo La Coruña"
+      },
+      "away": {
+        "id": 100000095,
+        "name": "Valencia CF"
+      },
+      "goals": {
+        "home": 3,
+        "away": 1
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 564651
+    },
+    {
+      "fixtureId": 200558622,
+      "kickoff": "2026-08-30T18:45:00Z",
+      "status": "FT",
+      "league": {
+        "id": 135,
+        "name": "Serie A",
+        "country": "Italy",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000110,
+        "name": "SS Lazio"
+      },
+      "away": {
+        "id": 100000107,
+        "name": "Genoa CFC"
+      },
+      "goals": {
+        "home": 1,
+        "away": 0
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 558622
+    },
+    {
+      "fixtureId": 200558623,
+      "kickoff": "2026-08-30T18:45:00Z",
+      "status": "FT",
+      "league": {
+        "id": 135,
+        "name": "Serie A",
+        "country": "Italy",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000104,
+        "name": "Cagliari Calcio"
+      },
+      "away": {
+        "id": 100000108,
+        "name": "FC Internazionale Milano"
+      },
+      "goals": {
+        "home": 0,
+        "away": 1
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 558623
+    },
+    {
+      "fixtureId": 200559703,
+      "kickoff": "2026-08-30T18:45:00Z",
+      "status": "FT",
+      "league": {
+        "id": 61,
+        "name": "Ligue 1",
+        "country": "France",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000548,
+        "name": "AS Monaco FC"
+      },
+      "away": {
+        "id": 100000516,
+        "name": "Olympique de Marseille"
       },
       "goals": {
         "home": 2,
@@ -2492,122 +4421,42 @@
       },
       "stats": {
         "home": {
-          "shots": 25,
-          "sot": 10,
-          "corners": 4,
-          "fouls": 10,
-          "saves": 1,
-          "cards": 2
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
         },
         "away": {
-          "shots": 6,
-          "sot": 1,
-          "corners": 3,
-          "fouls": 10,
-          "saves": 8,
-          "cards": 2
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
         }
-      }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 559703
     },
     {
-      "fixtureId": 1208398,
-      "kickoff": "2025-05-25T15:00:00+00:00",
+      "fixtureId": 200564652,
+      "kickoff": "2026-08-30T19:30:00Z",
       "status": "FT",
       "league": {
-        "id": 39,
-        "name": "Premier League",
-        "country": "England",
-        "season": 2024
+        "id": 140,
+        "name": "La Liga",
+        "country": "Spain",
+        "season": 2026
       },
       "home": {
-        "id": 34,
-        "name": "Newcastle"
+        "id": 100000558,
+        "name": "RC Celta de Vigo"
       },
       "away": {
-        "id": 45,
-        "name": "Everton"
-      },
-      "goals": {
-        "home": 0,
-        "away": 1
-      },
-      "stats": {
-        "home": {
-          "shots": 17,
-          "sot": 6,
-          "corners": 12,
-          "fouls": 12,
-          "saves": 5,
-          "cards": 1
-        },
-        "away": {
-          "shots": 14,
-          "sot": 6,
-          "corners": 3,
-          "fouls": 9,
-          "saves": 6,
-          "cards": 4
-        }
-      }
-    },
-    {
-      "fixtureId": 1208393,
-      "kickoff": "2025-05-25T15:00:00+00:00",
-      "status": "FT",
-      "league": {
-        "id": 39,
-        "name": "Premier League",
-        "country": "England",
-        "season": 2024
-      },
-      "home": {
-        "id": 35,
-        "name": "Bournemouth"
-      },
-      "away": {
-        "id": 46,
-        "name": "Leicester"
-      },
-      "goals": {
-        "home": 2,
-        "away": 0
-      },
-      "stats": {
-        "home": {
-          "shots": 20,
-          "sot": 7,
-          "corners": 6,
-          "fouls": 19,
-          "saves": 0,
-          "cards": 0
-        },
-        "away": {
-          "shots": 3,
-          "sot": 0,
-          "corners": 1,
-          "fouls": 16,
-          "saves": 5,
-          "cards": 2
-        }
-      }
-    },
-    {
-      "fixtureId": 1208394,
-      "kickoff": "2025-05-25T15:00:00+00:00",
-      "status": "FT",
-      "league": {
-        "id": 39,
-        "name": "Premier League",
-        "country": "England",
-        "season": 2024
-      },
-      "home": {
-        "id": 36,
-        "name": "Fulham"
-      },
-      "away": {
-        "id": 50,
-        "name": "Manchester City"
+        "id": 100000077,
+        "name": "Athletic Club"
       },
       "goals": {
         "home": 0,
@@ -2615,573 +4464,515 @@
       },
       "stats": {
         "home": {
-          "shots": 13,
-          "sot": 3,
-          "corners": 1,
-          "fouls": 11,
-          "saves": 3,
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
           "cards": null
         },
         "away": {
-          "shots": 20,
-          "sot": 5,
-          "corners": 6,
-          "fouls": 5,
-          "saves": 3,
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
           "cards": null
         }
-      }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 564652
     },
     {
-      "fixtureId": 1208402,
-      "kickoff": "2025-05-25T15:00:00+00:00",
-      "status": "FT",
-      "league": {
-        "id": 39,
-        "name": "Premier League",
-        "country": "England",
-        "season": 2024
-      },
-      "home": {
-        "id": 39,
-        "name": "Wolves"
-      },
-      "away": {
-        "id": 55,
-        "name": "Brentford"
-      },
-      "goals": {
-        "home": 1,
-        "away": 1
-      },
-      "stats": {
-        "home": {
-          "shots": 18,
-          "sot": 6,
-          "corners": 8,
-          "fouls": 7,
-          "saves": 6,
-          "cards": 2
-        },
-        "away": {
-          "shots": 13,
-          "sot": 7,
-          "corners": 3,
-          "fouls": 9,
-          "saves": 5,
-          "cards": 1
-        }
-      }
-    },
-    {
-      "fixtureId": 1208396,
-      "kickoff": "2025-05-25T15:00:00+00:00",
-      "status": "FT",
-      "league": {
-        "id": 39,
-        "name": "Premier League",
-        "country": "England",
-        "season": 2024
-      },
-      "home": {
-        "id": 40,
-        "name": "Liverpool"
-      },
-      "away": {
-        "id": 52,
-        "name": "Crystal Palace"
-      },
-      "goals": {
-        "home": 1,
-        "away": 1
-      },
-      "stats": {
-        "home": {
-          "shots": 14,
-          "sot": 3,
-          "corners": 11,
-          "fouls": 7,
-          "saves": 4,
-          "cards": 2
-        },
-        "away": {
-          "shots": 8,
-          "sot": 5,
-          "corners": 0,
-          "fouls": 10,
-          "saves": 2,
-          "cards": 0
-        }
-      }
-    },
-    {
-      "fixtureId": 1208400,
-      "kickoff": "2025-05-25T15:00:00+00:00",
-      "status": "FT",
-      "league": {
-        "id": 39,
-        "name": "Premier League",
-        "country": "England",
-        "season": 2024
-      },
-      "home": {
-        "id": 41,
-        "name": "Southampton"
-      },
-      "away": {
-        "id": 42,
-        "name": "Arsenal"
-      },
-      "goals": {
-        "home": 1,
-        "away": 2
-      },
-      "stats": {
-        "home": {
-          "shots": 7,
-          "sot": 2,
-          "corners": 5,
-          "fouls": 7,
-          "saves": 6,
-          "cards": null
-        },
-        "away": {
-          "shots": 23,
-          "sot": 8,
-          "corners": 8,
-          "fouls": 8,
-          "saves": 1,
-          "cards": null
-        }
-      }
-    },
-    {
-      "fixtureId": 1208401,
-      "kickoff": "2025-05-25T15:00:00+00:00",
-      "status": "FT",
-      "league": {
-        "id": 39,
-        "name": "Premier League",
-        "country": "England",
-        "season": 2024
-      },
-      "home": {
-        "id": 47,
-        "name": "Tottenham"
-      },
-      "away": {
-        "id": 51,
-        "name": "Brighton"
-      },
-      "goals": {
-        "home": 1,
-        "away": 4
-      },
-      "stats": {
-        "home": {
-          "shots": 4,
-          "sot": 2,
-          "corners": 2,
-          "fouls": 13,
-          "saves": 4,
-          "cards": 3
-        },
-        "away": {
-          "shots": 23,
-          "sot": 8,
-          "corners": 11,
-          "fouls": 8,
-          "saves": 1,
-          "cards": 1
-        }
-      }
-    },
-    {
-      "fixtureId": 1208395,
-      "kickoff": "2025-05-25T15:00:00+00:00",
-      "status": "FT",
-      "league": {
-        "id": 39,
-        "name": "Premier League",
-        "country": "England",
-        "season": 2024
-      },
-      "home": {
-        "id": 57,
-        "name": "Ipswich"
-      },
-      "away": {
-        "id": 48,
-        "name": "West Ham"
-      },
-      "goals": {
-        "home": 1,
-        "away": 3
-      },
-      "stats": {
-        "home": {
-          "shots": 14,
-          "sot": 4,
-          "corners": 4,
-          "fouls": 10,
-          "saves": 3,
-          "cards": 1
-        },
-        "away": {
-          "shots": 10,
-          "sot": 6,
-          "corners": 0,
-          "fouls": 9,
-          "saves": 3,
-          "cards": 1
-        }
-      }
-    },
-    {
-      "fixtureId": 1208399,
-      "kickoff": "2025-05-25T15:00:00+00:00",
-      "status": "FT",
-      "league": {
-        "id": 39,
-        "name": "Premier League",
-        "country": "England",
-        "season": 2024
-      },
-      "home": {
-        "id": 65,
-        "name": "Nottingham Forest"
-      },
-      "away": {
-        "id": 49,
-        "name": "Chelsea"
-      },
-      "goals": {
-        "home": 0,
-        "away": 1
-      },
-      "stats": {
-        "home": {
-          "shots": 10,
-          "sot": 2,
-          "corners": 7,
-          "fouls": 10,
-          "saves": 1,
-          "cards": 2
-        },
-        "away": {
-          "shots": 6,
-          "sot": 2,
-          "corners": 4,
-          "fouls": 11,
-          "saves": 2,
-          "cards": 2
-        }
-      }
-    },
-    {
-      "fixtureId": 1223969,
-      "kickoff": "2025-05-25T18:45:00+00:00",
+      "fixtureId": 200558621,
+      "kickoff": "2026-08-31T16:30:00Z",
       "status": "FT",
       "league": {
         "id": 135,
         "name": "Serie A",
         "country": "Italy",
-        "season": 2024
+        "season": 2026
       },
       "home": {
-        "id": 487,
-        "name": "Lazio"
+        "id": 100005890,
+        "name": "US Lecce"
       },
       "away": {
-        "id": 867,
-        "name": "Lecce"
-      },
-      "goals": {
-        "home": 0,
-        "away": 1
-      },
-      "stats": {
-        "home": {
-          "shots": 26,
-          "sot": 7,
-          "corners": 14,
-          "fouls": 11,
-          "saves": 2,
-          "cards": 2
-        },
-        "away": {
-          "shots": 9,
-          "sot": 3,
-          "corners": 4,
-          "fouls": 11,
-          "saves": 8,
-          "cards": 3
-        }
-      }
-    },
-    {
-      "fixtureId": 1223973,
-      "kickoff": "2025-05-25T18:45:00+00:00",
-      "status": "FT",
-      "league": {
-        "id": 135,
-        "name": "Serie A",
-        "country": "Italy",
-        "season": 2024
-      },
-      "home": {
-        "id": 494,
-        "name": "Udinese"
-      },
-      "away": {
-        "id": 502,
-        "name": "Fiorentina"
-      },
-      "goals": {
-        "home": 2,
-        "away": 3
-      },
-      "stats": {
-        "home": {
-          "shots": 12,
-          "sot": 3,
-          "corners": 2,
-          "fouls": 15,
-          "saves": 8,
-          "cards": 3
-        },
-        "away": {
-          "shots": 25,
-          "sot": 11,
-          "corners": 8,
-          "fouls": 6,
-          "saves": 1,
-          "cards": 2
-        }
-      }
-    },
-    {
-      "fixtureId": 1223965,
-      "kickoff": "2025-05-25T18:45:00+00:00",
-      "status": "FT",
-      "league": {
-        "id": 135,
-        "name": "Serie A",
-        "country": "Italy",
-        "season": 2024
-      },
-      "home": {
-        "id": 499,
-        "name": "Atalanta"
-      },
-      "away": {
-        "id": 523,
-        "name": "Parma"
-      },
-      "goals": {
-        "home": 2,
-        "away": 3
-      },
-      "stats": {
-        "home": {
-          "shots": 11,
-          "sot": 5,
-          "corners": 5,
-          "fouls": 7,
-          "saves": 7,
-          "cards": 1
-        },
-        "away": {
-          "shots": 18,
-          "sot": 10,
-          "corners": 6,
-          "fouls": 7,
-          "saves": 2,
-          "cards": 1
-        }
-      }
-    },
-    {
-      "fixtureId": 1223972,
-      "kickoff": "2025-05-25T18:45:00+00:00",
-      "status": "FT",
-      "league": {
-        "id": 135,
-        "name": "Serie A",
-        "country": "Italy",
-        "season": 2024
-      },
-      "home": {
-        "id": 503,
-        "name": "Torino"
-      },
-      "away": {
-        "id": 497,
+        "id": 100000100,
         "name": "AS Roma"
       },
       "goals": {
         "home": 0,
-        "away": 2
+        "away": 4
       },
       "stats": {
         "home": {
-          "shots": 11,
-          "sot": 4,
-          "corners": 2,
-          "fouls": 15,
-          "saves": 3,
-          "cards": 1
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
         },
         "away": {
-          "shots": 15,
-          "sot": 5,
-          "corners": 1,
-          "fouls": 11,
-          "saves": 4,
-          "cards": 1
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
         }
-      }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 558621
     },
     {
-      "fixtureId": 1223968,
-      "kickoff": "2025-05-25T18:45:00+00:00",
-      "status": "FT",
-      "league": {
-        "id": 135,
-        "name": "Serie A",
-        "country": "Italy",
-        "season": 2024
-      },
-      "home": {
-        "id": 511,
-        "name": "Empoli"
-      },
-      "away": {
-        "id": 504,
-        "name": "Hellas Verona"
-      },
-      "goals": {
-        "home": 1,
-        "away": 2
-      },
-      "stats": {
-        "home": {
-          "shots": 15,
-          "sot": 5,
-          "corners": 13,
-          "fouls": 10,
-          "saves": 0,
-          "cards": 2
-        },
-        "away": {
-          "shots": 5,
-          "sot": 2,
-          "corners": 1,
-          "fouls": 29,
-          "saves": 4,
-          "cards": 2
-        }
-      }
-    },
-    {
-      "fixtureId": 1223974,
-      "kickoff": "2025-05-25T18:45:00+00:00",
-      "status": "FT",
-      "league": {
-        "id": 135,
-        "name": "Serie A",
-        "country": "Italy",
-        "season": 2024
-      },
-      "home": {
-        "id": 517,
-        "name": "Venezia"
-      },
-      "away": {
-        "id": 496,
-        "name": "Juventus"
-      },
-      "goals": {
-        "home": 2,
-        "away": 3
-      },
-      "stats": {
-        "home": {
-          "shots": 12,
-          "sot": 5,
-          "corners": 6,
-          "fouls": 10,
-          "saves": 2,
-          "cards": 1
-        },
-        "away": {
-          "shots": 15,
-          "sot": 5,
-          "corners": 6,
-          "fouls": 18,
-          "saves": 3,
-          "cards": 2
-        }
-      }
-    },
-    {
-      "fixtureId": 1208827,
-      "kickoff": "2025-05-25T19:00:00+00:00",
+      "fixtureId": 200564657,
+      "kickoff": "2026-08-31T17:30:00Z",
       "status": "FT",
       "league": {
         "id": 140,
         "name": "La Liga",
         "country": "Spain",
-        "season": 2024
+        "season": 2026
       },
       "home": {
-        "id": 531,
-        "name": "Athletic Club"
+        "id": 100000079,
+        "name": "CA Osasuna"
       },
       "away": {
-        "id": 529,
-        "name": "Barcelona"
+        "id": 100000082,
+        "name": "Getafe CF"
       },
       "goals": {
-        "home": 0,
-        "away": 3
+        "home": 1,
+        "away": 0
       },
       "stats": {
         "home": {
-          "shots": 9,
-          "sot": 1,
-          "corners": 2,
-          "fouls": 21,
-          "saves": 1,
-          "cards": 1
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
         },
         "away": {
-          "shots": 13,
-          "sot": 4,
-          "corners": 6,
-          "fouls": 10,
-          "saves": 2,
-          "cards": 0
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
         }
-      }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 564657
     },
     {
-      "fixtureId": 1375863,
-      "kickoff": "2025-05-26T18:30:00+00:00",
+      "fixtureId": 200558628,
+      "kickoff": "2026-08-31T18:45:00Z",
+      "status": "FT",
+      "league": {
+        "id": 135,
+        "name": "Serie A",
+        "country": "Italy",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000102,
+        "name": "Atalanta BC"
+      },
+      "away": {
+        "id": 100000103,
+        "name": "Bologna FC 1909"
+      },
+      "goals": {
+        "home": 1,
+        "away": 0
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 558628
+    },
+    {
+      "fixtureId": 200560557,
+      "kickoff": "2026-08-31T19:00:00Z",
+      "status": "FT",
+      "league": {
+        "id": 39,
+        "name": "Premier League",
+        "country": "England",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000058,
+        "name": "Aston Villa FC"
+      },
+      "away": {
+        "id": 100000057,
+        "name": "Arsenal FC"
+      },
+      "goals": {
+        "home": 0,
+        "away": 1
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 560557
+    },
+    {
+      "fixtureId": 200564650,
+      "kickoff": "2026-08-31T19:30:00Z",
+      "status": "FT",
+      "league": {
+        "id": 140,
+        "name": "La Liga",
+        "country": "Spain",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000081,
+        "name": "FC Barcelona"
+      },
+      "away": {
+        "id": 100000087,
+        "name": "Rayo Vallecano de Madrid"
+      },
+      "goals": {
+        "home": 5,
+        "away": 2
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 564650
+    },
+    {
+      "fixtureId": 200559696,
+      "kickoff": "2026-09-03T18:45:00Z",
+      "status": "FT",
+      "league": {
+        "id": 61,
+        "name": "Ligue 1",
+        "country": "France",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000511,
+        "name": "Toulouse FC"
+      },
+      "away": {
+        "id": 100000521,
+        "name": "Lille OSC"
+      },
+      "goals": {
+        "home": 0,
+        "away": 1
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 559696
+    },
+    {
+      "fixtureId": 200559699,
+      "kickoff": "2026-09-04T17:00:00Z",
+      "status": "FT",
+      "league": {
+        "id": 61,
+        "name": "Ligue 1",
+        "country": "France",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000523,
+        "name": "Olympique Lyonnais"
+      },
+      "away": {
+        "id": 100000519,
+        "name": "AJ Auxerre"
+      },
+      "goals": {
+        "home": 3,
+        "away": 1
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 559699
+    },
+    {
+      "fixtureId": 200565791,
+      "kickoff": "2026-09-04T18:30:00Z",
       "status": "FT",
       "league": {
         "id": 78,
         "name": "Bundesliga",
         "country": "Germany",
-        "season": 2024
+        "season": 2026
       },
       "home": {
-        "id": 1660,
-        "name": "SV Elversberg"
+        "id": 100000010,
+        "name": "VfB Stuttgart"
       },
       "away": {
-        "id": 180,
-        "name": "1. FC Heidenheim"
+        "id": 100000001,
+        "name": "1. FC Köln"
+      },
+      "goals": {
+        "home": 4,
+        "away": 1
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 565791
+    },
+    {
+      "fixtureId": 200558609,
+      "kickoff": "2026-09-04T18:45:00Z",
+      "status": "FT",
+      "league": {
+        "id": 135,
+        "name": "Serie A",
+        "country": "Italy",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000107,
+        "name": "Genoa CFC"
+      },
+      "away": {
+        "id": 100007397,
+        "name": "Como 1907"
+      },
+      "goals": {
+        "home": 1,
+        "away": 4
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 558609
+    },
+    {
+      "fixtureId": 200560566,
+      "kickoff": "2026-09-04T19:00:00Z",
+      "status": "FT",
+      "league": {
+        "id": 39,
+        "name": "Premier League",
+        "country": "England",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000349,
+        "name": "Ipswich Town FC"
+      },
+      "away": {
+        "id": 100000064,
+        "name": "Liverpool FC"
+      },
+      "goals": {
+        "home": 0,
+        "away": 2
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 560566
+    },
+    {
+      "fixtureId": 200564667,
+      "kickoff": "2026-09-04T19:00:00Z",
+      "status": "FT",
+      "league": {
+        "id": 140,
+        "name": "La Liga",
+        "country": "Spain",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000090,
+        "name": "Real Betis Balompié"
+      },
+      "away": {
+        "id": 100000086,
+        "name": "Real Madrid CF"
+      },
+      "goals": {
+        "home": 1,
+        "away": 0
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 564667
+    },
+    {
+      "fixtureId": 200559697,
+      "kickoff": "2026-09-04T19:05:00Z",
+      "status": "FT",
+      "league": {
+        "id": 61,
+        "name": "Ligue 1",
+        "country": "France",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000524,
+        "name": "Paris Saint-Germain FC"
+      },
+      "away": {
+        "id": 100000548,
+        "name": "AS Monaco FC"
       },
       "goals": {
         "home": 1,
@@ -3189,104 +4980,24 @@
       },
       "stats": {
         "home": {
-          "shots": 8,
-          "sot": 2,
-          "corners": 3,
-          "fouls": 12,
-          "saves": 2,
-          "cards": 1
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
         },
         "away": {
-          "shots": 11,
-          "sot": 4,
-          "corners": 2,
-          "fouls": 8,
-          "saves": 1,
-          "cards": 3
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
         }
-      }
-    },
-    {
-      "fixtureId": 1375859,
-      "kickoff": "2025-05-29T18:30:00+00:00",
-      "status": "AET",
-      "league": {
-        "id": 61,
-        "name": "Ligue 1",
-        "country": "France",
-        "season": 2024
       },
-      "home": {
-        "id": 93,
-        "name": "Reims"
-      },
-      "away": {
-        "id": 112,
-        "name": "Metz"
-      },
-      "goals": {
-        "home": 1,
-        "away": 3
-      },
-      "stats": {
-        "home": {
-          "shots": 18,
-          "sot": 3,
-          "corners": 4,
-          "fouls": 16,
-          "saves": 1,
-          "cards": 3
-        },
-        "away": {
-          "shots": 8,
-          "sot": 4,
-          "corners": 6,
-          "fouls": 12,
-          "saves": 2,
-          "cards": 2
-        }
-      }
-    },
-    {
-      "fixtureId": 1374812,
-      "kickoff": "2025-05-31T19:00:00+00:00",
-      "status": "FT",
-      "league": {
-        "id": 2,
-        "name": "UEFA Champions League",
-        "country": "World",
-        "season": 2024
-      },
-      "home": {
-        "id": 85,
-        "name": "Paris Saint Germain"
-      },
-      "away": {
-        "id": 505,
-        "name": "Inter"
-      },
-      "goals": {
-        "home": 5,
-        "away": 0
-      },
-      "stats": {
-        "home": {
-          "shots": 23,
-          "sot": 8,
-          "corners": 4,
-          "fouls": 13,
-          "saves": 2,
-          "cards": 2
-        },
-        "away": {
-          "shots": 8,
-          "sot": 2,
-          "corners": 6,
-          "fouls": 7,
-          "saves": 3,
-          "cards": 3
-        }
-      }
+      "source": "football-data.org",
+      "sourceMatchId": 559697
     }
   ]
 }
