@@ -1,10 +1,12 @@
 {
-  "generatedAt": "2026-09-08T17:50:55.810Z",
+  "generatedAt": "2026-09-08T20:00:59.714Z",
   "seasons": [
     2024,
     2023
   ],
-  "mode": "free-plan-historical-current-plus-previous",
+  "mode": "free-plan-historical-current-plus-previous-priority-today-compatible",
+  "today": "2026-09-08",
+  "todayTeamIds": [],
   "leagues": [
     {
       "id": 135,
@@ -81112,20 +81114,20 @@
       },
       "stats": {
         "home": {
-          "shots": 8,
-          "sot": 6,
-          "corners": 5,
-          "fouls": 15,
-          "saves": 2,
-          "cards": 3
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
         },
         "away": {
-          "shots": 8,
-          "sot": 3,
-          "corners": 3,
-          "fouls": 11,
-          "saves": 5,
-          "cards": 1
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
         }
       }
     },
@@ -81153,20 +81155,20 @@
       },
       "stats": {
         "home": {
-          "shots": 18,
-          "sot": 8,
-          "corners": 9,
-          "fouls": 17,
-          "saves": 8,
-          "cards": 1
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
         },
         "away": {
-          "shots": 15,
-          "sot": 11,
-          "corners": 3,
-          "fouls": 8,
-          "saves": 6,
-          "cards": 1
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
         }
       }
     },
@@ -81194,20 +81196,20 @@
       },
       "stats": {
         "home": {
-          "shots": 17,
-          "sot": 7,
-          "corners": 4,
-          "fouls": 18,
-          "saves": 3,
-          "cards": 4
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
         },
         "away": {
-          "shots": 15,
-          "sot": 3,
-          "corners": 5,
-          "fouls": 12,
-          "saves": 5,
-          "cards": 1
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
         }
       }
     },
@@ -81317,20 +81319,20 @@
       },
       "stats": {
         "home": {
-          "shots": null,
-          "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "shots": 15,
+          "sot": 5,
+          "corners": 5,
+          "fouls": 16,
+          "saves": 1,
+          "cards": 2
         },
         "away": {
-          "shots": null,
-          "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "shots": 5,
+          "sot": 2,
+          "corners": 2,
+          "fouls": 10,
+          "saves": 3,
+          "cards": 1
         }
       }
     },
@@ -81358,20 +81360,20 @@
       },
       "stats": {
         "home": {
-          "shots": null,
-          "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "shots": 13,
+          "sot": 4,
+          "corners": 9,
+          "fouls": 12,
+          "saves": 4,
+          "cards": 3
         },
         "away": {
-          "shots": null,
-          "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "shots": 13,
+          "sot": 6,
+          "corners": 8,
+          "fouls": 8,
+          "saves": 3,
+          "cards": 1
         }
       }
     },
@@ -81399,20 +81401,20 @@
       },
       "stats": {
         "home": {
-          "shots": null,
-          "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "shots": 12,
+          "sot": 5,
+          "corners": 5,
+          "fouls": 16,
+          "saves": 10,
+          "cards": 4
         },
         "away": {
-          "shots": null,
-          "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "shots": 33,
+          "sot": 12,
+          "corners": 13,
+          "fouls": 19,
+          "saves": 3,
+          "cards": 3
         }
       }
     },
@@ -163891,20 +163893,20 @@
       },
       "stats": {
         "home": {
-          "shots": 25,
-          "sot": 10,
-          "corners": 4,
-          "fouls": 10,
-          "saves": 1,
-          "cards": 2
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
         },
         "away": {
-          "shots": 6,
-          "sot": 1,
-          "corners": 3,
-          "fouls": 10,
-          "saves": 8,
-          "cards": 2
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
         }
       }
     },
@@ -163932,20 +163934,20 @@
       },
       "stats": {
         "home": {
-          "shots": 17,
-          "sot": 6,
-          "corners": 12,
-          "fouls": 12,
-          "saves": 5,
-          "cards": 1
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
         },
         "away": {
-          "shots": 14,
-          "sot": 6,
-          "corners": 3,
-          "fouls": 9,
-          "saves": 6,
-          "cards": 4
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
         }
       }
     },
@@ -164506,20 +164508,20 @@
       },
       "stats": {
         "home": {
-          "shots": 12,
-          "sot": 5,
-          "corners": 6,
-          "fouls": 10,
-          "saves": 2,
-          "cards": 1
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
         },
         "away": {
-          "shots": 15,
-          "sot": 5,
-          "corners": 6,
-          "fouls": 18,
-          "saves": 3,
-          "cards": 2
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
         }
       }
     },
@@ -164547,20 +164549,20 @@
       },
       "stats": {
         "home": {
-          "shots": null,
-          "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "shots": 9,
+          "sot": 1,
+          "corners": 2,
+          "fouls": 21,
+          "saves": 1,
+          "cards": 1
         },
         "away": {
-          "shots": null,
-          "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "shots": 13,
+          "sot": 4,
+          "corners": 6,
+          "fouls": 10,
+          "saves": 2,
+          "cards": 0
         }
       }
     },
@@ -164588,20 +164590,20 @@
       },
       "stats": {
         "home": {
-          "shots": null,
-          "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "shots": 8,
+          "sot": 2,
+          "corners": 3,
+          "fouls": 12,
+          "saves": 2,
+          "cards": 1
         },
         "away": {
-          "shots": null,
-          "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "shots": 11,
+          "sot": 4,
+          "corners": 2,
+          "fouls": 8,
+          "saves": 1,
+          "cards": 3
         }
       }
     },
@@ -164629,20 +164631,20 @@
       },
       "stats": {
         "home": {
-          "shots": null,
-          "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "shots": 18,
+          "sot": 3,
+          "corners": 4,
+          "fouls": 16,
+          "saves": 1,
+          "cards": 3
         },
         "away": {
-          "shots": null,
-          "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "shots": 8,
+          "sot": 4,
+          "corners": 6,
+          "fouls": 12,
+          "saves": 2,
+          "cards": 2
         }
       }
     },
@@ -164670,20 +164672,20 @@
       },
       "stats": {
         "home": {
-          "shots": null,
-          "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "shots": 23,
+          "sot": 8,
+          "corners": 4,
+          "fouls": 13,
+          "saves": 2,
+          "cards": 2
         },
         "away": {
-          "shots": null,
-          "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "shots": 8,
+          "sot": 2,
+          "corners": 6,
+          "fouls": 7,
+          "saves": 3,
+          "cards": 3
         }
       }
     }
