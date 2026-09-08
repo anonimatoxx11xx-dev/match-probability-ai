@@ -1,6 +1,9 @@
 name: API-Football Data Sync
 
 on:
+  push:
+    paths:
+      - '.github/workflows/api-football-sync.yml'
   workflow_dispatch:
     inputs:
       season:
