@@ -3,7 +3,9 @@ main = "src/worker-v2.ts"
 compatibility_date = "2026-09-03"
 
 [triggers]
-crons = ["*/5 * * * *"]
+# Historical snapshot sync is needed daily, not every 5 minutes.
+# Live fixtures are fetched from ESPN/API-Football by /api/today.
+crons = ["0 3 * * *"]
 
 [[d1_databases]]
 binding = "DB"
