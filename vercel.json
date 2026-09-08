@@ -1,0 +1,10 @@
+{
+  "buildCommand": "cd app && npm install && npm run build",
+  "outputDirectory": "app/dist",
+  "crons": [
+    {
+      "path": "/api/warm",
+      "schedule": "0 6 * * *"
+    }
+  ]
+}
