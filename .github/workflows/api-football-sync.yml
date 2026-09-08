@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       season:
-        description: 'Stagione API-Football (es. 2024, 2023, 2022)'
+        description: 'Stagione API-Football singola (fallback/manuale)'
         required: true
-        default: '2024'
+        default: '2026'
         type: string
   schedule:
     - cron: '17 3 * * *'
@@ -24,7 +24,6 @@ jobs:
     timeout-minutes: 20
     env:
       API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
-      SEASON: ${{ inputs.season || '2024' }}
       REQUEST_DELAY_MS: '6500'
       MAX_DETAIL_FIXTURES: '40'
     steps:
@@ -40,19 +39,34 @@ jobs:
             exit 1
           fi
 
-      - name: Validate season
+      - name: Collect current and previous season data
         run: |
-          if ! [[ "$SEASON" =~ ^20[0-9]{2}$ ]]; then
-            echo "SEASON non valida: $SEASON"
-            exit 1
-          fi
-
-      - name: Collect API-Football data
-        run: node scripts/api-football-sync.mjs > data/api-football/latest.json
+          SEASON=2026 node scripts/api-football-sync.mjs > /tmp/current.json
+          SEASON=2025 node scripts/api-football-sync.mjs > /tmp/previous.json
+          node <<'NODE'
+          const fs = require('fs');
+          const a = JSON.parse(fs.readFileSync('/tmp/current.json','utf8'));
+          const b = JSON.parse(fs.readFileSync('/tmp/previous.json','utf8'));
+          const teams = new Map();
+          for (const t of [...(b.teams||[]), ...(a.teams||[])]) teams.set(String(t.apiId), t);
+          const fixtures = [...(b.fixtures||[]), ...(a.fixtures||[])];
+          const byId = new Map();
+          for (const f of fixtures) byId.set(String(f.fixtureId), f);
+          const out = {
+            generatedAt: new Date().toISOString(),
+            seasons: [2026, 2025],
+            mode: 'historical-bootstrap-current-plus-previous',
+            leagues: a.leagues || b.leagues || [],
+            teams: [...teams.values()],
+            fixtures: [...byId.values()].sort((x,y)=>String(x.kickoff).localeCompare(String(y.kickoff)))
+          };
+          fs.writeFileSync('data/api-football/latest.json', JSON.stringify(out, null, 2));
+          console.log(`seasons=${out.seasons.join(',')} fixtures=${out.fixtures.length} teams=${out.teams.length}`);
+          NODE
 
       - name: Validate snapshot
         run: |
-          node -e "const fs=require('fs'); const x=JSON.parse(fs.readFileSync('data/api-football/latest.json','utf8')); if(!x.generatedAt || !Array.isArray(x.fixtures)) process.exit(1); console.log('season='+x.season,'fixtures='+x.fixtures.length,'teams='+x.teams.length,'generatedAt='+x.generatedAt);"
+          node -e "const fs=require('fs'); const x=JSON.parse(fs.readFileSync('data/api-football/latest.json','utf8')); if(!x.generatedAt || !Array.isArray(x.fixtures) || !Array.isArray(x.teams)) process.exit(1); console.log('fixtures='+x.fixtures.length,'teams='+x.teams.length,'generatedAt='+x.generatedAt);"
 
       - name: Commit snapshot
         run: |
@@ -63,5 +77,5 @@ jobs:
             echo 'Nessun cambiamento dati.'
             exit 0
           fi
-          git commit -m "chore: update API-Football snapshot season $SEASON"
+          git commit -m "chore: refresh current and previous API-Football seasons"
           git push
