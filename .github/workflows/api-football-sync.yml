@@ -10,7 +10,7 @@ on:
       season:
         description: 'Stagione API-Football singola (fallback/manuale)'
         required: true
-        default: '2026'
+        default: '2024'
         type: string
   schedule:
     - cron: '17 3 * * *'
@@ -45,14 +45,14 @@ jobs:
 
       - name: Collect current and historical season data
         run: |
-          SEASON=2026 node scripts/api-football-sync.mjs > /tmp/current.json
+          SEASON=2024 node scripts/api-football-sync.mjs > /tmp/current.json
           TODAY_TEAM_IDS=$(node -e "const x=require('/tmp/current.json'); process.stdout.write((x.todayTeamIds||[]).join(','))")
-          echo "Squadre di oggi: ${TODAY_TEAM_IDS:-nessuna}"
-          TODAY_TEAM_IDS="$TODAY_TEAM_IDS" SEASON=2024 node scripts/api-football-sync.mjs > /tmp/historical.json
+          echo "Squadre prioritarie disponibili: ${TODAY_TEAM_IDS:-nessuna}"
+          TODAY_TEAM_IDS="$TODAY_TEAM_IDS" SEASON=2023 node scripts/api-football-sync.mjs > /tmp/previous.json
           node <<'NODE'
           const fs = require('fs');
           const a = JSON.parse(fs.readFileSync('/tmp/current.json','utf8'));
-          const b = JSON.parse(fs.readFileSync('/tmp/historical.json','utf8'));
+          const b = JSON.parse(fs.readFileSync('/tmp/previous.json','utf8'));
           const teams = new Map();
           for (const t of [...(b.teams||[]), ...(a.teams||[])]) teams.set(String(t.apiId), t);
           const fixtures = [...(b.fixtures||[]), ...(a.fixtures||[])];
@@ -60,8 +60,8 @@ jobs:
           for (const f of fixtures) byId.set(String(f.fixtureId), f);
           const out = {
             generatedAt: new Date().toISOString(),
-            seasons: [2026, 2024],
-            mode: 'historical-bootstrap-current-plus-accessible-history-priority-today',
+            seasons: [2024, 2023],
+            mode: 'free-plan-historical-current-plus-previous-priority-today-compatible',
             today: a.today || null,
             todayTeamIds: a.todayTeamIds || [],
             leagues: a.leagues || b.leagues || [],
@@ -85,5 +85,5 @@ jobs:
             echo 'Nessun cambiamento dati.'
             exit 0
           fi
-          git commit -m "chore: refresh current and historical API-Football stats"
+          git commit -m "chore: refresh API-Football free-plan compatible seasons"
           git push
