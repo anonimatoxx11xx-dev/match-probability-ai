@@ -43,12 +43,31 @@ jobs:
             exit 1
           fi
 
+      - name: Collect today's team names from ESPN
+        run: |
+          TODAY=$(TZ=Europe/Rome date +%F)
+          node <<'NODE' > /tmp/today_names.txt
+          const date=process.env.TODAY;
+          const leagues=['ita.1','eng.1','esp.1','ger.1','fra.1','uefa.champions'];
+          const names=new Set();
+          for(const slug of leagues){
+            const r=await fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/${slug}/scoreboard?dates=${date.replaceAll('-','')}`);
+            if(!r.ok) continue;
+            const x=await r.json();
+            for(const e of x.events||[]){
+              const c=e.competitions?.[0];
+              for(const z of c?.competitors||[]){if(z.team?.displayName) names.add(z.team.displayName)}
+            }
+          }
+          process.stdout.write([...names].join('|'));
+          NODE
+          echo "Squadre di oggi: $(cat /tmp/today_names.txt)"
+
       - name: Collect current and historical season data
         run: |
-          SEASON=2024 node scripts/api-football-sync.mjs > /tmp/current.json
-          TODAY_TEAM_IDS=$(node -e "const x=require('/tmp/current.json'); process.stdout.write((x.todayTeamIds||[]).join(','))")
-          echo "Squadre prioritarie disponibili: ${TODAY_TEAM_IDS:-nessuna}"
-          TODAY_TEAM_IDS="$TODAY_TEAM_IDS" SEASON=2023 node scripts/api-football-sync.mjs > /tmp/previous.json
+          TODAY_TEAM_NAMES=$(cat /tmp/today_names.txt)
+          TODAY_TEAM_NAMES="$TODAY_TEAM_NAMES" SEASON=2024 node scripts/api-football-sync.mjs > /tmp/current.json
+          TODAY_TEAM_NAMES="$TODAY_TEAM_NAMES" SEASON=2023 node scripts/api-football-sync.mjs > /tmp/previous.json
           node <<'NODE'
           const fs = require('fs');
           const a = JSON.parse(fs.readFileSync('/tmp/current.json','utf8'));
@@ -61,20 +80,21 @@ jobs:
           const out = {
             generatedAt: new Date().toISOString(),
             seasons: [2024, 2023],
-            mode: 'free-plan-historical-current-plus-previous-priority-today-compatible',
+            mode: 'free-plan-historical-2024-2023-priority-today-by-name',
             today: a.today || null,
             todayTeamIds: a.todayTeamIds || [],
+            todayTeamNames: a.todayTeamNames || b.todayTeamNames || [],
             leagues: a.leagues || b.leagues || [],
             teams: [...teams.values()],
             fixtures: [...byId.values()].sort((x,y)=>String(x.kickoff).localeCompare(String(y.kickoff)))
           };
           fs.writeFileSync('data/api-football/latest.json', JSON.stringify(out, null, 2));
-          console.log(`seasons=${out.seasons.join(',')} fixtures=${out.fixtures.length} teams=${out.teams.length} todayTeams=${out.todayTeamIds.length}`);
+          console.log(`seasons=${out.seasons.join(',')} fixtures=${out.fixtures.length} teams=${out.teams.length} todayNames=${out.todayTeamNames.length}`);
           NODE
 
       - name: Validate snapshot
         run: |
-          node -e "const fs=require('fs'); const x=JSON.parse(fs.readFileSync('data/api-football/latest.json','utf8')); if(!x.generatedAt || !Array.isArray(x.fixtures) || !Array.isArray(x.teams)) process.exit(1); console.log('fixtures='+x.fixtures.length,'teams='+x.teams.length,'generatedAt='+x.generatedAt);"
+          node -e "const fs=require('fs'); const x=JSON.parse(fs.readFileSync('data/api-football/latest.json','utf8')); if(!x.generatedAt || !Array.isArray(x.fixtures) || !Array.isArray(x.teams)) process.exit(1); console.log('fixtures='+x.fixtures.length,'teams='+x.teams.length,'generatedAt='+x.generatedAt,'todayNames='+(x.todayTeamNames||[]).length);"
 
       - name: Commit snapshot
         run: |
@@ -85,5 +105,5 @@ jobs:
             echo 'Nessun cambiamento dati.'
             exit 0
           fi
-          git commit -m "chore: refresh API-Football free-plan compatible seasons"
+          git commit -m "chore: refresh historical stats prioritized for today's teams"
           git push
