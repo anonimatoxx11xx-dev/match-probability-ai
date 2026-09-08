@@ -3,7 +3,7 @@ main = "src/worker-v2.ts"
 compatibility_date = "2026-09-03"
 
 [triggers]
-# Historical snapshot sync is needed daily, not every 5 minutes.
+# Historical snapshot sync + daily prediction cache warm-up.
 # Live fixtures are fetched from ESPN/API-Football by /api/today.
 crons = ["0 3 * * *"]
 
@@ -11,3 +11,8 @@ crons = ["0 3 * * *"]
 binding = "DB"
 database_name = "match-probability-ai-db"
 database_id = "6da97357-a6cc-471b-86e7-21db19e67d98"
+
+# Daily predictions are calculated once and served from KV afterwards.
+# Wrangler automatically provisions this namespace on deploy.
+[[kv_namespaces]]
+binding = "PREDICTIONS_KV"
