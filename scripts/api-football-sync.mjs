@@ -9,11 +9,13 @@ const leagues = [
   { id: 78, name: 'Bundesliga', country: 'Germany', localLeague: 'Bundesliga' },
   { id: 61, name: 'Ligue 1', country: 'France', localLeague: 'Ligue 1' },
   { id: 2, name: 'Champions League', country: 'World', localLeague: 'Champions League' },
+  { id: 197, name: 'Super League 1', country: 'Greece', localLeague: 'Super League 1' },
+  { id: 218, name: 'Bundesliga Austria', country: 'Austria', localLeague: 'Bundesliga Austria' },
 ];
 
 const season = Number(process.env.SEASON || 2024);
 const sleepMs = Number(process.env.REQUEST_DELAY_MS || 6500);
-const maxDetailFixtures = Math.min(Number(process.env.MAX_DETAIL_FIXTURES || 40), 40);
+const maxDetailFixtures = Math.min(Number(process.env.MAX_DETAIL_FIXTURES || 36), 36);
 const todayTeamIds = new Set(String(process.env.TODAY_TEAM_IDS || '').split(',').map(x => Number(x)).filter(Boolean));
 const norm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
 const todayTeamNames = new Set(String(process.env.TODAY_TEAM_NAMES || '').split('|').map(norm).filter(Boolean));
@@ -83,9 +85,20 @@ const candidates = [];
 const listFixtures = new Map();
 const teams = new Map();
 const todayIds = new Set(todayTeamIds);
+let quotaReached = false;
 
 for (const league of leagues) {
-  const result = await api(`/fixtures?league=${league.id}&season=${season}`);
+  let result;
+  try {
+    result = await api(`/fixtures?league=${league.id}&season=${season}`);
+  } catch (error) {
+    if (String(error?.message || error).includes('429')) {
+      console.error(`Daily API quota reached while loading ${league.name}; using collected data.`);
+      quotaReached = true;
+      break;
+    }
+    throw error;
+  }
   const list = result.data.response || [];
   for (const f of list) {
     const homeId = f.teams?.home?.id;
@@ -107,6 +120,7 @@ for (const league of leagues) {
     if (awayId) teams.set(awayId, { apiId: awayId, name: f.teams.away.name, leagueId: league.id });
   }
   console.error(`league=${league.name} fixtures=${list.length} completed=${candidates.filter(x => x.leagueId === league.id).length} remaining=${result.remaining ?? '?'}`);
+  if (result.remaining !== null && result.remaining <= 1) { quotaReached = true; break; }
   await sleep(sleepMs);
 }
 
@@ -116,17 +130,18 @@ const ordered = [...priority, ...normal];
 const uniqueIds = [...new Set(ordered.map(x => x.fixtureId))].slice(0, maxDetailFixtures);
 const detailed = new Map();
 
-for (let i = 0; i < uniqueIds.length; i++) {
+for (let i = 0; i < uniqueIds.length && !quotaReached; i++) {
   const fixtureId = uniqueIds[i];
   try {
     const result = await api(`/fixtures?id=${fixtureId}`);
     for (const f of result.data.response || []) detailed.set(f.fixture?.id, compactFixture(f));
     console.error(`detail=${fixtureId} (${i + 1}/${uniqueIds.length}) remaining=${result.remaining ?? '?'}`);
-    if (result.remaining !== null && result.remaining <= 1) break;
+    if (result.remaining !== null && result.remaining <= 1) { quotaReached = true; break; }
   } catch (error) {
     const msg = String(error?.message || error);
     if (msg.includes('reached the request limit for the day') || msg.includes('429')) {
       console.error('Daily API quota reached; keeping summary fixtures collected so far.');
+      quotaReached = true;
       break;
     }
     throw error;
@@ -141,7 +156,7 @@ fixtures.sort((a, b) => String(a.kickoff).localeCompare(String(b.kickoff)));
 const snapshot = {
   generatedAt: new Date().toISOString(),
   season,
-  mode: 'historical-bootstrap-priority-today-names',
+  mode: 'historical-bootstrap-priority-today-names-quota-safe',
   today,
   todayTeamIds: [...todayIds],
   todayTeamNames: [...todayTeamNames],
