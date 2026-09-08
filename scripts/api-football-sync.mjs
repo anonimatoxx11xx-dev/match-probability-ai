@@ -15,6 +15,8 @@ const season = Number(process.env.SEASON || 2024);
 const sleepMs = Number(process.env.REQUEST_DELAY_MS || 6500);
 const maxDetailFixtures = Math.min(Number(process.env.MAX_DETAIL_FIXTURES || 40), 40);
 const todayTeamIds = new Set(String(process.env.TODAY_TEAM_IDS || '').split(',').map(x => Number(x)).filter(Boolean));
+const norm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
+const todayTeamNames = new Set(String(process.env.TODAY_TEAM_NAMES || '').split('|').map(norm).filter(Boolean));
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
@@ -29,8 +31,6 @@ async function api(path) {
   if (!response.ok || (data.errors && Object.keys(data.errors).length)) throw new Error(`API-Football: ${JSON.stringify(data.errors || data)}`);
   return { data, remaining };
 }
-
-const norm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
 
 function statValue(stats, name) {
   const row = stats?.find(x => norm(x.type) === norm(name));
@@ -90,17 +90,18 @@ for (const league of leagues) {
   for (const f of list) {
     const homeId = f.teams?.home?.id;
     const awayId = f.teams?.away?.id;
+    const homeName = norm(f.teams?.home?.name);
+    const awayName = norm(f.teams?.away?.name);
     const kickoff = f.fixture?.date || '';
-    // On the current season, expose the teams scheduled for today so the workflow
-    // can pass the same IDs into the previous-season enrichment run.
     if (season === 2026 && String(kickoff).slice(0, 10) === today) {
       if (homeId) todayIds.add(homeId);
       if (awayId) todayIds.add(awayId);
     }
     const status = String(f.fixture?.status?.short || '');
     if (!f.fixture?.id || !['FT', 'AET', 'P'].includes(status)) continue;
+    const priority = todayIds.has(homeId) || todayIds.has(awayId) || todayTeamNames.has(homeName) || todayTeamNames.has(awayName) ? 1 : 0;
     const row = summaryFixture(f, league.id);
-    candidates.push({ fixtureId: f.fixture.id, kickoff, leagueId: league.id, priority: todayIds.has(homeId) || todayIds.has(awayId) ? 1 : 0 });
+    candidates.push({ fixtureId: f.fixture.id, kickoff, leagueId: league.id, priority });
     listFixtures.set(f.fixture.id, row);
     if (homeId) teams.set(homeId, { apiId: homeId, name: f.teams.home.name, leagueId: league.id });
     if (awayId) teams.set(awayId, { apiId: awayId, name: f.teams.away.name, leagueId: league.id });
@@ -109,9 +110,6 @@ for (const league of leagues) {
   await sleep(sleepMs);
 }
 
-// First spend the detail budget on the most recent completed matches involving
-// teams playing today. This makes today's predictions receive real shot/corner/
-// foul/card/save data instead of enriching unrelated historical matches.
 const priority = candidates.filter(x => x.priority === 1).sort((a, b) => String(b.kickoff).localeCompare(String(a.kickoff)));
 const normal = candidates.filter(x => x.priority !== 1).sort((a, b) => String(b.kickoff).localeCompare(String(a.kickoff)));
 const ordered = [...priority, ...normal];
@@ -143,9 +141,10 @@ fixtures.sort((a, b) => String(a.kickoff).localeCompare(String(b.kickoff)));
 const snapshot = {
   generatedAt: new Date().toISOString(),
   season,
-  mode: 'historical-bootstrap-priority-today',
+  mode: 'historical-bootstrap-priority-today-names',
   today,
   todayTeamIds: [...todayIds],
+  todayTeamNames: [...todayTeamNames],
   leagues,
   teams: [...teams.values()],
   fixtures,
