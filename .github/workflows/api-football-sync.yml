@@ -29,7 +29,7 @@ jobs:
     env:
       API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
       REQUEST_DELAY_MS: '6500'
-      MAX_DETAIL_FIXTURES: '40'
+      MAX_DETAIL_FIXTURES: '36'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -46,45 +46,47 @@ jobs:
       - name: Collect today's team names from ESPN
         run: |
           export TODAY=$(TZ=Europe/Rome date +%F)
-          node <<'NODE' > /tmp/today_names.txt
+          node --input-type=module <<'NODE' > /tmp/today_names.txt
           const date=process.env.TODAY;
           const leagues=['ita.1','eng.1','esp.1','ger.1','fra.1','uefa.champions'];
           const names=new Set();
           for(const slug of leagues){
-            const r=await fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/${slug}/scoreboard?dates=${date.replaceAll('-','')}`);
-            if(!r.ok) continue;
-            const x=await r.json();
-            for(const e of x.events||[]){
-              const c=e.competitions?.[0];
-              for(const z of c?.competitors||[]){if(z.team?.displayName) names.add(z.team.displayName)}
-            }
+            try{
+              const r=await fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/${slug}/scoreboard?dates=${date.replaceAll('-','')}`);
+              if(!r.ok) continue;
+              const x=await r.json();
+              for(const e of x.events||[]){
+                const c=e.competitions?.[0];
+                for(const z of c?.competitors||[]){if(z.team?.displayName) names.add(z.team.displayName)}
+              }
+            }catch(_){ }
           }
           process.stdout.write([...names].join('|'));
           NODE
           echo "Squadre di oggi: $(cat /tmp/today_names.txt)"
 
-      - name: Collect current and historical season data
+      - name: Collect current historical season data
         run: |
           TODAY_TEAM_NAMES=$(cat /tmp/today_names.txt)
           TODAY_TEAM_NAMES="$TODAY_TEAM_NAMES" SEASON=2024 node scripts/api-football-sync.mjs > /tmp/current.json
-          TODAY_TEAM_NAMES="$TODAY_TEAM_NAMES" SEASON=2023 node scripts/api-football-sync.mjs > /tmp/previous.json
           node <<'NODE'
           const fs = require('fs');
           const a = JSON.parse(fs.readFileSync('/tmp/current.json','utf8'));
-          const b = JSON.parse(fs.readFileSync('/tmp/previous.json','utf8'));
+          let old = null;
+          try { old = JSON.parse(fs.readFileSync('data/api-football/latest.json','utf8')); } catch (_) {}
           const teams = new Map();
-          for (const t of [...(b.teams||[]), ...(a.teams||[])]) teams.set(String(t.apiId), t);
-          const fixtures = [...(b.fixtures||[]), ...(a.fixtures||[])];
+          for (const t of [...(old?.teams||[]), ...(a.teams||[])]) teams.set(String(t.apiId), t);
+          const fixtures = [...(old?.fixtures||[]).filter(f => Number(f?.league?.season) !== 2024), ...(a.fixtures||[])];
           const byId = new Map();
           for (const f of fixtures) byId.set(String(f.fixtureId), f);
           const out = {
             generatedAt: new Date().toISOString(),
             seasons: [2024, 2023],
-            mode: 'free-plan-historical-2024-2023-priority-today-by-name',
-            today: a.today || null,
-            todayTeamIds: a.todayTeamIds || [],
-            todayTeamNames: a.todayTeamNames || b.todayTeamNames || [],
-            leagues: a.leagues || b.leagues || [],
+            mode: 'free-plan-historical-2024-refresh-plus-preserved-2023',
+            today: a.today || old?.today || null,
+            todayTeamIds: a.todayTeamIds || old?.todayTeamIds || [],
+            todayTeamNames: a.todayTeamNames || old?.todayTeamNames || [],
+            leagues: a.leagues || old?.leagues || [],
             teams: [...teams.values()],
             fixtures: [...byId.values()].sort((x,y)=>String(x.kickoff).localeCompare(String(y.kickoff)))
           };
@@ -105,5 +107,5 @@ jobs:
             echo 'Nessun cambiamento dati.'
             exit 0
           fi
-          git commit -m "chore: refresh historical stats prioritized for today's teams"
+          git commit -m "chore: refresh 2024 stats prioritized for today's teams"
           git push
