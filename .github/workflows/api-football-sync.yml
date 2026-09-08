@@ -4,12 +4,13 @@ on:
   push:
     paths:
       - '.github/workflows/api-football-sync.yml'
+      - 'scripts/api-football-sync.mjs'
   workflow_dispatch:
     inputs:
       season:
         description: 'Stagione API-Football singola (fallback/manuale)'
         required: true
-        default: '2024'
+        default: '2026'
         type: string
   schedule:
     - cron: '17 3 * * *'
@@ -42,10 +43,12 @@ jobs:
             exit 1
           fi
 
-      - name: Collect free-plan historical data
+      - name: Collect current and previous season data
         run: |
-          SEASON=2024 node scripts/api-football-sync.mjs > /tmp/current.json
-          SEASON=2023 node scripts/api-football-sync.mjs > /tmp/previous.json
+          SEASON=2026 node scripts/api-football-sync.mjs > /tmp/current.json
+          TODAY_TEAM_IDS=$(node -e "const x=require('/tmp/current.json'); process.stdout.write((x.todayTeamIds||[]).join(','))")
+          echo "Squadre di oggi: ${TODAY_TEAM_IDS:-nessuna}"
+          TODAY_TEAM_IDS="$TODAY_TEAM_IDS" SEASON=2025 node scripts/api-football-sync.mjs > /tmp/previous.json
           node <<'NODE'
           const fs = require('fs');
           const a = JSON.parse(fs.readFileSync('/tmp/current.json','utf8'));
@@ -57,14 +60,16 @@ jobs:
           for (const f of fixtures) byId.set(String(f.fixtureId), f);
           const out = {
             generatedAt: new Date().toISOString(),
-            seasons: [2024, 2023],
-            mode: 'free-plan-historical-current-plus-previous',
+            seasons: [2026, 2025],
+            mode: 'historical-bootstrap-current-plus-previous-priority-today',
+            today: a.today || null,
+            todayTeamIds: a.todayTeamIds || [],
             leagues: a.leagues || b.leagues || [],
             teams: [...teams.values()],
             fixtures: [...byId.values()].sort((x,y)=>String(x.kickoff).localeCompare(String(y.kickoff)))
           };
           fs.writeFileSync('data/api-football/latest.json', JSON.stringify(out, null, 2));
-          console.log(`seasons=${out.seasons.join(',')} fixtures=${out.fixtures.length} teams=${out.teams.length}`);
+          console.log(`seasons=${out.seasons.join(',')} fixtures=${out.fixtures.length} teams=${out.teams.length} todayTeams=${out.todayTeamIds.length}`);
           NODE
 
       - name: Validate snapshot
@@ -80,5 +85,5 @@ jobs:
             echo 'Nessun cambiamento dati.'
             exit 0
           fi
-          git commit -m "chore: refresh free-plan API-Football historical data"
+          git commit -m "chore: refresh current and previous API-Football seasons"
           git push
