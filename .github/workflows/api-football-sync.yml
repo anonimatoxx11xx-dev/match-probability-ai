@@ -45,7 +45,7 @@ jobs:
 
       - name: Collect today's team names from ESPN
         run: |
-          TODAY=$(TZ=Europe/Rome date +%F)
+          export TODAY=$(TZ=Europe/Rome date +%F)
           node <<'NODE' > /tmp/today_names.txt
           const date=process.env.TODAY;
           const leagues=['ita.1','eng.1','esp.1','ger.1','fra.1','uefa.champions'];
