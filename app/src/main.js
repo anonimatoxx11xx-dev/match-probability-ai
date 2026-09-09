@@ -138,13 +138,14 @@ function parseSofaStats(payload,teamName){
   return out;
 }
 const sofaStatCache=new Map();
-async function sofaMatchStats(eventId,teamName){
+async function sofaMatchStats(eventId,teamName,meta=null){
   const cacheKey=`${eventId}:${normalize(teamName)}`;
   if(sofaStatCache.has(cacheKey)) return sofaStatCache.get(cacheKey);
   let result=null;
   try{
     const p=await get(`${SOFA}/event/${encodeURIComponent(eventId)}/statistics`);
-    const stats=parseSofaStats(p,teamName);
+    const event={homeTeam:{name:meta?.home?teamName:(meta?.opponent||'')},awayTeam:{name:meta?.home?(meta?.opponent||''):teamName}};
+    const stats=parseSofaStats({...p,event},teamName);
     result=Object.keys(stats).length?stats:null;
   }catch(e){result=null}
   sofaStatCache.set(cacheKey,result);
@@ -181,7 +182,7 @@ async function sofaTeam(id,name){
       if(e.home)addResult(form,hs,as,true,e.matchId,e.utcTime,e.opponent); else addResult(form,as,hs,false,e.matchId,e.utcTime,e.opponent);
       if(form.n>=10)break;
     }
-    const stats=await Promise.all(form.results.slice(-5).reverse().map(r=>sofaMatchStats(r.matchId,name)));
+    const stats=await Promise.all(form.results.slice(-5).reverse().map(r=>sofaMatchStats(r.matchId,name,r)));
     form.stats=stats.filter(Boolean); form.statSummary=aggregateStats(form.stats); form.statSource=form.stats.length?'SofaScore':'N/D';
     if(form.n>=2)return {form,source:'SofaScore',teamId:id};
   }catch(e){}
@@ -200,16 +201,25 @@ function aggregateStats(items){
 }
 async function enrichFormStats(form,name){
   const recent=form.results.slice(-5).reverse();
-  const stats=await Promise.all(recent.map(r=>fotmobMatchStats(r.matchId,name)));
-  form.stats=stats.filter(Boolean); form.statSummary=aggregateStats(form.stats); form.statSource=form.stats.length?'FotMob':'N/D';
-  if(form.stats.length) return form;
+  const fotStats=await Promise.all(recent.map(r=>fotmobMatchStats(r.matchId,name)));
+  let sofaEvents=[];
   try{
-    const sid=await sofaSearch(name); if(!sid)return form;
-    const events=await sofaRecentEvents(sid,name);
-    const sofaStats=await Promise.all(events.slice(0,5).map(e=>sofaMatchStats(e.matchId,name)));
-    const valid=sofaStats.filter(Boolean);
-    if(valid.length){form.stats=valid;form.statSummary=aggregateStats(valid);form.statSource='SofaScore';}
+    const sid=await sofaSearch(name);
+    if(sid) sofaEvents=await sofaRecentEvents(sid,name);
   }catch(e){}
+  const combined=[];
+  for(let i=0;i<recent.length;i++){
+    if(fotStats[i]) { combined.push(fotStats[i]); continue; }
+    const r=recent[i];
+    const target=sofaEvents.find(e=>sameTeam(e.opponent,r.opponent) && (!r.utcTime || !e.utcTime || Math.abs(new Date(e.utcTime)-new Date(r.utcTime))<=3*86400000));
+    if(target){
+      const s=await sofaMatchStats(target.matchId,name,target);
+      if(s) combined.push(s);
+    }
+  }
+  form.stats=combined; form.statSummary=aggregateStats(combined);
+  const fotCount=fotStats.filter(Boolean).length, sofaCount=Math.max(0,combined.length-fotCount);
+  form.statSource=fotCount&&sofaCount?'FotMob+SofaScore':fotCount?'FotMob':sofaCount?'SofaScore':'N/D';
   return form;
 }
 async function fotmobTeam(id,name){
