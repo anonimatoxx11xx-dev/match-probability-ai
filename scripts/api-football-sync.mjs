@@ -21,6 +21,10 @@ const norm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u030
 const todayTeamNames = new Set(String(process.env.TODAY_TEAM_NAMES || '').split('|').map(norm).filter(Boolean));
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
+const isQuotaError = error => {
+  const msg = String(error?.message || error || '').toLowerCase();
+  return msg.includes('429') || msg.includes('request limit for the day') || msg.includes('daily quota') || msg.includes('rate limit');
+};
 
 async function api(path) {
   const response = await fetch(`${API}${path}`, {
@@ -92,7 +96,7 @@ for (const league of leagues) {
   try {
     result = await api(`/fixtures?league=${league.id}&season=${season}`);
   } catch (error) {
-    if (String(error?.message || error).includes('429')) {
+    if (isQuotaError(error)) {
       console.error(`Daily API quota reached while loading ${league.name}; using collected data.`);
       quotaReached = true;
       break;
@@ -130,23 +134,28 @@ const ordered = [...priority, ...normal];
 const uniqueIds = [...new Set(ordered.map(x => x.fixtureId))].slice(0, maxDetailFixtures);
 const detailed = new Map();
 
-for (let i = 0; i < uniqueIds.length && !quotaReached; i++) {
-  const fixtureId = uniqueIds[i];
+// API-Football supports up to 20 fixture IDs in one request. Batching here is
+// critical on the free plan: it turns dozens of detail calls into 1-2 calls
+// and makes it much more likely that the historical stats are actually saved.
+const idBatches = [];
+for (let i = 0; i < uniqueIds.length; i += 20) idBatches.push(uniqueIds.slice(i, i + 20));
+
+for (let i = 0; i < idBatches.length && !quotaReached; i++) {
+  const ids = idBatches[i];
   try {
-    const result = await api(`/fixtures?id=${fixtureId}`);
+    const result = await api(`/fixtures?ids=${ids.join('-')}`);
     for (const f of result.data.response || []) detailed.set(f.fixture?.id, compactFixture(f));
-    console.error(`detail=${fixtureId} (${i + 1}/${uniqueIds.length}) remaining=${result.remaining ?? '?'}`);
+    console.error(`detail-batch=${i + 1}/${idBatches.length} fixtures=${ids.length} remaining=${result.remaining ?? '?'}`);
     if (result.remaining !== null && result.remaining <= 1) { quotaReached = true; break; }
   } catch (error) {
-    const msg = String(error?.message || error);
-    if (msg.includes('reached the request limit for the day') || msg.includes('429')) {
+    if (isQuotaError(error)) {
       console.error('Daily API quota reached; keeping summary fixtures collected so far.');
       quotaReached = true;
       break;
     }
     throw error;
   }
-  if (i + 1 < uniqueIds.length) await sleep(sleepMs);
+  if (i + 1 < idBatches.length) await sleep(sleepMs);
 }
 
 const fixtures = [];
@@ -156,7 +165,7 @@ fixtures.sort((a, b) => String(a.kickoff).localeCompare(String(b.kickoff)));
 const snapshot = {
   generatedAt: new Date().toISOString(),
   season,
-  mode: 'historical-bootstrap-priority-today-names-quota-safe',
+  mode: 'historical-bootstrap-priority-today-names-batched-details',
   today,
   todayTeamIds: [...todayIds],
   todayTeamNames: [...todayTeamNames],
