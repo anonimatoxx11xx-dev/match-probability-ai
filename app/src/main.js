@@ -1,16 +1,114 @@
 import './style.css';
-const API='';const app=document.querySelector('#app');const leagues=['Serie A','Premier League','La Liga','Bundesliga','Ligue 1','Champions League'];const state={tab:'today',league:'Champions League',teams:[],home:null,away:null};
-function pct(x){return (Number(x||0)*100).toFixed(1)+'%'}function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}function errorText(e){if(!e)return'Errore sconosciuto';if(typeof e==='string')return e;if(typeof e.message==='string')return e.message;try{return JSON.stringify(e)}catch(_){return String(e)}}
-function apiGet(path){return fetch(API+path,{headers:{Accept:'application/json'}}).then(async r=>{const t=await r.text();let d;try{d=JSON.parse(t)}catch(_){throw new Error('Risposta API non valida ('+r.status+')')}if(!r.ok)throw new Error(errorText(d.error||('Errore API '+r.status)));return d})}function apiPost(path,body){return fetch(API+path,{method:'POST',headers:{'content-type':'application/json',Accept:'application/json'},body:JSON.stringify(body)}).then(async r=>{const t=await r.text();let d;try{d=JSON.parse(t)}catch(_){throw new Error('Risposta API non valida ('+r.status+')')}if(!r.ok)throw new Error(errorText(d.error||('Errore API '+r.status)));return d})}
-function shell(title,subtitle){app.innerHTML='<main class="shell"><header><div class="brand"><span class="ball">⚽</span><div><h1>Match Probability AI</h1><small>Previsioni calcistiche intelligenti</small></div></div><button id="refresh" class="icon">↻</button></header><section class="hero"><span class="eyebrow">AI PREDICTION ENGINE</span><h2>'+title+'</h2><p>'+subtitle+'</p></section><div id="result"></div><nav><button data-tab="today" class="'+(state.tab==='today'?'active':'')+'">●<small>Oggi</small></button><button data-tab="analysis" class="'+(state.tab==='analysis'?'active':'')+'">⌂<small>Analisi</small></button><button data-tab="model" class="'+(state.tab==='model'?'active':'')+'">◈<small>Modello AI</small></button><button data-tab="data" class="'+(state.tab==='data'?'active':'')+'">◉<small>Dati</small></button></nav></main>';document.querySelector('#refresh').onclick=refreshCurrent;document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{state.tab=b.dataset.tab;render()})}
-function render(){if(state.tab==='today'){shell('PARTITE DI OGGI','Calendario reale e probabilità automatiche.');today();return}if(state.tab==='analysis'){shell('ANALISI AI DI OGGI','L’AI analizza automaticamente le partite di oggi e ordina gli eventi utili dalla probabilità più alta.');automaticAnalysis();return}if(state.tab==='model'){shell('MODELLO AI','Confronto tra Poisson e un modello ML addestrato online sui dati storici.');backtest();return}shell('DATI','Stato del database e qualità della base storica.');status()}
-function candidates(f){const p=f.prediction;if(!p)return[];const r=p.result||{},m=p.markets||{},d=p.doubleChance||{},dn=p.drawNoBet||{};return[['1 · Vittoria '+f.home.name,r.home],['X · Pareggio',r.draw],['2 · Vittoria '+f.away.name,r.away],['1X · Casa o pareggio',d['1X']],['X2 · Pareggio o ospite',d.X2],['12 · No pareggio',d['12']],['Over 2.5',m.over25],['Under 2.5',m.under25],['Gol/Gol · Sì',m.bttsYes],['Gol/Gol · No',m.bttsNo],['DNB 1',dn.home],['DNB 2',dn.away]].filter(x=>Number.isFinite(Number(x[1]))&&Number(x[1])>=0&&Number(x[1])<=1)}
-function automaticAnalysis(){const box=document.querySelector('#result');box.innerHTML='<section class="card result"><h3>Analisi automatica in corso...</h3><p>Confronto di 1X2, doppia chance, Over/Under 2.5, BTTS e DNB.</p></section>';apiGet('/api/today').then(d=>{const usable=(d.fixtures||[]).filter(f=>f.prediction);if(!usable.length){box.innerHTML='<section class="card result"><h3>Nessuna analisi disponibile</h3><p>Le partite di oggi non hanno ancora dati storici sufficienti.</p></section>';return}const ranked=usable.map(f=>{const all=candidates(f).sort((a,b)=>b[1]-a[1]);return{f,best:all[0],top:all.slice(0,5)}}).sort((a,b)=>b.best[1]-a.best[1]);const cards=ranked.map((x,i)=>'<article class="match-card auto-analysis"><div class="match-meta">#'+(i+1)+' · '+esc(x.f.league?.name||'Calcio')+' · '+formatTime(x.f.date)+'</div><div class="teams-line"><strong>'+esc(x.f.home.name)+'</strong><span>VS</span><strong>'+esc(x.f.away.name)+'</strong></div><div class="best-event"><span>EVENTO PIÙ PROBABILE</span><b>'+esc(x.best[0])+'</b><strong>'+pct(x.best[1])+'</strong></div><div class="quality">Affidabilità dati '+pct(x.f.prediction?.dataQuality?.reliability??x.f.prediction?.reliability)+'</div><div class="analysis-top">'+x.top.map((e,n)=>'<div><span>'+(n+1)+'. '+esc(e[0])+'</span><b>'+pct(e[1])+'</b></div>').join('')+'</div><button class="secondary details" data-id="'+esc(x.f.fixtureId)+'">＋ TUTTE LE STATISTICHE</button><div class="details-box" id="detail-'+esc(x.f.fixtureId)+'"></div></article>').join('');box.innerHTML='<section class="card result"><span class="eyebrow">SCELTE AI · '+esc(d.date)+'</span><h3>'+usable.length+' partite analizzate</h3><p>Ranking basato sui mercati principali; le linee più facili non vengono usate per falsare la classifica. Non è una garanzia di esito.</p><div class="today-list">'+cards+'</div></section>';document.querySelectorAll('.details').forEach(b=>b.onclick=()=>{const x=ranked.find(z=>String(z.f.fixtureId)===String(b.dataset.id));const target=document.querySelector('#detail-'+CSS.escape(String(b.dataset.id)));if(!x||!target)return;if(target.innerHTML){target.innerHTML='';b.textContent='＋ TUTTE LE STATISTICHE';return}target.innerHTML=detailsHtml(x.f.prediction);b.textContent='− CHIUDI STATISTICHE'})}).catch(e=>box.innerHTML='<section class="card result"><div class="error">'+esc(errorText(e))+'</div></section>')}
-function today(){const box=document.querySelector('#result');box.innerHTML='<section class="card result"><h3>Ricerca partite...</h3></section>';apiGet('/api/today').then(d=>{if(!d.fixtures?.length){box.innerHTML='<section class="card result"><h3>Nessuna partita trovata</h3></section>';return}box.innerHTML='<section class="card result"><span class="eyebrow">PARTITE DI OGGI · '+esc(d.date)+'</span><h3>'+d.matches+' partite trovate</h3><p>Calendario reale · '+esc(d.timezone)+' · '+esc(d.source||'')+'</p><div class="today-list">'+d.fixtures.map(matchCard).join('')+'</div></section>';bindDetails(d.fixtures)}).catch(e=>box.innerHTML='<section class="card result"><div class="error">'+esc(errorText(e))+'</div></section>')}
-function matchCard(f){const p=f.prediction;let h='<article class="match-card"><div class="match-meta">'+esc(f.league?.name||'Calcio')+' · '+formatTime(f.date)+' · '+esc(f.status||'NS')+'</div><div class="teams-line"><strong>'+esc(f.home?.name||'Casa')+'</strong><span>VS</span><strong>'+esc(f.away?.name||'Ospite')+'</strong></div>';if(!p)return h+'<div class="quality">⚠️ '+esc(f.reason||'Previsione non disponibile')+'</div></article>';const r=p.result||{},m=p.markets||{};const pick=r.home>=r.draw&&r.home>=r.away?'1':r.away>=r.home&&r.away>=r.draw?'2':'X';return h+'<div class="today-prob"><span>1 <b>'+pct(r.home)+'</b></span><span>X <b>'+pct(r.draw)+'</b></span><span>2 <b>'+pct(r.away)+'</b></span></div><div class="pick">AI: <b>'+pick+'</b> · Gol '+Number(p.expectedGoals?.home||0).toFixed(2)+'-'+Number(p.expectedGoals?.away||0).toFixed(2)+' · O2.5 '+pct(m.over25)+'</div><div class="quality">🎯 Gol/Gol '+pct(m.bttsYes)+' · affidabilità '+pct(p.dataQuality?.reliability??p.reliability)+'</div><button class="secondary details" data-id="'+esc(f.fixtureId)+'">＋ DETTAGLI</button><div class="details-box" id="detail-'+esc(f.fixtureId)+'"></div></article>'}
-function bindDetails(fixtures){document.querySelectorAll('.details').forEach(b=>b.onclick=()=>{const f=fixtures.find(x=>String(x.fixtureId)===String(b.dataset.id));const t=document.querySelector('#detail-'+CSS.escape(String(b.dataset.id)));if(!f?.prediction||!t)return;if(t.innerHTML){t.innerHTML='';b.textContent='＋ DETTAGLI'}else{t.innerHTML=detailsHtml(f.prediction);b.textContent='− CHIUDI'}})}
-function detailsHtml(p){const m=p.markets||{},d=p.doubleChance||{},dn=p.drawNoBet||{},s=p.expectedStats||{},q=p.dataQuality||{};const val=v=>v==null?'N/D':typeof v==='number'?v.toFixed(2):esc(v);const row=(n,v)=>'<div><span>'+n+'</span><b>'+v+'</b></div>';return '<div class="details-content"><h4>Mercati principali</h4><div class="stat-grid">'+row('Over 0.5',pct(m.over05))+row('Under 0.5',pct(m.under05))+row('Over 1.5',pct(m.over15))+row('Under 1.5',pct(m.under15))+row('Over 2.5',pct(m.over25))+row('Under 2.5',pct(m.under25))+row('Over 3.5',pct(m.over35))+row('Under 3.5',pct(m.under35))+row('Over 4.5',pct(m.over45))+row('Under 4.5',pct(m.under45))+row('BTTS / Gol-Gol',pct(m.bttsYes))+row('No Gol',pct(m.bttsNo))+'</div><h4>Doppia chance · Draw No Bet</h4><div class="stat-grid">'+row('1X',pct(d['1X']))+row('X2',pct(d.X2))+row('12',pct(d['12']))+row('DNB 1',pct(dn.home))+row('DNB 2',pct(dn.away))+'</div><h4>Statistiche attese dal modello</h4><div class="stat-grid">'+row('⚽ Gol',val(p.expectedGoals?.total))+row('🎯 Tiri',val(s.shots))+row('🥅 Tiri in porta',val(s.sot))+row('🚩 Corner',val(s.corners))+row('🟨 Falli',val(s.fouls))+row('🧤 Parate',val(s.saves))+row('🟨 Cartellini',val(s.cards))+row('↔ Rimesse','N/D')+'</div><h4>Top risultati esatti</h4><div class="score-list">'+(p.correctScores||[]).slice(0,5).map(x=>row(esc(x.score),pct(x.probability))).join('')+'</div><h4>Qualità dati</h4><p>'+Number(q.homeMatches||0)+' gare casa · '+Number(q.awayMatches||0)+' gare trasferta · affidabilità '+pct(q.reliability??p.reliability)+'</p></div>'}
-function formatTime(v){try{return new Intl.DateTimeFormat('it-IT',{timeZone:'Europe/Rome',hour:'2-digit',minute:'2-digit'}).format(new Date(v))}catch(_){return'--:--'}}
-function backtest(){const box=document.querySelector('#result');const opts=leagues.map(x=>'<option '+(x===state.league?'selected':'')+'>'+x+'</option>').join('');box.innerHTML='<section class="card result"><label>Campionato <select id="modelLeague">'+opts+'</select></label><div id="modelBody"><h3>Validazione...</h3></div></section>';document.querySelector('#modelLeague').onchange=e=>{state.league=e.target.value;backtest()};Promise.all([apiGet('/api/backtest?league='+encodeURIComponent(state.league)+'&minHistory=3'),apiGet('/api/ml/backtest?league='+encodeURIComponent(state.league)+'&minHistory=3')]).then(([po,ml])=>{const winner=(ml.evaluated>0&&(!po.evaluated||ml.accuracy>=po.accuracy))?'ML':'Poisson';document.querySelector('#modelBody').innerHTML='<span class="eyebrow">MODELLO AI</span><h3>'+esc(state.league)+'</h3><div class="model-compare"><article><span>Poisson</span><b>'+pct(po.accuracy)+'</b><small>'+po.evaluated+' partite · Brier '+Number(po.brier||0).toFixed(2)+' · LogLoss '+Number(po.logLoss||0).toFixed(2)+'</small></article><article><span>ML · Logistic Regression</span><b>'+pct(ml.accuracy)+'</b><small>'+ml.evaluated+' partite · Brier '+Number(ml.brier||0).toFixed(2)+' · LogLoss '+Number(ml.logLoss||0).toFixed(2)+'</small></article></div><div class="quality">Modello selezionato dal backtest: <b>'+winner+'</b>. Validazione walk-forward, senza usare il futuro.</div><h4>Feature ML</h4><div class="feature-grid">'+(ml.features||[]).map(x=>'<span>✓ '+esc(x)+'</span>').join('')+'</div>'}).catch(e=>document.querySelector('#modelBody').innerHTML='<div class="error">'+esc(errorText(e))+'</div>')}
-function status(){const box=document.querySelector('#result');box.innerHTML='<section class="card result"><h3>Caricamento dati...</h3></section>';apiGet('/api/data/status').then(d=>box.innerHTML='<section class="card result"><span class="eyebrow">DATABASE</span><h3>Dati disponibili</h3><div class="big">'+d.matches+'</div><p>partite storiche · <b>'+d.teamsWithStats+'</b> squadre con statistiche</p></section>').catch(e=>box.innerHTML='<section class="card result"><div class="error">'+esc(errorText(e))+'</div></section>')}
-function refreshCurrent(){render()}render();
+
+const app = document.querySelector('#app');
+const FOTMOB = 'https://www.fotmob.com';
+const SOFA = 'https://www.sofascore.com/api/v1';
+const state = { loading:false, fixtures:[], source:'', error:null };
+
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+const pct = x => `${(Number(x || 0) * 100).toFixed(1)}%`;
+const clamp = (x,a,b) => Math.max(a,Math.min(b,x));
+function dateRome(){
+  const p = new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Rome',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
+  const o=Object.fromEntries(p.map(x=>[x.type,x.value])); return `${o.year}${o.month}${o.day}`;
+}
+function dateIsoRome(){ const s=dateRome(); return `${s.slice(0,4)}-${s.slice(4,6)}-${s.slice(6)}`; }
+async function get(url){
+  const r=await fetch(url,{headers:{Accept:'application/json'}});
+  const t=await r.text(); let d; try{d=JSON.parse(t)}catch{throw new Error(`JSON non valido ${r.status}`)}
+  if(!r.ok) throw new Error(`${r.status} ${url}`); return d;
+}
+function poisson(k,l){ return Math.exp(-l)*Math.pow(l,k)/fact(k); }
+const fact=n=>{let x=1;for(let i=2;i<=n;i++)x*=i;return x};
+function prediction(home,away){
+  const h=home.form, a=away.form;
+  let lh = 1.52, la = 1.12;
+  if(h.n) lh = 0.45*lh + 0.55*((h.gf/h.n)*0.72 + (a.n ? (a.ga/a.n)*0.28 : 1.1));
+  if(a.n) la = 0.45*la + 0.55*((a.gf/a.n)*0.72 + (h.n ? (h.ga/h.n)*0.28 : 1.0));
+  lh=clamp(lh,0.35,3.8); la=clamp(la,0.30,3.2);
+  const cells=[];let sum=0,ph=0,pd=0,pa=0;
+  for(let i=0;i<=7;i++)for(let j=0;j<=7;j++){const p=poisson(i,lh)*poisson(j,la);sum+=p;cells.push([i,j,p]);if(i>j)ph+=p;else if(i===j)pd+=p;else pa+=p;}
+  ph/=sum;pd/=sum;pa/=sum;
+  const total=lh+la;
+  const under=t=>Math.exp(-total)*Array.from({length:t+1},(_,k)=>Math.pow(total,k)/fact(k)).reduce((a,b)=>a+b,0);
+  const over=t=>1-under(t);
+  const btts=1-Math.exp(-lh)-Math.exp(-la)+Math.exp(-total);
+  return {home:lh,away:la,total,result:{home:ph,draw:pd,away:pa},markets:{over05:over(0),under05:under(0),over15:over(1),under15:under(1),over25:over(2),under25:under(2),over35:over(3),under35:under(3),over45:over(4),under45:under(4),bttsYes:btts,bttsNo:1-btts},doubleChance:{'1X':ph+pd,X2:pd+pa,'12':ph+pa},drawNoBet:{home:ph/(ph+pa),away:pa/(ph+pa)},correctScores:cells.sort((x,y)=>y[2]-x[2]).slice(0,5).map(x=>({score:`${x[0]}-${x[1]}`,probability:x[2]/sum}))};
+}
+function normalize(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/fc|afc|sk|club|calcio|rotterdam/g,'').replace(/[^a-z0-9]/g,'');}
+function sameTeam(a,b){const x=normalize(a),y=normalize(b);return x===y||x.includes(y)||y.includes(x);}
+function emptyForm(){return {n:0,gf:0,ga:0,results:[]};}
+function addResult(form,gf,ga,home){form.n++;form.gf+=gf;form.ga+=ga;form.results.push({gf,ga,home});}
+function extractFixtures(payload){
+  const out=[]; for(const lg of (payload?.leagues||[])) for(const m of (lg.matches||[])) out.push({id:m.id,league:lg.name||m.leagueName||'Calcio',time:m.time,status:m.status,home:{id:m.home?.id,name:m.home?.name},away:{id:m.away?.id,name:m.away?.name}});
+  return out;
+}
+async function fotmobToday(){ return extractFixtures(await get(`${FOTMOB}/api/matches?date=${dateRome()}`)); }
+function walkMatches(obj,out=[]){
+  if(!obj||typeof obj!=='object')return out;
+  if(Array.isArray(obj)){for(const x of obj)walkMatches(x,out);return out}
+  if(obj.home?.name&&obj.away?.name&&(obj.id||obj.matchId))out.push(obj);
+  for(const [k,v] of Object.entries(obj)){if(['squad','players','transfers'].includes(k))continue;walkMatches(v,out)}
+  return out;
+}
+async function fotmobTeam(id,name){
+  try{
+    const p=await get(`${FOTMOB}/api/data/teams?id=${encodeURIComponent(id)}`);
+    const ms=walkMatches(p,[]).filter(m=>m.status?.finished===true || m.status?.type==='finished' || m.finished===true);
+    const seen=new Set(), form=emptyForm();
+    ms.sort((a,b)=>new Date(b.status?.utcTime||b.utcTime||0)-new Date(a.status?.utcTime||a.utcTime||0));
+    for(const m of ms){const mid=String(m.id||m.matchId);if(seen.has(mid))continue;seen.add(mid);const hn=m.home?.name||'',an=m.away?.name||'';let gf,ga,ishome;
+      if(sameTeam(hn,name)){gf=Number(m.home?.score??m.homeScore??0);ga=Number(m.away?.score??m.awayScore??0);ishome=true}
+      else if(sameTeam(an,name)){gf=Number(m.away?.score??m.awayScore??0);ga=Number(m.home?.score??m.homeScore??0);ishome=false}
+      else continue;
+      if(Number.isFinite(gf)&&Number.isFinite(ga))addResult(form,gf,ga,ishome); if(form.n>=10)break;
+    }
+    if(form.n>=2)return {form,source:'FotMob',teamId:id};
+  }catch(e){}
+  return null;
+}
+async function sofaSearch(name){
+  const p=await get(`${SOFA}/search/all?q=${encodeURIComponent(name)}`);
+  const teams=(p?.results||[]).filter(x=>x?.entity?.id);
+  const hit=teams.find(x=>sameTeam(x.entity?.name,name))||teams[0]; return hit?.entity?.id||null;
+}
+async function sofaTeam(id,name){
+  try{
+    const form=emptyForm(),seen=new Set();
+    for(let page=0;page<3&&form.n<10;page++){
+      const p=await get(`${SOFA}/team/${id}/events/last/${page}`);
+      for(const m of (p.events||[])){
+        if(m.status?.type!=='finished')continue; const mid=String(m.id);if(seen.has(mid))continue;seen.add(mid);
+        const hn=m.homeTeam?.name||'',an=m.awayTeam?.name||'',hs=Number(m.homeScore?.current??m.homeScore?.display),as=Number(m.awayScore?.current??m.awayScore?.display);
+        if(!Number.isFinite(hs)||!Number.isFinite(as))continue;
+        if(sameTeam(hn,name))addResult(form,hs,as,true);else if(sameTeam(an,name))addResult(form,as,hs,false);if(form.n>=10)break;
+      }
+    }
+    if(form.n>=2)return {form,source:'SofaScore',teamId:id};
+  }catch(e){}
+  return null;
+}
+async function history(team){
+  if(team.id){const f=await fotmobTeam(team.id,team.name);if(f)return f;}
+  try{const sid=await sofaSearch(team.name);if(sid){const s=await sofaTeam(sid,team.name);if(s)return s;}}catch(e){}
+  return {form:emptyForm(),source:'N/D',teamId:team.id||null};
+}
+async function build(){
+  state.loading=true;state.error=null;render();
+  try{
+    const all=await fotmobToday();
+    const fixtures=all.filter(x=>/champions league/i.test(x.league||''));
+    const unique=fixtures.filter((x,i,a)=>a.findIndex(y=>String(y.id)===String(x.id))===i);
+    state.fixtures=await Promise.all(unique.slice(0,12).map(async f=>{
+      const [h,a]=await Promise.all([history(f.home),history(f.away)]); const p=prediction(h,a);
+      const reliability=clamp((Math.min(h.form.n,10)+Math.min(a.form.n,10))/20,0,1);
+      return {...f,history:{home:h,away:a},prediction:p,reliability};
+    }));
+    state.source='FotMob calendario + FotMob/SofaScore cronologia';
+  }catch(e){state.error=e;state.fixtures=[];state.source=''}
+  state.loading=false;render();
+}
+function time(v){try{return new Intl.DateTimeFormat('it-IT',{timeZone:'Europe/Rome',hour:'2-digit',minute:'2-digit'}).format(new Date(v))}catch{return '--:--'}}
+function card(f){const p=f.prediction,q=f.history,r=p.result,m=p.markets,d=p.doubleChance,dn=p.drawNoBet;return `<article class="match-card"><div class="match-meta">${esc(f.league)} · ${time(f.status?.utcTime||f.time)} · TEST APK DIRETTO</div><div class="teams-line"><strong>${esc(f.home.name)}</strong><span>VS</span><strong>${esc(f.away.name)}</strong></div><div class="today-prob"><span>1 <b>${pct(r.home)}</b></span><span>X <b>${pct(r.draw)}</b></span><span>2 <b>${pct(r.away)}</b></span></div><div class="pick">Gol attesi <b>${p.home.toFixed(2)}-${p.away.toFixed(2)}</b> · O2.5 <b>${pct(m.over25)}</b></div><div class="quality">Casa: <b>${q.home.form.n}</b> gare (${esc(q.home.source)}) · Trasferta: <b>${q.away.form.n}</b> gare (${esc(q.away.source)})</div><div class="stat-grid compact"><div><span>1X</span><b>${pct(d['1X'])}</b></div><div><span>X2</span><b>${pct(d.X2)}</b></div><div><span>12</span><b>${pct(d['12'])}</b></div><div><span>DNB 1</span><b>${pct(dn.home)}</b></div><div><span>BTTS</span><b>${pct(m.bttsYes)}</b></div><div><span>Over 1.5</span><b>${pct(m.over15)}</b></div></div><h4>Top risultati</h4><div class="score-list">${p.correctScores.map(x=>`<div><span>${x.score}</span><b>${pct(x.probability)}</b></div>`).join('')}</div><div class="quality">Qualità cronologia: <b>${pct(f.reliability)}</b></div></article>`}
+function render(){app.innerHTML=`<main class="shell"><header><div class="brand"><span class="ball">⚽</span><div><h1>Match Probability AI</h1><small>APK · motore dati diretto</small></div></div><button id="refresh" class="icon">↻</button></header><section class="hero"><span class="eyebrow">TEST APK · NO VERCEL</span><h2>Partite di oggi</h2><p>Questa versione legge direttamente FotMob e, se necessario, SofaScore. Nessuna chiamata a <code>/api/today</code>.</p></section><div id="result">${state.loading?'<section class="card result"><h3>Recupero dati diretto...</h3><p>Calendario FotMob → cronologia FotMob → fallback SofaScore.</p></section>':state.error?`<section class="card result"><div class="error">${esc(state.error.message||state.error)}</div><p>Se FotMob blocca la richiesta dal WebView, il prossimo step sarà usare CapacitorHttp nativo.</p></section>`:`<section class="card result"><span class="eyebrow">${esc(dateIsoRome())}</span><h3>${state.fixtures.length} partite Champions League</h3><p>${esc(state.source)}</p><div class="today-list">${state.fixtures.map(card).join('')}</div></section>`}</div><nav><button class="active">●<small>Oggi</small></button><button>⌂<small>Analisi</small></button><button>◈<small>Modello AI</small></button><button>◉<small>Dati</small></button></nav></main>`;document.querySelector('#refresh').onclick=build}
+build();
