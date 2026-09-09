@@ -54,17 +54,27 @@ jobs:
       - name: Build release APK
         run: ./android/gradlew -p android assembleRelease --no-daemon
 
-      - name: Verify APK
+      - name: Verify and stage APK
         run: |
-          set -e
-          echo "APK files produced:"
-          find android/app/build/outputs -type f -name '*.apk' -print
-          test -n "$(find android/app/build/outputs -type f -name '*.apk' -print -quit)"
+          set -euo pipefail
+          echo "Searching APK under: $GITHUB_WORKSPACE/app/android"
+          find "$GITHUB_WORKSPACE/app/android" -type f -name '*.apk' -print
+          APK="$(find "$GITHUB_WORKSPACE/app/android" -type f -name '*.apk' -print -quit)"
+          if [ -z "$APK" ]; then
+            echo "ERROR: no APK was produced"
+            find "$GITHUB_WORKSPACE/app/android/app/build/outputs" -maxdepth 8 -type f -print || true
+            exit 1
+          fi
+          echo "APK produced: $APK"
+          mkdir -p "$GITHUB_WORKSPACE/artifacts"
+          cp "$APK" "$GITHUB_WORKSPACE/artifacts/Match-Probability-AI.apk"
+          test -s "$GITHUB_WORKSPACE/artifacts/Match-Probability-AI.apk"
+          ls -lh "$GITHUB_WORKSPACE/artifacts/Match-Probability-AI.apk"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Match-Probability-AI-APK-NATIVE-HTTP
-          path: app/android/app/build/outputs/apk/release/*.apk
+          path: artifacts/Match-Probability-AI.apk
           if-no-files-found: error
           retention-days: 30
