@@ -55,12 +55,16 @@ jobs:
         run: ./android/gradlew -p android assembleRelease --no-daemon
 
       - name: Verify APK
-        run: test -f android/app/build/outputs/apk/release/app-release.apk
+        run: |
+          set -e
+          echo "APK files produced:"
+          find android/app/build/outputs -type f -name '*.apk' -print
+          test -n "$(find android/app/build/outputs -type f -name '*.apk' -print -quit)"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Match-Probability-AI-APK-NATIVE-HTTP
-          path: app/android/app/build/outputs/apk/release/app-release.apk
+          path: app/android/app/build/outputs/apk/release/*.apk
           if-no-files-found: error
           retention-days: 30
