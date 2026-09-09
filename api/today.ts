@@ -118,7 +118,16 @@ function build(snap: any) {
     if (hasStats(hs)) { const b = baseline.get(String(lid)) || empty(); b.statMatches++; b.shots += n(hs.shots); b.sot += n(hs.sot); b.corners += n(hs.corners); b.fouls += n(hs.fouls); b.saves += n(hs.saves); b.cards += n(hs.cards); baseline.set(String(lid), b); globalBaseline.statMatches++; globalBaseline.shots += n(hs.shots); globalBaseline.sot += n(hs.sot); globalBaseline.corners += n(hs.corners); globalBaseline.fouls += n(hs.fouls); globalBaseline.saves += n(hs.saves); globalBaseline.cards += n(hs.cards); }
     if (hasStats(as)) { const b = baseline.get(String(lid)) || empty(); b.statMatches++; b.shots += n(as.shots); b.sot += n(as.sot); b.corners += n(as.corners); b.fouls += n(as.fouls); b.saves += n(as.saves); b.cards += n(as.cards); baseline.set(String(lid), b); globalBaseline.statMatches++; globalBaseline.shots += n(as.shots); globalBaseline.sot += n(as.sot); globalBaseline.corners += n(as.corners); globalBaseline.fouls += n(as.fouls); globalBaseline.saves += n(as.saves); globalBaseline.cards += n(as.cards); }
   }
-  return { league, all, baseline, globalBaseline, byName };
+  byName.clear();
+const recentCounts = new Map<string, number>();
+const recent = (snap.fixtures || []).filter((f: any) => f?.goals?.home != null && f?.goals?.away != null).slice().sort((a: any, b: any) => String(b.kickoff || b.date || '').localeCompare(String(a.kickoff || a.date || '')));
+for (const f of recent) {
+  const hs = f.stats?.home || {}, as = f.stats?.away || {}, hg = n(f.goals.home), ag = n(f.goals.away);
+  const hk = canon(f.home?.name), ak = canon(f.away?.name);
+  if (hk && (recentCounts.get(hk) || 0) < 20) { add(byName, hk, hg, ag, true, hs); recentCounts.set(hk, (recentCounts.get(hk) || 0) + 1); }
+  if (ak && (recentCounts.get(ak) || 0) < 20) { add(byName, ak, ag, hg, false, as); recentCounts.set(ak, (recentCounts.get(ak) || 0) + 1); }
+}
+return { league, all, baseline, globalBaseline, byName };
 }
 function team(snap: any, name: string, lid: number) {
   const wanted = tokens(name); let best: any = null, score = 0;
@@ -141,7 +150,9 @@ async function enrichRecentFromSofa(s: S, sofaId: any, excludeId: string) {
   } catch (_) { return false; }
 }
 function poisson(l: number, k: number) { let p = Math.exp(-l); for (let i = 1; i <= k; i++) p *= l / i; return p; }
-function predict(h: S, a: S, base: S | null) {
+function predict(h: S, a: S, base: S | null, liveH: S | null = null, liveA: S | null = null) {
+  if (liveH && liveH.matches >= 3) h = liveH;
+  if (liveA && liveA.matches >= 3) a = liveA;
   const hw = h.matches ? h.hm / (h.matches + 8) : .5, aw = a.matches ? a.am / (a.matches + 8) : .5;
   const hgf = h.hm ? h.hgf / h.hm : 1.35, hga = h.hm ? h.hga / h.hm : 1.35, agf = a.am ? a.agf / a.am : 1.15, aga = a.am ? a.aga / a.am : 1.15;
   const lh = clamp(((hgf * .55 + (h.matches ? h.gf / h.matches : 1.35) * .45) * hw + (aga * .45 + (a.matches ? a.ga / a.matches : 1.15) * .55) * aw) * 1.05, .2, 3.8);
@@ -229,19 +240,20 @@ export default async function handler(req: any, res: any) {
       const h = hn.matches > 0 ? hn : cloneS(maps.league.get(`${lid}:${n(ht?.apiId)}`) || maps.all.get(String(ht?.apiId)) || empty());
       const a = an.matches > 0 ? an : cloneS(maps.league.get(`${lid}:${n(at?.apiId)}`) || maps.all.get(String(at?.apiId)) || empty());
       const base = (lid ? maps.baseline.get(String(lid)) : null) || maps.globalBaseline;
-      if (lid && (h.matches < 8 || a.matches < 8)) {
+      let liveH = empty(), liveA = empty();
+if (lid) {
   const [homeSofaId, awaySofaId] = await Promise.all([f.home.sofaId || resolveSofaTeamId(f.home.name), f.away.sofaId || resolveSofaTeamId(f.away.name)]);
   await Promise.all([
     enrichRecentFromSofa(h, homeSofaId, f.fixtureId),
-    enrichRecentFromSofa(a, awaySofaId, f.fixtureId)
+    enrichRecentFromSofa(a, awaySofaId, f.fixtureId),
+    enrichRecentFromSofa(liveH, homeSofaId, f.fixtureId),
+    enrichRecentFromSofa(liveA, awaySofaId, f.fixtureId)
   ]);
-  if (h.matches < 8 || a.matches < 8) {
-    const espnSlug = Object.keys(ESPN_LEAGUES).find(k => Number(ESPN_LEAGUES[k]?.[1]) === lid) || '';
-    await Promise.all([
-      h.matches < 8 ? enrichRecentFromEspn(h, espnSlug, f.home.name, f.fixtureId) : Promise.resolve(false),
-      a.matches < 8 ? enrichRecentFromEspn(a, espnSlug, f.away.name, f.fixtureId) : Promise.resolve(false)
-    ]);
-  }
+  const espnSlug = Object.keys(ESPN_LEAGUES).find(k => Number(ESPN_LEAGUES[k]?.[1]) === lid) || '';
+  if (liveH.matches < 3 || liveA.matches < 3) await Promise.all([
+    liveH.matches < 3 ? enrichRecentFromEspn(liveH, espnSlug, f.home.name, f.fixtureId) : Promise.resolve(false),
+    liveA.matches < 3 ? enrichRecentFromEspn(liveA, espnSlug, f.away.name, f.fixtureId) : Promise.resolve(false)
+  ]);
 }
 const prediction = predict(h, a, base);
       return { fixtureId: f.fixtureId, date: f.date, league: f.league, status: f.status, home: f.home, away: f.away, prediction };
