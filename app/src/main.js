@@ -150,14 +150,6 @@ async function history(team){
   try{const sid=await sofaSearch(team.name);if(sid){const s=await sofaTeam(sid,team.name);if(s)return s;}}catch(e){}
   return {form:emptyForm(),source:'N/D',teamId:team.id||null};
 }
-function combineRange(a,b,key,weightA=.6){
-  const x=a?.statSummary?.[key], y=b?.statSummary?.[key];
-  if(!x&&!y)return null;
-  const mean=(x?x.mean*weightA:0)+(y?y.mean*(1-weightA):0);
-  const spread=(x?x.sd*weightA:0)+(y?y.sd*(1-weightA):0);
-  const width=Math.max(1,spread*1.35,mean*.12);
-  return {min:Math.max(0,Math.round(mean-width)),max:Math.max(0,Math.round(mean+width)),mean};
-}
 function totalStatRange(home,away,key){
   const ownH=home?.statSummary?.[key], ownA=away?.statSummary?.[key];
   if(!ownH&&!ownA)return null;
@@ -166,7 +158,7 @@ function totalStatRange(home,away,key){
   const width=Math.max(1.5,sd*.75,mean*.10);
   return {min:Math.max(0,Math.round(mean-width)),max:Math.max(0,Math.round(mean+width)),mean};
 }
-function rangeText(r,decimals=0){return r?`${r.min}-${r.max}`:'N/D'}
+function rangeText(r){return r?`${r.min}-${r.max}`:'N/D'}
 function statPrediction(home,away){
   return {
     shots: totalStatRange(home,away,'shots'),
@@ -188,8 +180,7 @@ async function build(){
     state.fixtures=await Promise.all(unique.slice(0,12).map(async f=>{
       const [h,a]=await Promise.all([history(f.home),history(f.away)]); const p=prediction(h,a); p.stats=statPrediction(h.form,a.form);
       const reliability=clamp((Math.min(h.form.n,10)+Math.min(a.form.n,10))/20,0,1);
-      const statsQuality=Math.round((Math.min(h.form.stats?.length||0,5)+Math.min(a.form.stats?.length||0,5))/10*100);
-      return {...f,history:{home:h,away:a},prediction:p,reliability,statsQuality};
+      return {...f,history:{home:h,away:a},prediction:p,reliability};
     }));
     state.source='FotMob calendario + FotMob/SofaScore cronologia + statistiche match FotMob';
   }catch(e){state.error=e;state.fixtures=[];state.source=''}
@@ -198,6 +189,8 @@ async function build(){
 function time(v){try{return new Intl.DateTimeFormat('it-IT',{timeZone:'Europe/Rome',hour:'2-digit',minute:'2-digit'}).format(new Date(v))}catch{return '--:--'}}
 function card(f){
   const p=f.prediction,q=f.history,r=p.result,st=p.stats;
-  return `<article class="match-card"><div class="match-meta">${esc(f.league)} · ${time(f.status?.utcTime||f.time)} · TEST APK DIRETTO</div><div class="teams-line"><strong>${esc(f.home.name)}</strong><span>VS</span><strong>${esc(f.away.name)}</strong></div><div class="today-prob"><span>1 <b>${pct(r.home)}</b></span><span>X <b>${pct(r.draw)}</b></span><span>2 <b>${pct(r.away)}</b></span></div><div class="pick">Gol attesi <b>${p.home.toFixed(2)}-${p.away.toFixed(2)}</b> · Gol totali <b>${Math.max(0,Math.round(p.total-.7))}-${Math.round(p.total+1.0)}</b></div><div class="quality">Casa: <b>${q.home.form.n}</b> gare (${esc(q.home.source)}) · Trasferta: <b>${q.away.form.n}</b> gare (${esc(q.away.source)})</div><h4>Range statistiche previste</h4><div class="stat-grid compact"><div><span>Tiri totali</span><b>${rangeText(st.shots)}</b></div><div><span>Tiri in porta</span><b>${rangeText(st.shotsOnTarget)}</b></div><div><span>Corner</span><b>${rangeText(st.corners)}</b></div><div><span>Falli</span><b>${rangeText(st.fouls)}</b></div><div><span>Cartellini</span><b>${rangeText(st.yellow)}</b></div><div><span>Fuorigioco</span><b>${rangeText(st.offsides)}</b></div></div><h4>Top risultati</h4><div class="score-list">${p.correctScores.map(x=>`<div><span>${x.score}</span><b>${pct(x.probability)}</b></div>`).join('')}</div><div class="quality">Qualità cronologia: <b>${pct(f.reliability)}</b> · Statistiche recenti: <b>${f.statsQuality}%</b></div></article>`}
+  const historyCount=Math.min(q.home.form.n,10)+Math.min(q.away.form.n,10);
+  const statCount=(q.home.form.stats?.length||0)+(q.away.form.stats?.length||0);
+  return `<article class="match-card"><div class="match-meta">${esc(f.league)} · ${time(f.status?.utcTime||f.time)} · TEST APK DIRETTO</div><div class="teams-line"><strong>${esc(f.home.name)}</strong><span>VS</span><strong>${esc(f.away.name)}</strong></div><div class="today-prob"><span>1 <b>${pct(r.home)}</b></span><span>X <b>${pct(r.draw)}</b></span><span>2 <b>${pct(r.away)}</b></span></div><div class="pick">Gol attesi <b>${p.home.toFixed(2)}-${p.away.toFixed(2)}</b> · Gol totali <b>${Math.max(0,Math.round(p.total-.7))}-${Math.round(p.total+1.0)}</b></div><div class="quality">Casa: <b>${q.home.form.n}</b> gare (${esc(q.home.source)}) · Trasferta: <b>${q.away.form.n}</b> gare (${esc(q.away.source)})</div><h4>Range statistiche previste</h4><div class="stat-grid compact"><div><span>Tiri totali</span><b>${rangeText(st.shots)}</b></div><div><span>Tiri in porta</span><b>${rangeText(st.shotsOnTarget)}</b></div><div><span>Corner</span><b>${rangeText(st.corners)}</b></div><div><span>Falli</span><b>${rangeText(st.fouls)}</b></div><div><span>Cartellini</span><b>${rangeText(st.yellow)}</b></div><div><span>Fuorigioco</span><b>${rangeText(st.offsides)}</b></div></div><h4>Top risultati</h4><div class="score-list">${p.correctScores.map(x=>`<div><span>${x.score}</span><b>${pct(x.probability)}</b></div>`).join('')}</div><div class="quality">Cronologia: <b>${historyCount}/20 gare</b> · Statistiche dettagliate: <b>${statCount}/10 partite</b></div></article>`}
 function render(){app.innerHTML=`<main class="shell"><header><div class="brand"><span class="ball">⚽</span><div><h1>Match Probability AI</h1><small>APK · motore dati diretto</small></div></div><button id="refresh" class="icon">↻</button></header><section class="hero"><span class="eyebrow">TEST APK · NO VERCEL</span><h2>Partite di oggi</h2><p>Questa versione legge direttamente FotMob e, se necessario, SofaScore. Nessuna chiamata a <code>/api/today</code>.</p></section><div id="result">${state.loading?'<section class="card result"><h3>Recupero dati diretto...</h3><p>Calendario → cronologia → statistiche match FotMob.</p></section>':state.error?`<section class="card result"><div class="error">${esc(state.error.message||state.error)}</div><p>Il motore diretto ha incontrato un errore nel recupero dati.</p></section>`:`<section class="card result"><span class="eyebrow">${esc(dateIsoRome())}</span><h3>${state.fixtures.length} partite Champions League</h3><p>${esc(state.source)}</p><div class="today-list">${state.fixtures.map(card).join('')}</div></section>`}</div><nav><button class="active">●<small>Oggi</small></button><button>⌂<small>Analisi</small></button><button>◈<small>Modello AI</small></button><button>◉<small>Dati</small></button></nav></main>`;document.querySelector('#refresh').onclick=build}
 build();
