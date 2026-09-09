@@ -1,0 +1,52 @@
+name: Repair live football source
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    if: ${{ !contains(github.event.head_commit.message, '[live-source-repair]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Patch today API with ESPN failover
+        shell: python
+        run: |
+          from pathlib import Path
+
+          p = Path('api/today.ts')
+          s = p.read_text()
+
+          old = """async function fixtures(date:string){try{const x=await fixturesSofa(date);if(x.length)return{x,source:'SofaScore'}}catch(e){console.warn('SOFA_FIXTURES_FAILED',String(e))}try{const x=await fixturesFotmob(date);if(x.length)return{x,source:'FotMob'}}catch(e){console.warn('FOTMOB_FIXTURES_FAILED',String(e))}throw new Error('Nessuna partita disponibile dalle fonti live')}"""
+          new = """const ESPN_BASE='https://site.api.espn.com/apis/site/v2/sports/soccer';
+          const ESPN_LEAGUES:[string,string][]=[['eng.1','Premier League'],['ita.1','Serie A'],['esp.1','LaLiga'],['ger.1','Bundesliga'],['fra.1','Ligue 1'],['uefa.champions','Champions League']];
+          async function getEspn(url:string){const r=await fetch(url);if(!r.ok)throw new Error(`HTTP ${r.status}`);return r.json()}
+          async function fixturesEspn(date:string){const ds=date.replaceAll('-','');const rows:any[]=[];await Promise.all(ESPN_LEAGUES.map(async([code,name])=>{try{const x=await getEspn(`${ESPN_BASE}/${code}/scoreboard?dates=${ds}&limit=100`);for(const e of x.events||[]){const c=e.competitions?.[0],sides:any={};for(const c0 of c?.competitors||[])sides[c0.homeAway]=c0;const h=sides.home?.team,a=sides.away?.team;if(!h?.id||!a?.id)continue;rows.push({fixtureId:`espn-${e.id}`,eventId:String(e.id),leagueCode:code,date:e.date,league:{name},status:e.status?.type?.detail||e.status?.type?.description||'Scheduled',home:{id:String(h.id),name:h.displayName||h.name},away:{id:String(a.id),name:a.displayName||a.name}})}}catch(e){console.warn('ESPN_FIXTURES_FAILED',code,String(e))}}));const seen=new Set<string>();return rows.sort((a,b)=>String(a.date).localeCompare(String(b.date))).filter(f=>!seen.has(f.fixtureId)&&(seen.add(f.fixtureId),true))}
+          async function teamRecentEspn(leagueCode:string,teamId:string,s:S){if(!leagueCode||!teamId)return false;try{const x=await getEspn(`${ESPN_BASE}/${leagueCode}/teams/${encodeURIComponent(teamId)}/schedule?limit=20`);const events=(x.events||[]).filter((e:any)=>e.status?.type?.completed).sort((a:any,b:any)=>String(b.date).localeCompare(String(a.date))).slice(0,8);for(const e of events){const c=e.competitions?.[0],sides:any={};for(const c0 of c?.competitors||[])sides[c0.homeAway]=c0;const h=sides.home,a=sides.away;if(!h||!a)continue;const hg=n(h.score),ag=n(a.score),home=String(h.team?.id)===String(teamId);add(s,home?hg:ag,home?ag:hg,home,{})}return s.matches>0}catch(_){return false}}
+          async function fixtures(date:string){try{const x=await fixturesSofa(date);if(x.length)return{x,source:'SofaScore'}}catch(e){console.warn('SOFA_FIXTURES_FAILED',String(e))}try{const x=await fixturesFotmob(date);if(x.length)return{x,source:'FotMob'}}catch(e){console.warn('FOTMOB_FIXTURES_FAILED',String(e))}try{const x=await fixturesEspn(date);if(x.length)return{x,source:'ESPN'}}catch(e){console.warn('ESPN_FIXTURES_FAILED',String(e))}throw new Error('Nessuna partita disponibile dalle fonti live')}"""
+          if old not in s:
+              raise SystemExit('expected fixtures block not found')
+          s=s.replace(old,new,1)
+
+          old2="""const [okH,okA,h2]=await Promise.all([live.source==='SofaScore'?teamRecentSofa(f.home.id,h):teamRecentFotmob(f.home.id,h),live.source==='SofaScore'?teamRecentSofa(f.away.id,a):teamRecentFotmob(f.away.id,a),h2h(f.fixtureId,f.home.id,f.away.id)]);"""
+          new2="""const [okH,okA,h2]=await Promise.all([live.source==='SofaScore'?teamRecentSofa(f.home.id,h):live.source==='FotMob'?teamRecentFotmob(f.home.id,h):teamRecentEspn(f.leagueCode,f.home.id,h),live.source==='SofaScore'?teamRecentSofa(f.away.id,a):live.source==='FotMob'?teamRecentFotmob(f.away.id,a):teamRecentEspn(f.leagueCode,f.away.id,a),h2h(f.fixtureId,f.home.id,f.away.id)]);"""
+          if old2 not in s:
+              raise SystemExit('expected team form block not found')
+          s=s.replace(old2,new2,1)
+
+          p.write_text(s)
+
+          wf=Path('.github/workflows/repair-live-source.yml')
+          wf.unlink()
+      - name: Commit repair
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add api/today.ts .github/workflows/repair-live-source.yml
+          git commit -m "[live-source-repair] Add ESPN failover and current form"
+          git push
