@@ -8,10 +8,13 @@ if (Capacitor.isNativePlatform()) {
     const method = String(init.method || 'GET').toUpperCase();
     if (method !== 'GET') return originalFetch(input, init);
 
-    // FotMob's current daily endpoint is /api/data/matches.
+    // FotMob current data endpoints used by the APK.
     if (url.includes('www.fotmob.com/api/matches?')) {
       url = url.replace('/api/matches?', '/api/data/matches?');
       if (!url.includes('timezone=')) url += '&timezone=Europe%2FRome';
+    }
+    if (url.includes('www.fotmob.com/api/matchDetails?')) {
+      url = url.replace('/api/matchDetails?', '/api/data/matchDetails?');
     }
 
     // Use the primary SofaScore API host from the native layer.
