@@ -57,6 +57,46 @@ async function resolveSofaTeamId(name: string) {
   })());
   return sofaTeamCache.get(key)!;
 }
+const espnTeamCache = new Map<string, Promise<any>>();
+async function resolveEspnTeamId(slug: string, name: string) {
+  const key = slug + ':' + canon(name); if (!slug || !key) return null;
+  if (!espnTeamCache.has(key)) espnTeamCache.set(key, (async () => {
+    try {
+      const x = await get(ESPN_BASE + '/' + slug + '/teams?limit=500');
+      const rows: any[] = x?.sports?.[0]?.leagues?.[0]?.teams || x?.teams || [];
+      const wanted = tokens(name); let best: any = null, bestScore = 0;
+      for (const r of rows) {
+        const e = r?.team || r; if (!e?.id || !e?.displayName) continue;
+        const got = tokens(e.displayName); const hit = wanted.filter((t: string) => got.includes(t)).length;
+        const score = wanted.length && got.length ? hit / Math.max(wanted.length, got.length) : 0;
+        if (score > bestScore) { bestScore = score; best = e.id; }
+      }
+      return bestScore >= .5 ? best : null;
+    } catch (_) { return null; }
+  })());
+  return espnTeamCache.get(key)!;
+}
+async function enrichRecentFromEspn(s: S, slug: string, name: string, excludeId: string) {
+  if (!slug || s.matches >= 8) return false;
+  try {
+    const teamId = await resolveEspnTeamId(slug, name); if (!teamId) return false;
+    const x = await get(ESPN_BASE + '/all/teams/' + teamId + '/schedule?limit=100');
+    const events = (x.events || []).slice().sort((a: any, b: any) => String(b.date || '').localeCompare(String(a.date || '')));
+    let added = 0;
+    for (const e of events) {
+      if (String(e.id) === String(excludeId)) continue;
+      const c = e.competitions?.[0]; if (!c) continue;
+      const completed = Boolean(e.status?.type?.completed || c.status?.type?.completed);
+      if (!completed) continue;
+      const comps = c.competitors || []; const me = comps.find((z: any) => String(z.team?.id) === String(teamId));
+      const opp = comps.find((z: any) => String(z.team?.id) !== String(teamId));
+      if (!me || !opp) continue;
+      const gf = n(me.score), ga = n(opp.score); if (!Number.isFinite(gf) || !Number.isFinite(ga)) continue;
+      addDirect(s, gf, ga, me.homeAway === 'home'); added++; if (s.matches >= 10) break;
+    }
+    return added > 0;
+  } catch (_) { return false; }
+}
 function hasStats(stats: any) { return ['shots', 'sot', 'corners', 'fouls', 'saves', 'cards'].some(k => n(stats?.[k]) > 0); }
 function add(m: Map<string, S>, key: string, g: number, ga: number, home: boolean, stats: any = {}) {
   const s = m.get(key) || empty(); s.matches++; s.gf += g; s.ga += ga;
@@ -161,7 +201,14 @@ export default async function handler(req: any, res: any) {
       const base = (lid ? maps.baseline.get(String(lid)) : null) || maps.globalBaseline;
       if (lid && (h.matches < 8 || a.matches < 8)) {
         const [homeSofaId, awaySofaId] = await Promise.all([f.home.sofaId || resolveSofaTeamId(f.home.name), f.away.sofaId || resolveSofaTeamId(f.away.name)]);
-        await Promise.all([enrichRecentFromSofa(h, homeSofaId, f.fixtureId), enrichRecentFromSofa(a, awaySofaId, f.fixtureId)]);
+        const sofaResults = await Promise.all([enrichRecentFromSofa(h, homeSofaId, f.fixtureId), enrichRecentFromSofa(a, awaySofaId, f.fixtureId)]);
+if (h.matches < 8 || a.matches < 8) {
+  const espnSlug = Object.keys(ESPN_LEAGUES).find(k => Number(ESPN_LEAGUES[k]?.[1]) === lid) || '';
+  await Promise.all([
+    h.matches < 8 ? enrichRecentFromEspn(h, espnSlug, f.home.name, f.fixtureId) : Promise.resolve(false),
+    a.matches < 8 ? enrichRecentFromEspn(a, espnSlug, f.away.name, f.fixtureId) : Promise.resolve(false)
+  ]);
+}
       }
       const prediction = predict(h, a, base);
       return { fixtureId: f.fixtureId, date: f.date, league: f.league, status: f.status, home: f.home, away: f.away, prediction };
