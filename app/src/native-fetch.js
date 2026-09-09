@@ -1,17 +1,17 @@
 import { Capacitor, CapacitorHttp } from '@capacitor/core';
-
 if (Capacitor.isNativePlatform()) {
-  const originalFetch = window.fetch.bind(window);
-  const normalizeTeam = s => String(s || '')
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/\b(fc|afc|sk|club|calcio|rotterdam|cf|fk|sc|ac|as)\b/g, '')
-    .replace(/[^a-z0-9]/g, '');
-  const sameTeam = (a,b) => { const x=normalizeTeam(a),y=normalizeTeam(b); return !!x&&!!y&&(x===y||x.includes(y)||y.includes(x)); };
-  const toNum = v => { if(v&&typeof v==='object') v=v.value??v.displayValue??v.homeValue; const m=String(v??'').replace(',','.').match(/-?\d+(?:\.\d+)?/); const n=m?Number(m[0]):NaN; return Number.isFinite(n)?n:null; };
-  const cache=new Map();
-  async function nativeJson(url){try{const r=await CapacitorHttp.get({url,headers:{Accept:'application/json','User-Agent':'Mozilla/5.0 (Linux; Android 16) AppleWebKit/537.36 Chrome/140 Mobile Safari/537.36'}});if(Number(r.status||0)>=400)return null;return typeof r.data==='object'?r.data:JSON.parse(String(r.data??'null'));}catch{return null;}}
-  async function espnAugment(payload){try{const g=payload?.general||{},home=g?.homeTeam?.name||payload?.header?.teams?.[0]?.name||'',away=g?.awayTeam?.name||payload?.header?.teams?.[1]?.name||'',iso=g?.matchTimeUTCDate||g?.matchTimeUTC||payload?.header?.status?.utcTime||'',m=String(iso).match(/(\d{4})-(\d{2})-(\d{2})/);if(!home||!away||!m||g.finished===false)return payload;const d=`${m[1]}${m[2]}${m[3]}`,sk=`score:${d}`;let sb=cache.get(sk);if(!sb){sb=await nativeJson(`https://site.api.espn.com/apis/site/v2/sports/soccer/all/scoreboard?dates=${d}`);cache.set(sk,sb);}const ev=(sb?.events||[]).find(e=>{const c=e?.competitions?.[0]?.competitors||[],h=c.find(x=>x.homeAway==='home')||c[0],a=c.find(x=>x.homeAway==='away')||c[1];return sameTeam(h?.team?.displayName||'',home)&&sameTeam(a?.team?.displayName||'',away)});if(!ev?.id)return payload;const sum=await nativeJson(`https://site.api.espn.com/apis/site/v2/sports/soccer/all/summary?event=${ev.id}`);const teams=sum?.boxscore?.teams||[];if(teams.length<2)return payload;const rows=[];for(const t of teams){const values={};for(const r of t.statistics||[]){const k=String(r.name||r.label||'').toLowerCase().replace(/[^a-z0-9]/g,''),v=toNum(r.displayValue??r.value);if(v!=null)values[k]=v;}rows.push({side:t.homeAway,values});}const h=rows.find(x=>x.side==='home')?.values||{},a=rows.find(x=>x.side==='away')?.values||{},pair=(keys,title)=>{const hv=keys.map(k=>h[k]).find(v=>v!==undefined),av=keys.map(k=>a[k]).find(v=>v!==undefined);return hv!==undefined&&av!==undefined?{title,stats:[hv,av]}:null;},extra=[pair(['shotsontarget','shotson','shotsongoal'],'Shots on target'),pair(['shots','totalshots','shotattempts'],'Total shots'),pair(['corners','cornerkicks'],'Corners'),pair(['fouls','totalfouls'],'Fouls'),pair(['yellowcards','yellowcard','yellow'],'Yellow cards'),pair(['offsides','offside'],'Offsides'),pair(['bigchances','bigchance'],'Big chances'),pair(['expectedgoals','expectedgoal','xg'],'Expected goals (xG)')].filter(Boolean);if(!extra.length)return payload;const existing=payload?.content?.stats?.Periods?.All?.stats;return{...payload,content:{...(payload.content||{}),stats:{...(payload.content?.stats||{}),Periods:{...(payload.content?.stats?.Periods||{}),All:{...(payload.content?.stats?.Periods?.All||{}),stats:Array.isArray(existing)?[...existing,...extra]:extra}}}}; }catch{return payload;}}
-  window.fetch=async(input,init={})=>{let url=typeof input==='string'?input:input.url;if(!/^https?:\/\//i.test(url)||String(init.method||'GET').toUpperCase()!=='GET')return originalFetch(input,init);const requested=url;if(url.includes('www.fotmob.com/api/matches?')){url=url.replace('/api/matches?','/api/data/matches?');if(!url.includes('timezone='))url+='&timezone=Europe%2FRome';}if(url.startsWith('https://www.sofascore.com/api/v1/'))url=url.replace('https://www.sofascore.com/api/v1/','https://api.sofascore.com/api/v1/');const headers={Accept:'application/json','User-Agent':'Mozilla/5.0 (Linux; Android 16) AppleWebKit/537.36 Chrome/140 Mobile Safari/537.36',Referer:'https://www.fotmob.com/'};let r=await CapacitorHttp.get({url,headers});if(Number(r.status||0)>=400&&url.includes('/api/data/matchDetails?'))r=await CapacitorHttp.get({url:url.replace('/api/data/matchDetails?','/api/matchDetails?'),headers});if(Number(r.status||0)>=400&&requested.includes('www.fotmob.com/api/matchDetails?'))r=await CapacitorHttp.get({url:requested.replace('/api/matchDetails?','/api/data/matchDetails?'),headers});let data=r.data;if(Number(r.status||0)<400&&(url.includes('/api/data/matchDetails?')||url.includes('/api/matchDetails?'))){try{data=await espnAugment(typeof data==='string'?JSON.parse(data):data);}catch{}}return new Response(typeof data==='string'?data:JSON.stringify(data??null),{status:Number(r.status||200),headers:new Headers(r.headers||{'content-type':'application/json'})});};
+  const originalFetch=window.fetch.bind(window);
+  window.fetch=async(input,init={})=>{
+    let url=typeof input==='string'?input:input.url;
+    const method=String(init.method||'GET').toUpperCase();
+    if(!/^https?:\/\//i.test(url)||method!=='GET')return originalFetch(input,init);
+    if(url.includes('www.fotmob.com/api/matches?')){url=url.replace('/api/matches?','/api/data/matches?');if(!url.includes('timezone='))url+='&timezone=Europe%2FRome';}
+    if(url.startsWith('https://www.sofascore.com/api/v1/'))url=url.replace('https://www.sofascore.com/api/v1/','https://api.sofascore.com/api/v1/');
+    const headers={Accept:'application/json','User-Agent':'Mozilla/5.0 (Linux; Android 16) AppleWebKit/537.36 Chrome/140 Mobile Safari/537.36',Referer:'https://www.fotmob.com/'};
+    let r=await CapacitorHttp.get({url,headers});
+    if(Number(r.status||0)>=400&&url.includes('/api/data/matchDetails?'))r=await CapacitorHttp.get({url:url.replace('/api/data/matchDetails?','/api/matchDetails?'),headers});
+    if(Number(r.status||0)>=400&&url.includes('/api/matchDetails?'))r=await CapacitorHttp.get({url:url.replace('/api/matchDetails?','/api/data/matchDetails?'),headers});
+    const data=r.data;
+    return new Response(typeof data==='string'?data:JSON.stringify(data??null),{status:Number(r.status||200),headers:new Headers(r.headers||{'content-type':'application/json'})});
+  };
 }
