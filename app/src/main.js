@@ -3,7 +3,7 @@ import { todayMatches, findTeamIds, teamHistory, enrichHistory, diagnostics } fr
 
 const app=document.querySelector('#app');
 const esc=x=>String(x??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]));
-const poisson=(k,l)=>{l=Math.max(.05,Math.min(6,Number(l)||.05);let p=Math.exp(-l);for(let i=1;i<=k;i++)p*=l/i;return p};
+const poisson=(k,l)=>{l=Math.max(.05,Math.min(6,Number(l)||.05));let p=Math.exp(-l);for(let i=1;i<=k;i++)p*=l/i;return p};
 
 function pred(home,away){
   let lh=1.52,la=1.12;
