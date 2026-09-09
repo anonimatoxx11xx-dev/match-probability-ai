@@ -56,7 +56,7 @@ async function sofaDay(d){if(ss.has(d))return ss.get(d);let a=[];try{a=(await ge
 function sofaPick(a,home,away,time){const tm=time?new Date(time).getTime():0;let best=null,bs=-1e9;for(const e of a){let x=0;if(same(e.homeTeam?.name,home))x+=100;if(same(e.awayTeam?.name,away))x+=100;if(x<200)continue;if(tm&&e.startTimestamp)x-=Math.min(Math.abs(e.startTimestamp*1000-tm)/36e5,72);if(x>bs)bs=x,best=e}return best}
 function parseSofa(p,team){const rows=(p.statistics||[]).find(x=>String(x.period).toUpperCase()==='ALL')?.groups||[];const h=p._event?.homeTeam?.name||'',w=p._event?.awayTeam?.name||'',out={};for(const g of rows)for(const r of g.statisticsItems||[]){const k=key(r.key||r.name),a=n(r.homeValue??r.home),b=n(r.awayValue??r.away);if(k&&a!=null&&b!=null)out[k]=same(h,team)?a:same(w,team)?b:null}return out}
 const sc=new Map();
-async function sofa(r,team){const q=r.id+norm(team);if(sc.has(q))return sc.get(q);let z={};try{const d=day(r.time),base=new Date(d+'T12:00:00Z'),ds=[];for(let i=-1;i<=1;i++){const x=new Date(base);x.setUTCDate(x.getUTCDate()+i);ds.push(x.toISOString().slice(0,10))}let e;for(const d of ds){e=sofaPick(await sofaDay(d),r.home?r.team:r.opp,r.home?r.opp:r.team,r.time);if(e)break}if(e){const p=await get(`${S}/event/${e.id}/statistics`);p._event=e;z=parseSofa(p,team)}}catch{}sc.set(q,z);return z}
+async function sofa(r,team){const q=r.id+norm(team);if(sc.has(q))return sc.get(q);let z={};try{let e=null;if(r.sofaId)e={id:r.sofaId,homeTeam:{name:r.home?r.team:r.opp},awayTeam:{name:r.home?r.opp:r.team}};else{const d=day(r.time),base=new Date(d+'T12:00:00Z'),ds=[];for(let i=-1;i<=1;i++){const x=new Date(base);x.setUTCDate(x.getUTCDate()+i);ds.push(x.toISOString().slice(0,10))}for(const d of ds){e=sofaPick(await sofaDay(d),r.home?r.team:r.opp,r.home?r.opp:r.team,r.time);if(e)break}}if(e){const p=await get(`${S}/event/${e.id}/statistics`);p._event=e;z=parseSofa(p,team)}}catch{}sc.set(q,z);return z}
 
 function espnEvent(p,h,a){for(const e of p?.events||[]){const c=e.competitions?.[0]?.competitors||[];const hh=c.find(x=>x.homeAway==='home')||c[0],aa=c.find(x=>x.homeAway==='away')||c[1];if(same(hh?.team?.displayName||'',h)&&same(aa?.team?.displayName||'',a))return e}}
 function parseEspn(p,team){const t=(p?.boxscore?.teams||[]).find(x=>same(x.team?.displayName||x.team?.name,team)),o={};for(const r of t?.statistics||[]){const k=key(r.name||r.label),v=n(r.displayValue??r.value);if(k&&v!=null)o[k]=v}return o}
@@ -72,10 +72,11 @@ async function ts(r,team){const q=r.id+norm(team);if(tsc.has(q))return tsc.get(q
 function merge(a,...b){const o={...a};for(const x of b)for(const k of K)if(o[k]==null&&x?.[k]!=null)o[k]=x[k];return o}
 async function enrich(r,team){const [a,b,c,d]=await Promise.all([fot(r.id,team),sofa(r,team),espn(r,team),ts(r,team)]);return{data:merge(a,b,c,d),sources:['FotMob',Object.keys(b).length?'SofaScore':'',Object.keys(c).length?'ESPN':'',Object.keys(d).length?'TheSportsDB':''].filter(Boolean),opp:r.opp}}
 
+async function sofaSearch(name){try{const p=await get(`${S}/search/all?q=${encodeURIComponent(name)}`),a=p.results||[],x=a.find(x=>x.entity?.name&&same(x.entity.name,name)&&String(x.entity?.type||'').toLowerCase()==='team')||a.find(x=>String(x.entity?.type||'').toLowerCase()==='team');return x?.entity?.id||null}catch{return null}}
+async function sofaTeamForm(id,name){if(!id)return[];const out=[];try{for(let page=0;page<3&&out.length<5;page++){const p=await get(`${S}/team/${id}/events/last/${page}`),ev=p.events||[];for(const m of ev){if(String(m.status?.type||'').toLowerCase()!=='finished')continue;const h=m.homeTeam?.name,w=m.awayTeam?.name,a=n(m.homeScore?.current),b=n(m.awayScore?.current);if(a==null||b==null)continue;if(same(h,name))out.push({id:`sofa-${m.id}`,sofaId:String(m.id),team:name,opp:w,home:true,gf:a,ga:b,time:m.startTimestamp?new Date(m.startTimestamp*1000).toISOString():''});else if(same(w,name))out.push({id:`sofa-${m.id}`,sofaId:String(m.id),team:name,opp:h,home:false,gf:b,ga:a,time:m.startTimestamp?new Date(m.startTimestamp*1000).toISOString():''});if(out.length>=5)break}}}catch{}return out.slice(0,5)}
 async function teamForm(id,name){
-  if(!id)return[];
   let out=[];
-  try{
+  if(id)try{
     const p=await get(`${F}/api/data/teams?id=${id}`),all=[];
     const walk=o=>{if(!o||typeof o!=='object')return;if(Array.isArray(o)){o.forEach(walk);return}if(o.home?.name&&o.away?.name&&o.id)all.push(o);Object.entries(o).forEach(([k,v])=>!['players','squad','transfers'].includes(k)&&walk(v))};
     walk(p);
@@ -87,7 +88,8 @@ async function teamForm(id,name){
       if(out.length>=5)break;
     }
   }catch{}
-  return out;
+  if(out.length<5){const sid=await sofaSearch(name);const sf=await sofaTeamForm(sid,name);const seen=new Set(out.map(x=>`${x.opp}|${x.time}`));for(const x of sf)if(!seen.has(`${x.opp}|${x.time}`))out.push(x);}
+  return out.slice(0,5);
 }
 async function search(name){try{const p=await get(`${F}/api/data/search/suggest?term=${encodeURIComponent(name)}&hits=20&lang=en`),a=p.results||p.suggestions||[],x=a.find(x=>same(x.title||x.name||x.entity?.name,name))||a.find(x=>x.type==='team')||a[0];return x?.id||x?.entity?.id}catch{return null}}
 
@@ -109,7 +111,7 @@ async function loadFotMatches(d){
 async function loadSofaMatches(d){
   try{
     const a=(await get(`${S}/sport/football/scheduled-events/${d}`)).events||[];
-    return a.filter(e=>e.homeTeam?.name&&e.awayTeam?.name).map(e=>({id:String(e.id),league:e.tournament?.name||e.uniqueTournament?.name||'Calcio',time:e.startTimestamp?new Date(e.startTimestamp*1000).toISOString():'',home:e.homeTeam.name,away:e.awayTeam.name}));
+    return a.filter(e=>e.homeTeam?.name&&e.awayTeam?.name).map(e=>({id:String(e.id),sofaId:String(e.id),league:e.tournament?.name||e.uniqueTournament?.name||'Calcio',time:e.startTimestamp?new Date(e.startTimestamp*1000).toISOString():'',home:e.homeTeam.name,away:e.awayTeam.name}));
   }catch{return[]}
 }
 async function loadEspnMatches(d){
@@ -120,13 +122,13 @@ async function loadEspnMatches(d){
 }
 function mergeSchedule(...lists){
   const out=[];
-  for(const list of lists)for(const m of list){const exists=out.find(x=>same(x.home,m.home)&&same(x.away,m.away));if(exists){exists.id=exists.id.startsWith('espn-')&&m.id&&!m.id.startsWith('espn-')?m.id:exists.id;exists.espnId=exists.espnId||m.espnId;exists.league=exists.league==='Calcio'?m.league:exists.league;exists.time=exists.time||m.time}else out.push({...m})}
+  for(const list of lists)for(const m of list){const exists=out.find(x=>same(x.home,m.home)&&same(x.away,m.away));if(exists){exists.id=exists.id.startsWith('espn-')&&m.id&&!m.id.startsWith('espn-')?m.id:exists.id;exists.espnId=exists.espnId||m.espnId;exists.sofaId=exists.sofaId||m.sofaId;exists.league=exists.league==='Calcio'?m.league:exists.league;exists.time=exists.time||m.time}else out.push({...m})}
   return out;
 }
 
 function card(f){
   const h=f.H,a=f.A,p=pred(h.form,a.form),d=Math.min(h.stats.filter(x=>Object.keys(x.data).length).length+a.stats.filter(x=>Object.keys(x.data).length).length,10),src=[...new Set([...h.stats,...a.stats].flatMap(x=>x.sources))];
-  return`<article class="match-card"><div class="match-meta">${esc(f.league)} · ${esc(f.time||'')} · TEST APK MULTI-SOURCE</div><div class="teams-line"><b>${esc(f.home)}</b><span>VS</span><b>${esc(f.away)}</b></div><div class="today-prob"><span>1 <b>${(p.p[0]*100).toFixed(1)}%</b></span><span>X <b>${(p.p[1]*100).toFixed(1)}%</b></span><span>2 <b>${(p.p[2]*100).toFixed(1)}%</b></span></div><div class="pick">Gol attesi <b>${p.lh.toFixed(2)}-${p.la.toFixed(2)}</b> · Gol totali <b>${Math.floor(p.total)}-${Math.ceil(p.total+1)}</b></div><div class="quality">Casa: <b>${h.form.length}</b> gare (FotMob) · Trasferta: <b>${a.form.length}</b> gare (FotMob)</div><h3>Range statistiche previste</h3><div class="stat-grid"><div>Tiri totali <b>${range([...h.stats,...a.stats],'shots')}</b></div><div>Tiri in porta <b>${range([...h.stats,...a.stats],'shotsOnTarget')}</b></div><div>Corner <b>${range([...h.stats,...a.stats],'corners')}</b></div><div>Falli <b>${range([...h.stats,...a.stats],'fouls')}</b></div><div>Cartellini <b>${range([...h.stats,...a.stats],'yellow')}</b></div><div>Fuorigioco <b>${range([...h.stats,...a.stats],'offsides')}</b></div></div><h3>Top risultati</h3><div class="score-list">${p.cs.map(x=>`<div>${x[0]}-${x[1]}<b>${(x[2]*100).toFixed(1)}%</b></div>`).join('')}</div><div class="quality">Cronologia: <b>20/20</b> gare · Statistiche dettagliate: <b>${d}/10 partite</b> · Fonte stats: <b>${esc(src.join(' + ')||'N/D')}</b></div><details class="details-content"><summary>Diagnostica fonti</summary>${[...h.stats,...a.stats].map(x=>`<div class="quality" style="text-align:left">${esc(x.opp)} → <b>${esc(x.sources.join(' + ')||'nessuna')}</b> · ${Object.keys(x.data).length} metriche</div>`).join('')}</details></article>`;
+  return`<article class="match-card"><div class="match-meta">${esc(f.league)} · ${esc(f.time||'')} · TEST APK MULTI-SOURCE</div><div class="teams-line"><b>${esc(f.home)}</b><span>VS</span><b>${esc(f.away)}</b></div><div class="today-prob"><span>1 <b>${(p.p[0]*100).toFixed(1)}%</b></span><span>X <b>${(p.p[1]*100).toFixed(1)}%</b></span><span>2 <b>${(p.p[2]*100).toFixed(1)}%</b></span></div><div class="pick">Gol attesi <b>${p.lh.toFixed(2)}-${p.la.toFixed(2)}</b> · Gol totali <b>${Math.floor(p.total)}-${Math.ceil(p.total+1)}</b></div><div class="quality">Casa: <b>${h.form.length}</b> gare · Trasferta: <b>${a.form.length}</b> gare · storico multi-source</div><h3>Range statistiche previste</h3><div class="stat-grid"><div>Tiri totali <b>${range([...h.stats,...a.stats],'shots')}</b></div><div>Tiri in porta <b>${range([...h.stats,...a.stats],'shotsOnTarget')}</b></div><div>Corner <b>${range([...h.stats,...a.stats],'corners')}</b></div><div>Falli <b>${range([...h.stats,...a.stats],'fouls')}</b></div><div>Cartellini <b>${range([...h.stats,...a.stats],'yellow')}</b></div><div>Fuorigioco <b>${range([...h.stats,...a.stats],'offsides')}</b></div></div><h3>Top risultati</h3><div class="score-list">${p.cs.map(x=>`<div>${x[0]}-${x[1]}<b>${(x[2]*100).toFixed(1)}%</b></div>`).join('')}</div><div class="quality">Cronologia: <b>${h.form.length+a.form.length}/10</b> gare · Statistiche dettagliate: <b>${d}/10 partite</b> · Fonte stats: <b>${esc(src.join(' + ')||'N/D')}</b></div><details class="details-content"><summary>Diagnostica fonti</summary>${[...h.stats,...a.stats].map(x=>`<div class="quality" style="text-align:left">${esc(x.opp)} → <b>${esc(x.sources.join(' + ')||'nessuna')}</b> · ${Object.keys(x.data).length} metriche</div>`).join('')}</details></article>`;
 }
 
 async function load(){
