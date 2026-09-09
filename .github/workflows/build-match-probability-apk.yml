@@ -17,6 +17,7 @@ env:
 jobs:
   build-apk:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     defaults:
       run:
         working-directory: app
@@ -34,8 +35,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-          cache-dependency-path: app/package-lock.json
 
       - name: Install npm dependencies
         run: npm install
@@ -61,7 +60,7 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: Match-Probability-AI-APK-DIRECT-DATA
+          name: Match-Probability-AI-APK-NATIVE-HTTP
           path: app/android/app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
           retention-days: 30
