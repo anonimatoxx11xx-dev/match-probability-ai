@@ -77,15 +77,17 @@ function statRows(payload){
   return rows;
 }
 function statKey(value){
-  const t=String(value||'').toLowerCase().replace(/[_-]+/g,' ').replace(/\s+/g,' ').trim();
-  if(/shots on target|on target|shots on goal|tiri in porta/.test(t)) return 'shotsOnTarget';
-  if(/total shots|shots total|shot attempts|tiri totali|tiri$/.test(t)) return 'shots';
-  if(/corners|corner kicks|corner|calci d'angolo/.test(t)) return 'corners';
-  if(/fouls|total fouls|falli/.test(t)) return 'fouls';
-  if(/yellow cards|yellow card|yellow|ammonizioni|cartellini gialli/.test(t)) return 'yellow';
-  if(/offsides|offside|fuorigioco/.test(t)) return 'offsides';
-  if(/big chances|big chance/.test(t)) return 'bigChances';
-  if(/expected goals|expected goal|xg/.test(t)) return 'xg';
+  const raw=String(value||'').toLowerCase();
+  const t=raw.replace(/[_-]+/g,' ').replace(/\s+/g,' ').trim();
+  const compact=t.replace(/[^a-z0-9]/g,'');
+  if(/shotsontarget|shotsongoal|ontarget|shots on target|shots on goal|tiri in porta/.test(t)||/shotsontarget|shotsongoal|ontarget/.test(compact)) return 'shotsOnTarget';
+  if(/total shots|shots total|shot attempts|tiri totali|tiri$/.test(t)||compact==='shots'||compact==='totalshots'||compact==='shotattempts') return 'shots';
+  if(/corners|corner kicks|corner|calci d'angolo/.test(t)||compact==='cornerkicks'||compact==='corners') return 'corners';
+  if(/fouls|total fouls|falli/.test(t)||compact==='fouls'||compact==='totalfouls') return 'fouls';
+  if(/yellow cards|yellow card|yellow|ammonizioni|cartellini gialli/.test(t)||compact==='yellowcards'||compact==='yellowcard') return 'yellow';
+  if(/offsides|offside|fuorigioco/.test(t)||compact==='offsides'||compact==='offside') return 'offsides';
+  if(/big chances|big chance/.test(t)||compact==='bigchances'||compact==='bigchance') return 'bigChances';
+  if(/expected goals|expected goal|xg/.test(t)||compact==='expectedgoals'||compact==='expectedgoal') return 'xg';
   return null;
 }
 function parseMatchStats(payload,teamName){
@@ -129,7 +131,7 @@ function parseSofaStats(payload,teamName){
   if(!isHome&&!isAway) return {};
   const out={};
   for(const row of sofaStatRows(payload)){
-    const key=statKey(row?.key||row?.name); if(!key) continue;
+    const key=statKey(row?.key||row?.name||row?.title); if(!key) continue;
     const h=row?.homeValue!==undefined?num(row.homeValue):num(row.home);
     const a=row?.awayValue!==undefined?num(row.awayValue):num(row.away);
     if(h===null||a===null) continue;
@@ -199,6 +201,16 @@ function aggregateStats(items){
   }
   return out;
 }
+function findSofaMatch(sofaEvents,r){
+  const rt=r.utcTime?new Date(r.utcTime).getTime():0;
+  const candidates=sofaEvents.filter(e=>e.home===r.home && (!rt || !e.utcTime || Math.abs(new Date(e.utcTime).getTime()-rt)<=3*86400000));
+  if(!candidates.length) return null;
+  return candidates.sort((a,b)=>{
+    const da=rt&&a.utcTime?Math.abs(new Date(a.utcTime).getTime()-rt):Number.MAX_SAFE_INTEGER;
+    const db=rt&&b.utcTime?Math.abs(new Date(b.utcTime).getTime()-rt):Number.MAX_SAFE_INTEGER;
+    return da-db;
+  })[0];
+}
 async function enrichFormStats(form,name){
   const recent=form.results.slice(-5).reverse();
   const fotStats=await Promise.all(recent.map(r=>fotmobMatchStats(r.matchId,name)));
@@ -211,7 +223,8 @@ async function enrichFormStats(form,name){
   for(let i=0;i<recent.length;i++){
     if(fotStats[i]) { combined.push(fotStats[i]); continue; }
     const r=recent[i];
-    const target=sofaEvents.find(e=>sameTeam(e.opponent,r.opponent) && (!r.utcTime || !e.utcTime || Math.abs(new Date(e.utcTime)-new Date(r.utcTime))<=3*86400000));
+    let target=findSofaMatch(sofaEvents,r);
+    if(!target) target=sofaEvents.find(e=>sameTeam(e.opponent,r.opponent) && (!r.utcTime || !e.utcTime || Math.abs(new Date(e.utcTime)-new Date(r.utcTime))<=3*86400000));
     if(target){
       const s=await sofaMatchStats(target.matchId,name,target);
       if(s) combined.push(s);
