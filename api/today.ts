@@ -201,7 +201,14 @@ export default async function handler(req: any, res: any) {
       const base = (lid ? maps.baseline.get(String(lid)) : null) || maps.globalBaseline;
       if (lid && (h.matches < 8 || a.matches < 8)) {
         const [homeSofaId, awaySofaId] = await Promise.all([f.home.sofaId || resolveSofaTeamId(f.home.name), f.away.sofaId || resolveSofaTeamId(f.away.name)]);
-        const sofaResults = await Promise.all([enrichRecentFromSofa(h, homeSofaId, f.fixtureId), enrichRecentFromSofa(a, awaySofaId, f.fixtureId)]);
+        const sofaResults = const sofaResults = await Promise.all([enrichRecentFromSofa(h, homeSofaId, f.fixtureId), enrichRecentFromSofa(a, awaySofaId, f.fixtureId)]);
+if (h.matches < 8 || a.matches < 8) {
+  const espnSlug = Object.keys(ESPN_LEAGUES).find(k => Number(ESPN_LEAGUES[k]?.[1]) === lid) || '';
+  await Promise.all([
+    h.matches < 8 ? enrichRecentFromEspn(h, espnSlug, f.home.name, f.fixtureId) : Promise.resolve(false),
+    a.matches < 8 ? enrichRecentFromEspn(a, espnSlug, f.away.name, f.fixtureId) : Promise.resolve(false)
+  ]);
+}
 if (h.matches < 8 || a.matches < 8) {
   const espnSlug = Object.keys(ESPN_LEAGUES).find(k => Number(ESPN_LEAGUES[k]?.[1]) === lid) || '';
   await Promise.all([
