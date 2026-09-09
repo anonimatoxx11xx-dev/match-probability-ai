@@ -5,6 +5,11 @@ const config: CapacitorConfig = {
   appName: 'Match Probability AI',
   webDir: 'dist',
   bundledWebRuntime: false,
+  plugins: {
+    CapacitorHttp: {
+      enabled: true
+    }
+  },
   server: {
     androidScheme: 'https'
   }
