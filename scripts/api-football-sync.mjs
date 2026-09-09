@@ -136,7 +136,7 @@ for (const league of leagues) {
     if (awayId) teams.set(awayId, { apiId: awayId, name: f.teams.away.name, leagueId: league.id });
   }
   console.error(`league=${league.name} fixtures=${list.length} completed=${candidates.filter(x => x.leagueId === league.id).length} remaining=${result.remaining ?? '?'}`);
-  if (result.remaining !== null && result.remaining <= 1) { quotaReached = true; break; }
+  if (result.remaining !== null && result.remaining <= 2) { quotaReached = true; break; }
   await sleep(sleepMs);
 }
 
@@ -146,18 +146,21 @@ const ordered = [...priority, ...normal];
 const uniqueIds = [...new Set(ordered.map(x => x.fixtureId))].slice(0, maxDetailFixtures);
 const detailed = new Map();
 
-// The free API-Football plan does NOT allow the `ids` parameter on /fixtures.
-// Use the documented statistics endpoint instead, one fixture per request.
-// With eight league-list calls + up to 36 statistics calls we stay well below
-// the 100 requests/day free-plan quota when the workflow runs once per day.
-for (let i = 0; i < uniqueIds.length && !quotaReached; i++) {
-  const id = uniqueIds[i];
-  const base = listFixtures.get(id);
+// API-Football supports up to 20 fixture IDs per /fixtures?ids= request.
+// Each batch includes the available statistics, so 36 fixtures require only
+// two detail requests instead of 36 /fixtures/statistics requests.
+const idBatches = [];
+for (let i = 0; i < uniqueIds.length; i += 20) idBatches.push(uniqueIds.slice(i, i + 20));
+
+for (let i = 0; i < idBatches.length && !quotaReached; i++) {
+  const ids = idBatches[i];
   try {
-    const result = await api(`/fixtures/statistics?fixture=${id}`);
-    detailed.set(id, compactStatistics(base, result.data.response || []));
-    console.error(`detail=${i + 1}/${uniqueIds.length} fixture=${id} remaining=${result.remaining ?? '?'}`);
-    if (result.remaining !== null && result.remaining <= 1) { quotaReached = true; break; }
+    const result = await api(`/fixtures?ids=${ids.join('-')}`);
+    for (const f of result.data.response || []) {
+      if (f.fixture?.id && listFixtures.has(f.fixture.id)) detailed.set(f.fixture.id, compactFixture(f));
+    }
+    console.error(`detail-batch=${i + 1}/${idBatches.length} fixtures=${ids.length} remaining=${result.remaining ?? '?'}`);
+    if (result.remaining !== null && result.remaining <= 0) quotaReached = true;
   } catch (error) {
     if (isQuotaError(error)) {
       console.error('Daily API quota reached; keeping summary fixtures collected so far.');
@@ -166,7 +169,7 @@ for (let i = 0; i < uniqueIds.length && !quotaReached; i++) {
     }
     throw error;
   }
-  if (i + 1 < uniqueIds.length) await sleep(sleepMs);
+  if (i + 1 < idBatches.length) await sleep(sleepMs);
 }
 
 const fixtures = [];
@@ -176,7 +179,7 @@ fixtures.sort((a, b) => String(a.kickoff).localeCompare(String(b.kickoff)));
 const snapshot = {
   generatedAt: new Date().toISOString(),
   season,
-  mode: 'historical-bootstrap-priority-today-names-free-plan-statistics',
+  mode: 'historical-bootstrap-priority-today-names-batched-details',
   today,
   todayTeamIds: [...todayIds],
   todayTeamNames: [...todayTeamNames],
