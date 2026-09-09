@@ -16,11 +16,9 @@ if (Capacitor.isNativePlatform()) {
       if (!url.includes('timezone=')) url += '&timezone=Europe%2FRome';
     }
 
-    // Match details are more reliable through the legacy route on Android;
-    // retry the current /api/data route if the legacy route is unavailable.
-    if (url.includes('www.fotmob.com/api/data/matchDetails?')) {
-      url = url.replace('/api/data/matchDetails?', '/api/matchDetails?');
-    }
+    // Keep the current /api/data/matchDetails route as the primary path.
+    // If Android receives an error, retry the legacy route as a fallback.
+    const isFotmobDataDetails = url.includes('www.fotmob.com/api/data/matchDetails?');
 
     // Use the primary SofaScore API host from the native layer.
     if (url.startsWith('https://www.sofascore.com/api/v1/')) {
@@ -35,15 +33,16 @@ if (Capacitor.isNativePlatform()) {
 
     let r = await CapacitorHttp.get({ url, headers });
 
-    // If legacy FotMob matchDetails fails, retry the current data route.
-    if (Number(r.status || 0) >= 400 && url.includes('www.fotmob.com/api/matchDetails?')) {
-      const retryUrl = url.replace('/api/matchDetails?', '/api/data/matchDetails?');
+    // FotMob has both current data and older public routes in the wild.
+    // Try the alternate route only after the primary request fails.
+    if (Number(r.status || 0) >= 400 && isFotmobDataDetails) {
+      const retryUrl = url.replace('/api/data/matchDetails?', '/api/matchDetails?');
       r = await CapacitorHttp.get({ url: retryUrl, headers });
     }
 
-    // If a direct data-route request failed, retry the legacy route.
-    if (Number(r.status || 0) >= 400 && requestedUrl.includes('www.fotmob.com/api/data/matchDetails?')) {
-      const retryUrl = requestedUrl.replace('/api/data/matchDetails?', '/api/matchDetails?');
+    // If the caller ever requests the legacy route directly, retry current data route.
+    if (Number(r.status || 0) >= 400 && requestedUrl.includes('www.fotmob.com/api/matchDetails?')) {
+      const retryUrl = requestedUrl.replace('/api/matchDetails?', '/api/data/matchDetails?');
       r = await CapacitorHttp.get({ url: retryUrl, headers });
     }
 
