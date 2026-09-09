@@ -15,7 +15,9 @@ const leagues = [
 
 const season = Number(process.env.SEASON || 2024);
 const sleepMs = Number(process.env.REQUEST_DELAY_MS || 6500);
-const maxFixtures = Math.min(Number(process.env.MAX_DETAIL_FIXTURES || 36), 36);
+// Keep a generous cap so today's teams receive enough historical detailed stats.
+// The workflow sets this to 500; the cap here prevents an accidental unbounded run.
+const maxFixtures = Math.min(Number(process.env.MAX_DETAIL_FIXTURES || 500), 500);
 const todayTeamIds = new Set(String(process.env.TODAY_TEAM_IDS || '').split(',').map(Number).filter(Boolean));
 const norm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
 const todayTeamNames = new Set(String(process.env.TODAY_TEAM_NAMES || '').split('|').map(norm).filter(Boolean));
