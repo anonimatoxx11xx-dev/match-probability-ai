@@ -8,7 +8,16 @@ const state = { loading:false, fixtures:[], source:'', error:null };
 const esc = s => String(s ?? '').replace(/[&<>\"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#039;'}[c]));
 const pct = x => `${(Number(x || 0) * 100).toFixed(1)}%`;
 const clamp = (x,a,b) => Math.max(a,Math.min(b,x));
-const num = x => { const n = Number(String(x ?? '').replace('%','').replace(',','.')); return Number.isFinite(n) ? n : null; };
+const num = x => {
+  if (x && typeof x === 'object') {
+    if (x.value !== undefined) return num(x.value);
+    if (x.homeValue !== undefined) return num(x.homeValue);
+  }
+  const s = String(x ?? '').replace('%','').replace(',','.');
+  const m = s.match(/-?\d+(?:\.\d+)?/);
+  const n = m ? Number(m[0]) : NaN;
+  return Number.isFinite(n) ? n : null;
+};
 function dateRome(){
   const p = new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Rome',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
   const o=Object.fromEntries(p.map(x=>[x.type,x.value])); return `${o.year}${o.month}${o.day}`;
@@ -38,8 +47,10 @@ function prediction(home,away){
 }
 function normalize(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/fc|afc|sk|club|calcio|rotterdam/g,'').replace(/[^a-z0-9]/g,'');}
 function sameTeam(a,b){const x=normalize(a),y=normalize(b);return x===y||x.includes(y)||y.includes(x);}
-function emptyForm(){return {n:0,gf:0,ga:0,results:[],stats:[]};}
-function addResult(form,gf,ga,home,matchId){form.n++;form.gf+=gf;form.ga+=ga;form.results.push({gf,ga,home,matchId});}
+function emptyForm(){return {n:0,gf:0,ga:0,results:[],stats:[],statSource:'N/D'};}
+function addResult(form,gf,ga,home,matchId,utcTime,opponent){
+  form.n++;form.gf+=gf;form.ga+=ga;form.results.push({gf,ga,home,matchId,utcTime:utcTime||null,opponent:opponent||''});
+}
 function extractFixtures(payload){
   const out=[]; for(const lg of (payload?.leagues||[])) for(const m of (lg.matches||[])) out.push({id:m.id,league:lg.name||m.leagueName||'Calcio',time:m.time,status:m.status,home:{id:m.home?.id,name:m.home?.name},away:{id:m.away?.id,name:m.away?.name}});
   return out;
@@ -53,48 +64,134 @@ function walkMatches(obj,out=[]){
   return out;
 }
 
+/* FotMob matchDetails.stats is grouped: Periods.All.stats[] -> groups -> group.stats[] -> stat rows. */
 function statRows(payload){
-  const stats=payload?.content?.stats?.Periods?.All?.stats;
-  return Array.isArray(stats)?stats:[];
+  const groups=payload?.content?.stats?.Periods?.All?.stats;
+  if(!Array.isArray(groups)) return [];
+  const rows=[];
+  for(const group of groups){
+    if(Array.isArray(group?.stats)) {
+      for(const row of group.stats) rows.push(row);
+    } else if(group && (group.title||group.key||group.name)) rows.push(group);
+  }
+  return rows;
 }
-function statKey(title){
-  const t=String(title||'').toLowerCase();
-  if(/total shots|shots total|shots$|tiri( totali)?$/.test(t)) return 'shots';
-  if(/shots on target|on target|tiri in porta/.test(t)) return 'shotsOnTarget';
-  if(/corners|corner|calci d'angolo/.test(t)) return 'corners';
-  if(/fouls|falli/.test(t)) return 'fouls';
-  if(/yellow cards|yellow|ammonizioni/.test(t)) return 'yellow';
-  if(/offsides|fuorigioco/.test(t)) return 'offsides';
-  if(/big chances/.test(t)) return 'bigChances';
-  if(/expected goals|xg/.test(t)) return 'xg';
+function statKey(value){
+  const t=String(value||'').toLowerCase().replace(/[_-]+/g,' ').replace(/\s+/g,' ').trim();
+  if(/shots on target|on target|shots on goal|tiri in porta/.test(t)) return 'shotsOnTarget';
+  if(/total shots|shots total|shot attempts|tiri totali|tiri$/.test(t)) return 'shots';
+  if(/corners|corner kicks|corner|calci d'angolo/.test(t)) return 'corners';
+  if(/fouls|total fouls|falli/.test(t)) return 'fouls';
+  if(/yellow cards|yellow card|yellow|ammonizioni|cartellini gialli/.test(t)) return 'yellow';
+  if(/offsides|offside|fuorigioco/.test(t)) return 'offsides';
+  if(/big chances|big chance/.test(t)) return 'bigChances';
+  if(/expected goals|expected goal|xg/.test(t)) return 'xg';
   return null;
 }
 function parseMatchStats(payload,teamName){
   const rows=statRows(payload), out={};
+  const homeName=payload?.general?.homeTeam?.name||payload?.header?.teams?.[0]?.name||'';
+  const awayName=payload?.general?.awayTeam?.name||payload?.header?.teams?.[1]?.name||'';
+  const isHome=sameTeam(homeName,teamName), isAway=sameTeam(awayName,teamName);
+  if(!isHome&&!isAway) return out;
   for(const row of rows){
-    const key=statKey(row?.title||row?.name); const vals=row?.stats;
+    const key=statKey(row?.title||row?.key||row?.name); const vals=row?.stats;
     if(!key||!Array.isArray(vals)||vals.length<2)continue;
-    let h=num(vals[0]),a=num(vals[1]);
+    const h=num(vals[0]),a=num(vals[1]);
     if(h===null||a===null)continue;
-    const homeName=payload?.general?.homeTeam?.name||'';
-    const isHome=sameTeam(homeName,teamName);
     out[key]=isHome?h:a;
   }
   return out;
 }
+const fotmobStatCache=new Map();
 async function fotmobMatchStats(matchId,teamName){
+  const cacheKey=`${matchId}:${normalize(teamName)}`;
+  if(fotmobStatCache.has(cacheKey)) return fotmobStatCache.get(cacheKey);
+  let result=null;
   try{
     const p=await get(`${FOTMOB}/api/data/matchDetails?matchId=${encodeURIComponent(matchId)}`);
     const stats=parseMatchStats(p,teamName);
-    return Object.keys(stats).length?stats:null;
-  }catch(e){return null}
+    result=Object.keys(stats).length?stats:null;
+  }catch(e){ result=null; }
+  fotmobStatCache.set(cacheKey,result);
+  return result;
+}
+function sofaStatRows(payload){
+  const all=(payload?.statistics||[]).find(x=>String(x?.period||'').toUpperCase()==='ALL') || payload?.statistics?.[0];
+  const groups=all?.groups;
+  if(!Array.isArray(groups)) return [];
+  return groups.flatMap(g=>Array.isArray(g?.statisticsItems)?g.statisticsItems:[]);
+}
+function parseSofaStats(payload,teamName){
+  const event=payload?.event||payload;
+  const homeName=event?.homeTeam?.name||'', awayName=event?.awayTeam?.name||'';
+  const isHome=sameTeam(homeName,teamName), isAway=sameTeam(awayName,teamName);
+  if(!isHome&&!isAway) return {};
+  const out={};
+  for(const row of sofaStatRows(payload)){
+    const key=statKey(row?.key||row?.name); if(!key) continue;
+    const h=row?.homeValue!==undefined?num(row.homeValue):num(row.home);
+    const a=row?.awayValue!==undefined?num(row.awayValue):num(row.away);
+    if(h===null||a===null) continue;
+    out[key]=isHome?h:a;
+  }
+  return out;
+}
+const sofaStatCache=new Map();
+async function sofaMatchStats(eventId,teamName){
+  const cacheKey=`${eventId}:${normalize(teamName)}`;
+  if(sofaStatCache.has(cacheKey)) return sofaStatCache.get(cacheKey);
+  let result=null;
+  try{
+    const p=await get(`${SOFA}/event/${encodeURIComponent(eventId)}/statistics`);
+    const stats=parseSofaStats(p,teamName);
+    result=Object.keys(stats).length?stats:null;
+  }catch(e){result=null}
+  sofaStatCache.set(cacheKey,result);
+  return result;
+}
+async function sofaSearch(name){
+  const p=await get(`${SOFA}/search/all?q=${encodeURIComponent(name)}`);
+  const teams=(p?.results||[]).filter(x=>x?.entity?.id);
+  const hit=teams.find(x=>sameTeam(x.entity?.name,name))||teams[0]; return hit?.entity?.id||null;
+}
+async function sofaRecentEvents(id,name){
+  const out=[],seen=new Set();
+  for(let page=0;page<3&&out.length<10;page++){
+    const p=await get(`${SOFA}/team/${id}/events/last/${page}`);
+    for(const m of (p.events||[])){
+      if(m.status?.type!=='finished')continue;
+      const mid=String(m.id);if(seen.has(mid))continue;seen.add(mid);
+      const hn=m.homeTeam?.name||'',an=m.awayTeam?.name||'';
+      const ts=m.startTimestamp?new Date(m.startTimestamp*1000).toISOString():null;
+      if(sameTeam(hn,name)) out.push({matchId:mid,home:true,opponent:an,utcTime:ts});
+      else if(sameTeam(an,name)) out.push({matchId:mid,home:false,opponent:hn,utcTime:ts});
+      if(out.length>=10)break;
+    }
+  }
+  return out;
+}
+async function sofaTeam(id,name){
+  try{
+    const form=emptyForm(),events=await sofaRecentEvents(id,name);
+    for(const e of events){
+      const p=await get(`${SOFA}/event/${e.matchId}`),m=p?.event;
+      const hs=num(m?.homeScore?.current??m?.homeScore?.display),as=num(m?.awayScore?.current??m?.awayScore?.display);
+      if(hs===null||as===null)continue;
+      if(e.home)addResult(form,hs,as,true,e.matchId,e.utcTime,e.opponent); else addResult(form,as,hs,false,e.matchId,e.utcTime,e.opponent);
+      if(form.n>=10)break;
+    }
+    const stats=await Promise.all(form.results.slice(-5).reverse().map(r=>sofaMatchStats(r.matchId,name)));
+    form.stats=stats.filter(Boolean); form.statSummary=aggregateStats(form.stats); form.statSource=form.stats.length?'SofaScore':'N/D';
+    if(form.n>=2)return {form,source:'SofaScore',teamId:id};
+  }catch(e){}
+  return null;
 }
 function aggregateStats(items){
   const keys=['shots','shotsOnTarget','corners','fouls','yellow','offsides','bigChances','xg'];
   const out={};
   for(const key of keys){
-    const vals=items.map(x=>num(x?.[key])).filter(x=>x!==null);
-    if(!vals.length)continue;
+    const vals=items.map(x=>num(x?.[key])).filter(x=>x!==null); if(!vals.length)continue;
     const mean=vals.reduce((a,b)=>a+b,0)/vals.length;
     const variance=vals.reduce((a,b)=>a+(b-mean)**2,0)/vals.length;
     out[key]={n:vals.length,mean,sd:Math.sqrt(variance),values:vals};
@@ -104,8 +201,15 @@ function aggregateStats(items){
 async function enrichFormStats(form,name){
   const recent=form.results.slice(-5).reverse();
   const stats=await Promise.all(recent.map(r=>fotmobMatchStats(r.matchId,name)));
-  form.stats=stats.filter(Boolean);
-  form.statSummary=aggregateStats(form.stats);
+  form.stats=stats.filter(Boolean); form.statSummary=aggregateStats(form.stats); form.statSource=form.stats.length?'FotMob':'N/D';
+  if(form.stats.length) return form;
+  try{
+    const sid=await sofaSearch(name); if(!sid)return form;
+    const events=await sofaRecentEvents(sid,name);
+    const sofaStats=await Promise.all(events.slice(0,5).map(e=>sofaMatchStats(e.matchId,name)));
+    const valid=sofaStats.filter(Boolean);
+    if(valid.length){form.stats=valid;form.statSummary=aggregateStats(valid);form.statSource='SofaScore';}
+  }catch(e){}
   return form;
 }
 async function fotmobTeam(id,name){
@@ -114,34 +218,14 @@ async function fotmobTeam(id,name){
     const ms=walkMatches(p,[]).filter(m=>m.status?.finished===true || m.status?.type==='finished' || m.finished===true);
     const seen=new Set(), form=emptyForm();
     ms.sort((a,b)=>new Date(b.status?.utcTime||b.utcTime||0)-new Date(a.status?.utcTime||a.utcTime||0));
-    for(const m of ms){const mid=String(m.id||m.matchId);if(seen.has(mid))continue;seen.add(mid);const hn=m.home?.name||'',an=m.away?.name||'',hs=num(m.home?.score??m.homeScore),as=num(m.away?.score??m.awayScore);let gf,ga,ishome;
-      if(sameTeam(hn,name)){gf=hs??0;ga=as??0;ishome=true}
-      else if(sameTeam(an,name)){gf=as??0;ga=hs??0;ishome=false}
-      else continue;
-      if(Number.isFinite(gf)&&Number.isFinite(ga))addResult(form,gf,ga,ishome,mid); if(form.n>=10)break;
+    for(const m of ms){
+      const mid=String(m.id||m.matchId);if(seen.has(mid))continue;seen.add(mid);
+      const hn=m.home?.name||'',an=m.away?.name||'',hs=num(m.home?.score??m.homeScore),as=num(m.away?.score??m.awayScore);let gf,ga,ishome;
+      if(sameTeam(hn,name)){gf=hs??0;ga=as??0;ishome=true}else if(sameTeam(an,name)){gf=as??0;ga=hs??0;ishome=false}else continue;
+      if(Number.isFinite(gf)&&Number.isFinite(ga))addResult(form,gf,ga,ishome,mid,m.status?.utcTime||m.utcTime,ishome?an:hn);
+      if(form.n>=10)break;
     }
     if(form.n>=2)return {form:await enrichFormStats(form,name),source:'FotMob',teamId:id};
-  }catch(e){}
-  return null;
-}
-async function sofaSearch(name){
-  const p=await get(`${SOFA}/search/all?q=${encodeURIComponent(name)}`);
-  const teams=(p?.results||[]).filter(x=>x?.entity?.id);
-  const hit=teams.find(x=>sameTeam(x.entity?.name,name))||teams[0]; return hit?.entity?.id||null;
-}
-async function sofaTeam(id,name){
-  try{
-    const form=emptyForm(),seen=new Set();
-    for(let page=0;page<3&&form.n<10;page++){
-      const p=await get(`${SOFA}/team/${id}/events/last/${page}`);
-      for(const m of (p.events||[])){
-        if(m.status?.type!=='finished')continue; const mid=String(m.id);if(seen.has(mid))continue;seen.add(mid);
-        const hn=m.homeTeam?.name||'',an=m.awayTeam?.name||'',hs=num(m.homeScore?.current??m.homeScore?.display),as=num(m.awayScore?.current??m.awayScore?.display);
-        if(hs===null||as===null)continue;
-        if(sameTeam(hn,name))addResult(form,hs,as,true,mid);else if(sameTeam(an,name))addResult(form,as,hs,false,mid);if(form.n>=10)break;
-      }
-    }
-    if(form.n>=2)return {form,source:'SofaScore',teamId:id};
   }catch(e){}
   return null;
 }
@@ -151,46 +235,25 @@ async function history(team){
   return {form:emptyForm(),source:'N/D',teamId:team.id||null};
 }
 function totalStatRange(home,away,key){
-  const ownH=home?.statSummary?.[key], ownA=away?.statSummary?.[key];
-  if(!ownH&&!ownA)return null;
-  const mean=(ownH?.mean||0)+(ownA?.mean||0);
-  const sd=Math.sqrt((ownH?.sd||0)**2+(ownA?.sd||0)**2);
-  const width=Math.max(1.5,sd*.75,mean*.10);
+  const ownH=home?.statSummary?.[key], ownA=away?.statSummary?.[key]; if(!ownH&&!ownA)return null;
+  const mean=(ownH?.mean||0)+(ownA?.mean||0), sd=Math.sqrt((ownH?.sd||0)**2+(ownA?.sd||0)**2), width=Math.max(1.5,sd*.75,mean*.10);
   return {min:Math.max(0,Math.round(mean-width)),max:Math.max(0,Math.round(mean+width)),mean};
 }
 function rangeText(r){return r?`${r.min}-${r.max}`:'N/D'}
-function statPrediction(home,away){
-  return {
-    shots: totalStatRange(home,away,'shots'),
-    shotsOnTarget: totalStatRange(home,away,'shotsOnTarget'),
-    corners: totalStatRange(home,away,'corners'),
-    fouls: totalStatRange(home,away,'fouls'),
-    yellow: totalStatRange(home,away,'yellow'),
-    offsides: totalStatRange(home,away,'offsides'),
-    bigChances: totalStatRange(home,away,'bigChances'),
-    xg: totalStatRange(home,away,'xg')
-  };
-}
+function statPrediction(home,away){return {shots:totalStatRange(home,away,'shots'),shotsOnTarget:totalStatRange(home,away,'shotsOnTarget'),corners:totalStatRange(home,away,'corners'),fouls:totalStatRange(home,away,'fouls'),yellow:totalStatRange(home,away,'yellow'),offsides:totalStatRange(home,away,'offsides'),bigChances:totalStatRange(home,away,'bigChances'),xg:totalStatRange(home,away,'xg')};}
 async function build(){
   state.loading=true;state.error=null;render();
   try{
-    const all=await fotmobToday();
-    const fixtures=all.filter(x=>/champions league/i.test(x.league||''));
-    const unique=fixtures.filter((x,i,a)=>a.findIndex(y=>String(y.id)===String(x.id))===i);
-    state.fixtures=await Promise.all(unique.slice(0,12).map(async f=>{
-      const [h,a]=await Promise.all([history(f.home),history(f.away)]); const p=prediction(h,a); p.stats=statPrediction(h.form,a.form);
-      const reliability=clamp((Math.min(h.form.n,10)+Math.min(a.form.n,10))/20,0,1);
-      return {...f,history:{home:h,away:a},prediction:p,reliability};
-    }));
-    state.source='FotMob calendario + FotMob/SofaScore cronologia + statistiche match FotMob';
+    const all=await fotmobToday(), fixtures=all.filter(x=>/champions league/i.test(x.league||'')), unique=fixtures.filter((x,i,a)=>a.findIndex(y=>String(y.id)===String(x.id))===i);
+    state.fixtures=await Promise.all(unique.slice(0,12).map(async f=>{const [h,a]=await Promise.all([history(f.home),history(f.away)]);const p=prediction(h,a);p.stats=statPrediction(h.form,a.form);const reliability=clamp((Math.min(h.form.n,10)+Math.min(a.form.n,10))/20,0,1);return {...f,history:{home:h,away:a},prediction:p,reliability};}));
+    state.source='FotMob calendario + FotMob/SofaScore cronologia + statistiche match FotMob/SofaScore';
   }catch(e){state.error=e;state.fixtures=[];state.source=''}
   state.loading=false;render();
 }
 function time(v){try{return new Intl.DateTimeFormat('it-IT',{timeZone:'Europe/Rome',hour:'2-digit',minute:'2-digit'}).format(new Date(v))}catch{return '--:--'}}
 function card(f){
-  const p=f.prediction,q=f.history,r=p.result,st=p.stats;
-  const historyCount=Math.min(q.home.form.n,10)+Math.min(q.away.form.n,10);
-  const statCount=(q.home.form.stats?.length||0)+(q.away.form.stats?.length||0);
-  return `<article class="match-card"><div class="match-meta">${esc(f.league)} · ${time(f.status?.utcTime||f.time)} · TEST APK DIRETTO</div><div class="teams-line"><strong>${esc(f.home.name)}</strong><span>VS</span><strong>${esc(f.away.name)}</strong></div><div class="today-prob"><span>1 <b>${pct(r.home)}</b></span><span>X <b>${pct(r.draw)}</b></span><span>2 <b>${pct(r.away)}</b></span></div><div class="pick">Gol attesi <b>${p.home.toFixed(2)}-${p.away.toFixed(2)}</b> · Gol totali <b>${Math.max(0,Math.round(p.total-.7))}-${Math.round(p.total+1.0)}</b></div><div class="quality">Casa: <b>${q.home.form.n}</b> gare (${esc(q.home.source)}) · Trasferta: <b>${q.away.form.n}</b> gare (${esc(q.away.source)})</div><h4>Range statistiche previste</h4><div class="stat-grid compact"><div><span>Tiri totali</span><b>${rangeText(st.shots)}</b></div><div><span>Tiri in porta</span><b>${rangeText(st.shotsOnTarget)}</b></div><div><span>Corner</span><b>${rangeText(st.corners)}</b></div><div><span>Falli</span><b>${rangeText(st.fouls)}</b></div><div><span>Cartellini</span><b>${rangeText(st.yellow)}</b></div><div><span>Fuorigioco</span><b>${rangeText(st.offsides)}</b></div></div><h4>Top risultati</h4><div class="score-list">${p.correctScores.map(x=>`<div><span>${x.score}</span><b>${pct(x.probability)}</b></div>`).join('')}</div><div class="quality">Cronologia: <b>${historyCount}/20 gare</b> · Statistiche dettagliate: <b>${statCount}/10 partite</b></div></article>`}
-function render(){app.innerHTML=`<main class="shell"><header><div class="brand"><span class="ball">⚽</span><div><h1>Match Probability AI</h1><small>APK · motore dati diretto</small></div></div><button id="refresh" class="icon">↻</button></header><section class="hero"><span class="eyebrow">TEST APK · NO VERCEL</span><h2>Partite di oggi</h2><p>Questa versione legge direttamente FotMob e, se necessario, SofaScore. Nessuna chiamata a <code>/api/today</code>.</p></section><div id="result">${state.loading?'<section class="card result"><h3>Recupero dati diretto...</h3><p>Calendario → cronologia → statistiche match FotMob.</p></section>':state.error?`<section class="card result"><div class="error">${esc(state.error.message||state.error)}</div><p>Il motore diretto ha incontrato un errore nel recupero dati.</p></section>`:`<section class="card result"><span class="eyebrow">${esc(dateIsoRome())}</span><h3>${state.fixtures.length} partite Champions League</h3><p>${esc(state.source)}</p><div class="today-list">${state.fixtures.map(card).join('')}</div></section>`}</div><nav><button class="active">●<small>Oggi</small></button><button>⌂<small>Analisi</small></button><button>◈<small>Modello AI</small></button><button>◉<small>Dati</small></button></nav></main>`;document.querySelector('#refresh').onclick=build}
+  const p=f.prediction,q=f.history,r=p.result,st=p.stats,historyCount=Math.min(q.home.form.n,10)+Math.min(q.away.form.n,10),statCount=(q.home.form.stats?.length||0)+(q.away.form.stats?.length||0),statSources=[q.home.form.statSource,q.away.form.statSource].filter(x=>x&&x!=='N/D'),sourceLabel=[...new Set(statSources)].join('+')||'N/D';
+  return `<article class="match-card"><div class="match-meta">${esc(f.league)} · ${time(f.status?.utcTime||f.time)} · TEST APK DIRETTO</div><div class="teams-line"><strong>${esc(f.home.name)}</strong><span>VS</span><strong>${esc(f.away.name)}</strong></div><div class="today-prob"><span>1 <b>${pct(r.home)}</b></span><span>X <b>${pct(r.draw)}</b></span><span>2 <b>${pct(r.away)}</b></span></div><div class="pick">Gol attesi <b>${p.home.toFixed(2)}-${p.away.toFixed(2)}</b> · Gol totali <b>${Math.max(0,Math.round(p.total-.7))}-${Math.round(p.total+1.0)}</b></div><div class="quality">Casa: <b>${q.home.form.n}</b> gare (${esc(q.home.source)}) · Trasferta: <b>${q.away.form.n}</b> gare (${esc(q.away.source)})</div><h4>Range statistiche previste</h4><div class="stat-grid compact"><div><span>Tiri totali</span><b>${rangeText(st.shots)}</b></div><div><span>Tiri in porta</span><b>${rangeText(st.shotsOnTarget)}</b></div><div><span>Corner</span><b>${rangeText(st.corners)}</b></div><div><span>Falli</span><b>${rangeText(st.fouls)}</b></div><div><span>Cartellini</span><b>${rangeText(st.yellow)}</b></div><div><span>Fuorigioco</span><b>${rangeText(st.offsides)}</b></div></div><h4>Top risultati</h4><div class="score-list">${p.correctScores.map(x=>`<div><span>${x.score}</span><b>${pct(x.probability)}</b></div>`).join('')}</div><div class="quality">Cronologia: <b>${historyCount}/20 gare</b> · Statistiche dettagliate: <b>${statCount}/10 partite</b> · Fonte stats: <b>${esc(sourceLabel)}</b></div></article>`;
+}
+function render(){app.innerHTML=`<main class="shell"><header><div class="brand"><span class="ball">⚽</span><div><h1>Match Probability AI</h1><small>APK · motore dati diretto</small></div></div><button id="refresh" class="icon">↻</button></header><section class="hero"><span class="eyebrow">TEST APK · NO VERCEL</span><h2>Partite di oggi</h2><p>Questa versione legge direttamente FotMob e usa SofaScore come fallback per cronologia e statistiche. Nessuna chiamata a <code>/api/today</code>.</p></section><div id="result">${state.loading?'<section class="card result"><h3>Recupero dati diretto...</h3><p>Calendario → cronologia → statistiche match FotMob/SofaScore.</p></section>':state.error?`<section class="card result"><div class="error">${esc(state.error.message||state.error)}</div><p>Il motore diretto ha incontrato un errore nel recupero dati.</p></section>`:`<section class="card result"><span class="eyebrow">${esc(dateIsoRome())}</span><h3>${state.fixtures.length} partite Champions League</h3><p>${esc(state.source)}</p><div class="today-list">${state.fixtures.map(card).join('')}</div></section>`}</div><nav><button class="active">●<small>Oggi</small></button><button>⌂<small>Analisi</small></button><button>◈<small>Modello AI</small></button><button>◉<small>Dati</small></button></nav></main>`;document.querySelector('#refresh').onclick=build}
 build();
