@@ -15,21 +15,14 @@ const leagues = [
 
 const season = Number(process.env.SEASON || 2024);
 const sleepMs = Number(process.env.REQUEST_DELAY_MS || 6500);
-const maxDetailFixtures = Math.min(Number(process.env.MAX_DETAIL_FIXTURES || 36), 36);
-const todayTeamIds = new Set(String(process.env.TODAY_TEAM_IDS || '').split(',').map(x => Number(x)).filter(Boolean));
+const maxFixtures = Math.min(Number(process.env.MAX_DETAIL_FIXTURES || 36), 36);
+const todayTeamIds = new Set(String(process.env.TODAY_TEAM_IDS || '').split(',').map(Number).filter(Boolean));
 const norm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
 const todayTeamNames = new Set(String(process.env.TODAY_TEAM_NAMES || '').split('|').map(norm).filter(Boolean));
-
 const sleep = ms => new Promise(r => setTimeout(r, ms));
-const isQuotaError = error => {
-  const msg = String(error?.message || error || '').toLowerCase();
-  return msg.includes('429') || msg.includes('request limit for the day') || msg.includes('daily quota') || msg.includes('rate limit');
-};
 
 async function api(path) {
-  const response = await fetch(`${API}${path}`, {
-    headers: { 'x-apisports-key': API_KEY, accept: 'application/json' },
-  });
+  const response = await fetch(`${API}${path}`, { headers: { 'x-apisports-key': API_KEY, accept: 'application/json' } });
   const remainingHeader = response.headers.get('X-RateLimit-Remaining');
   const remaining = remainingHeader == null ? null : Number(remainingHeader);
   if (response.status === 429) throw new Error(`API-Football 429 rate limit; remaining=${remainingHeader ?? 'unknown'}`);
@@ -38,12 +31,9 @@ async function api(path) {
   return { data, remaining };
 }
 
-function statValue(stats, name) {
-  const row = stats?.find(x => norm(x.type) === norm(name));
-  const v = row?.value;
-  if (v === null || v === undefined || v === '') return null;
-  const n = Number(String(v).replace('%', ''));
-  return Number.isFinite(n) ? n : null;
+function dateRome() {
+  const p = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Rome', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date());
+  return `${p.find(x => x.type === 'year')?.value}-${p.find(x => x.type === 'month')?.value}-${p.find(x => x.type === 'day')?.value}`;
 }
 
 function summaryFixture(f, leagueId) {
@@ -59,43 +49,6 @@ function summaryFixture(f, leagueId) {
   };
 }
 
-function compactFixture(f) {
-  const home = f.teams?.home;
-  const away = f.teams?.away;
-  const hs = f.statistics?.find(x => x.team?.id === home?.id)?.statistics || [];
-  const as = f.statistics?.find(x => x.team?.id === away?.id)?.statistics || [];
-  return {
-    fixtureId: f.fixture?.id,
-    kickoff: f.fixture?.date || null,
-    status: f.fixture?.status?.short || null,
-    league: { id: f.league?.id, name: f.league?.name, country: f.league?.country, season: f.league?.season },
-    home: { id: home?.id, name: home?.name },
-    away: { id: away?.id, name: away?.name },
-    goals: { home: f.goals?.home ?? null, away: f.goals?.away ?? null },
-    stats: {
-      home: { shots: statValue(hs, 'Total Shots'), sot: statValue(hs, 'Shots on Goal'), corners: statValue(hs, 'Corner Kicks'), fouls: statValue(hs, 'Fouls'), saves: statValue(hs, 'Goalkeeper Saves'), cards: statValue(hs, 'Yellow Cards') },
-      away: { shots: statValue(as, 'Total Shots'), sot: statValue(as, 'Shots on Goal'), corners: statValue(as, 'Corner Kicks'), fouls: statValue(as, 'Fouls'), saves: statValue(as, 'Goalkeeper Saves'), cards: statValue(as, 'Yellow Cards') },
-    },
-  };
-}
-
-function compactStatistics(base, response) {
-  const hs = response?.find(x => x.team?.id === base.home?.id)?.statistics || [];
-  const as = response?.find(x => x.team?.id === base.away?.id)?.statistics || [];
-  return {
-    ...base,
-    stats: {
-      home: { shots: statValue(hs, 'Total Shots'), sot: statValue(hs, 'Shots on Goal'), corners: statValue(hs, 'Corner Kicks'), fouls: statValue(hs, 'Fouls'), saves: statValue(hs, 'Goalkeeper Saves'), cards: statValue(hs, 'Yellow Cards') },
-      away: { shots: statValue(as, 'Total Shots'), sot: statValue(as, 'Shots on Goal'), corners: statValue(as, 'Corner Kicks'), fouls: statValue(as, 'Fouls'), saves: statValue(as, 'Goalkeeper Saves'), cards: statValue(as, 'Yellow Cards') },
-    },
-  };
-}
-
-function dateRome() {
-  const p = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Rome', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date());
-  return `${p.find(x => x.type === 'year')?.value}-${p.find(x => x.type === 'month')?.value}-${p.find(x => x.type === 'day')?.value}`;
-}
-
 const today = dateRome();
 const candidates = [];
 const listFixtures = new Map();
@@ -108,8 +61,9 @@ for (const league of leagues) {
   try {
     result = await api(`/fixtures?league=${league.id}&season=${season}`);
   } catch (error) {
-    if (isQuotaError(error)) {
-      console.error(`Daily API quota reached while loading ${league.name}; using collected data.`);
+    const msg = String(error?.message || '').toLowerCase();
+    if (msg.includes('429') || msg.includes('request limit') || msg.includes('daily quota') || msg.includes('rate limit')) {
+      console.error(`API quota reached while loading ${league.name}; keeping collected data.`);
       quotaReached = true;
       break;
     }
@@ -122,64 +76,33 @@ for (const league of leagues) {
     const homeName = norm(f.teams?.home?.name);
     const awayName = norm(f.teams?.away?.name);
     const kickoff = f.fixture?.date || '';
-    if (season === 2026 && String(kickoff).slice(0, 10) === today) {
+    if (season === 2026 && kickoff.slice(0, 10) === today) {
       if (homeId) todayIds.add(homeId);
       if (awayId) todayIds.add(awayId);
     }
     const status = String(f.fixture?.status?.short || '');
     if (!f.fixture?.id || !['FT', 'AET', 'P'].includes(status)) continue;
     const priority = todayIds.has(homeId) || todayIds.has(awayId) || todayTeamNames.has(homeName) || todayTeamNames.has(awayName) ? 1 : 0;
-    const row = summaryFixture(f, league.id);
     candidates.push({ fixtureId: f.fixture.id, kickoff, leagueId: league.id, priority });
-    listFixtures.set(f.fixture.id, row);
+    listFixtures.set(f.fixture.id, summaryFixture(f, league.id));
     if (homeId) teams.set(homeId, { apiId: homeId, name: f.teams.home.name, leagueId: league.id });
     if (awayId) teams.set(awayId, { apiId: awayId, name: f.teams.away.name, leagueId: league.id });
   }
-  console.error(`league=${league.name} fixtures=${list.length} completed=${candidates.filter(x => x.leagueId === league.id).length} remaining=${result.remaining ?? '?'}`);
+  console.error(`league=${league.name} fixtures=${list.length} remaining=${result.remaining ?? '?'}`);
   if (result.remaining !== null && result.remaining <= 2) { quotaReached = true; break; }
   await sleep(sleepMs);
 }
 
-const priority = candidates.filter(x => x.priority === 1).sort((a, b) => String(b.kickoff).localeCompare(String(a.kickoff)));
-const normal = candidates.filter(x => x.priority !== 1).sort((a, b) => String(b.kickoff).localeCompare(String(a.kickoff)));
+const priority = candidates.filter(x => x.priority === 1).sort((a,b) => String(b.kickoff).localeCompare(String(a.kickoff)));
+const normal = candidates.filter(x => x.priority !== 1).sort((a,b) => String(b.kickoff).localeCompare(String(a.kickoff)));
 const ordered = [...priority, ...normal];
-const uniqueIds = [...new Set(ordered.map(x => x.fixtureId))].slice(0, maxDetailFixtures);
-const detailed = new Map();
-
-// API-Football supports up to 20 fixture IDs per /fixtures?ids= request.
-// Each batch includes the available statistics, so 36 fixtures require only
-// two detail requests instead of 36 /fixtures/statistics requests.
-const idBatches = [];
-for (let i = 0; i < uniqueIds.length; i += 20) idBatches.push(uniqueIds.slice(i, i + 20));
-
-for (let i = 0; i < idBatches.length && !quotaReached; i++) {
-  const ids = idBatches[i];
-  try {
-    const result = await api(`/fixtures?ids=${ids.join('-')}`);
-    for (const f of result.data.response || []) {
-      if (f.fixture?.id && listFixtures.has(f.fixture.id)) detailed.set(f.fixture.id, compactFixture(f));
-    }
-    console.error(`detail-batch=${i + 1}/${idBatches.length} fixtures=${ids.length} remaining=${result.remaining ?? '?'}`);
-    if (result.remaining !== null && result.remaining <= 0) quotaReached = true;
-  } catch (error) {
-    if (isQuotaError(error)) {
-      console.error('Daily API quota reached; keeping summary fixtures collected so far.');
-      quotaReached = true;
-      break;
-    }
-    throw error;
-  }
-  if (i + 1 < idBatches.length) await sleep(sleepMs);
-}
-
-const fixtures = [];
-for (const [id, row] of listFixtures) fixtures.push(detailed.get(id) || row);
-fixtures.sort((a, b) => String(a.kickoff).localeCompare(String(b.kickoff)));
+const fixtures = [...new Set(ordered.map(x => x.fixtureId))].slice(0, maxFixtures).map(id => listFixtures.get(id));
+fixtures.sort((a,b) => String(a.kickoff).localeCompare(String(b.kickoff)));
 
 const snapshot = {
   generatedAt: new Date().toISOString(),
   season,
-  mode: 'historical-bootstrap-priority-today-names-batched-details',
+  mode: 'historical-bootstrap-priority-today-names-sofascore-stats',
   today,
   todayTeamIds: [...todayIds],
   todayTeamNames: [...todayTeamNames],
@@ -187,5 +110,4 @@ const snapshot = {
   teams: [...teams.values()],
   fixtures,
 };
-
 process.stdout.write(JSON.stringify(snapshot, null, 2));
