@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-09-09T09:05:04.373Z",
+  "generatedAt": "2026-09-09T09:10:14.586Z",
   "seasons": [
     2024,
     2023
   ],
-  "mode": "free-plan-historical-2024-refresh-plus-sofascore-stats-plus-preserved-2023",
+  "mode": "free-plan-historical-2024-refresh-plus-espn-stats-plus-preserved-2023",
   "today": "2026-09-09",
   "todayTeamIds": [],
   "todayTeamNames": [
@@ -72,6 +72,7 @@
     }
   ],
   "statsSourcePriority": [
+    "espn",
     "sofascore",
     "api-football",
     "none"
@@ -1743,22 +1744,24 @@
       },
       "stats": {
         "home": {
-          "shots": null,
+          "shots": 19,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 6,
+          "fouls": 14,
+          "saves": 1,
+          "cards": 0
         },
         "away": {
-          "shots": null,
+          "shots": 6,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 5,
+          "fouls": 16,
+          "saves": 3,
+          "cards": 4
         }
-      }
+      },
+      "statsSource": "espn",
+      "espnEventId": "711704"
     },
     {
       "fixtureId": 1214023,
@@ -1784,22 +1787,24 @@
       },
       "stats": {
         "home": {
-          "shots": null,
+          "shots": 32,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 17,
+          "fouls": 9,
+          "saves": 0,
+          "cards": 3
         },
         "away": {
-          "shots": null,
+          "shots": 7,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 0,
+          "fouls": 11,
+          "saves": 12,
+          "cards": 1
         }
-      }
+      },
+      "statsSource": "espn",
+      "espnEventId": "706700"
     },
     {
       "fixtureId": 1208357,
@@ -1825,22 +1830,24 @@
       },
       "stats": {
         "home": {
-          "shots": null,
+          "shots": 25,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 8,
+          "fouls": 16,
+          "saves": 2,
+          "cards": 2
         },
         "away": {
-          "shots": null,
+          "shots": 8,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 2,
+          "fouls": 9,
+          "saves": 2,
+          "cards": 1
         }
-      }
+      },
+      "statsSource": "espn",
+      "espnEventId": "704617"
     },
     {
       "fixtureId": 1223932,
@@ -1866,22 +1873,24 @@
       },
       "stats": {
         "home": {
-          "shots": null,
+          "shots": 8,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 2,
+          "fouls": 5,
+          "saves": 0,
+          "cards": 0
         },
         "away": {
-          "shots": null,
+          "shots": 9,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 5,
+          "fouls": 13,
+          "saves": 0,
+          "cards": 3
         }
-      }
+      },
+      "statsSource": "espn",
+      "espnEventId": "712450"
     },
     {
       "fixtureId": 1371730,
@@ -1907,22 +1916,24 @@
       },
       "stats": {
         "home": {
-          "shots": null,
+          "shots": 10,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 3,
+          "fouls": 15,
+          "saves": 3,
+          "cards": 2
         },
         "away": {
-          "shots": null,
+          "shots": 11,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 1,
+          "fouls": 15,
+          "saves": 5,
+          "cards": 2
         }
-      }
+      },
+      "statsSource": "espn",
+      "espnEventId": "733616"
     },
     {
       "fixtureId": 1371732,
@@ -1948,22 +1959,24 @@
       },
       "stats": {
         "home": {
-          "shots": null,
+          "shots": 19,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 7,
+          "fouls": 10,
+          "saves": 0,
+          "cards": 1
         },
         "away": {
-          "shots": null,
+          "shots": 7,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 2,
+          "fouls": 11,
+          "saves": 7,
+          "cards": 1
         }
-      }
+      },
+      "statsSource": "espn",
+      "espnEventId": "733617"
     },
     {
       "fixtureId": 1208793,
@@ -1989,22 +2002,24 @@
       },
       "stats": {
         "home": {
-          "shots": null,
+          "shots": 8,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 3,
+          "fouls": 18,
+          "saves": 2,
+          "cards": 3
         },
         "away": {
-          "shots": null,
+          "shots": 9,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 5,
+          "fouls": 13,
+          "saves": 2,
+          "cards": 2
         }
-      }
+      },
+      "statsSource": "espn",
+      "espnEventId": "704993"
     },
     {
       "fixtureId": 1224262,
@@ -2030,22 +2045,24 @@
       },
       "stats": {
         "home": {
-          "shots": null,
+          "shots": 6,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 4,
+          "fouls": 17,
+          "saves": 7,
+          "cards": 2
         },
         "away": {
-          "shots": null,
+          "shots": 21,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 4,
+          "fouls": 12,
+          "saves": 1,
+          "cards": 3
         }
-      }
+      },
+      "statsSource": "espn",
+      "espnEventId": "711717"
     },
     {
       "fixtureId": 1214033,
@@ -2071,22 +2088,24 @@
       },
       "stats": {
         "home": {
-          "shots": null,
+          "shots": 9,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 6,
+          "fouls": 14,
+          "saves": 3,
+          "cards": 1
         },
         "away": {
-          "shots": null,
+          "shots": 20,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 2,
+          "fouls": 13,
+          "saves": 1,
+          "cards": 2
         }
-      }
+      },
+      "statsSource": "espn",
+      "espnEventId": "706711"
     },
     {
       "fixtureId": 1223940,
@@ -2112,22 +2131,24 @@
       },
       "stats": {
         "home": {
-          "shots": null,
+          "shots": 9,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 5,
+          "fouls": 11,
+          "saves": 1,
+          "cards": 2
         },
         "away": {
-          "shots": null,
+          "shots": 8,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 2,
+          "fouls": 4,
+          "saves": 1,
+          "cards": 0
         }
-      }
+      },
+      "statsSource": "espn",
+      "espnEventId": "712456"
     },
     {
       "fixtureId": 1208363,
@@ -2153,22 +2174,24 @@
       },
       "stats": {
         "home": {
-          "shots": null,
+          "shots": 13,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 2,
+          "fouls": 7,
+          "saves": 0,
+          "cards": 0
         },
         "away": {
-          "shots": null,
+          "shots": 9,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 3,
+          "fouls": 16,
+          "saves": 3,
+          "cards": 2
         }
-      }
+      },
+      "statsSource": "espn",
+      "espnEventId": "704619"
     },
     {
       "fixtureId": 1208795,
@@ -2194,22 +2217,24 @@
       },
       "stats": {
         "home": {
-          "shots": null,
+          "shots": 5,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 4,
+          "fouls": 12,
+          "saves": 4,
+          "cards": 3
         },
         "away": {
-          "shots": null,
+          "shots": 24,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 8,
+          "fouls": 15,
+          "saves": 3,
+          "cards": 2
         }
-      }
+      },
+      "statsSource": "espn",
+      "espnEventId": "704996"
     },
     {
       "fixtureId": 1208367,
@@ -2235,22 +2260,24 @@
       },
       "stats": {
         "home": {
-          "shots": null,
+          "shots": 17,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 3,
+          "fouls": 10,
+          "saves": 1,
+          "cards": 2
         },
         "away": {
-          "shots": null,
+          "shots": 11,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 6,
+          "fouls": 11,
+          "saves": 5,
+          "cards": 2
         }
-      }
+      },
+      "statsSource": "espn",
+      "espnEventId": "704623"
     },
     {
       "fixtureId": 1371733,
@@ -2276,22 +2303,24 @@
       },
       "stats": {
         "home": {
-          "shots": null,
+          "shots": 13,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 5,
+          "fouls": 14,
+          "saves": 7,
+          "cards": 5
         },
         "away": {
-          "shots": null,
+          "shots": 22,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 7,
+          "fouls": 10,
+          "saves": 3,
+          "cards": 2
         }
-      }
+      },
+      "statsSource": "espn",
+      "espnEventId": "733619"
     },
     {
       "fixtureId": 1371731,
@@ -2317,22 +2346,24 @@
       },
       "stats": {
         "home": {
-          "shots": null,
+          "shots": 11,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 2,
+          "fouls": 11,
+          "saves": 3,
+          "cards": 2
         },
         "away": {
-          "shots": null,
+          "shots": 19,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 6,
+          "fouls": 11,
+          "saves": 4,
+          "cards": 4
         }
-      }
+      },
+      "statsSource": "espn",
+      "espnEventId": "733618"
     },
     {
       "fixtureId": 1208800,
@@ -2358,22 +2389,24 @@
       },
       "stats": {
         "home": {
-          "shots": null,
+          "shots": 13,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 3,
+          "fouls": 7,
+          "saves": 1,
+          "cards": 0
         },
         "away": {
-          "shots": null,
+          "shots": 6,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 3,
+          "fouls": 12,
+          "saves": 3,
+          "cards": 1
         }
-      }
+      },
+      "statsSource": "espn",
+      "espnEventId": "705001"
     },
     {
       "fixtureId": 1214040,
@@ -2399,22 +2432,24 @@
       },
       "stats": {
         "home": {
-          "shots": null,
+          "shots": 9,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 5,
+          "fouls": 14,
+          "saves": 4,
+          "cards": 1
         },
         "away": {
-          "shots": null,
+          "shots": 10,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 4,
+          "fouls": 11,
+          "saves": 3,
+          "cards": 1
         }
-      }
+      },
+      "statsSource": "espn",
+      "espnEventId": "706714"
     },
     {
       "fixtureId": 1208801,
@@ -2440,22 +2475,24 @@
       },
       "stats": {
         "home": {
-          "shots": null,
+          "shots": 23,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 10,
+          "fouls": 17,
+          "saves": 2,
+          "cards": 4
         },
         "away": {
-          "shots": null,
+          "shots": 9,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 2,
+          "fouls": 15,
+          "saves": 5,
+          "cards": 3
         }
-      }
+      },
+      "statsSource": "espn",
+      "espnEventId": "705002"
     },
     {
       "fixtureId": 1208376,
@@ -2481,22 +2518,24 @@
       },
       "stats": {
         "home": {
-          "shots": null,
+          "shots": 14,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 3,
+          "fouls": 13,
+          "saves": 4,
+          "cards": 1
         },
         "away": {
-          "shots": null,
+          "shots": 15,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 1,
+          "fouls": 10,
+          "saves": 3,
+          "cards": 1
         }
-      }
+      },
+      "statsSource": "espn",
+      "espnEventId": "704632"
     },
     {
       "fixtureId": 1224264,
@@ -2522,22 +2561,24 @@
       },
       "stats": {
         "home": {
-          "shots": null,
+          "shots": 29,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 11,
+          "fouls": 9,
+          "saves": 0,
+          "cards": 1
         },
         "away": {
-          "shots": null,
+          "shots": 7,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 2,
+          "fouls": 7,
+          "saves": 7,
+          "cards": 1
         }
-      }
+      },
+      "statsSource": "espn",
+      "espnEventId": "711727"
     },
     {
       "fixtureId": 1223951,
@@ -2563,22 +2604,24 @@
       },
       "stats": {
         "home": {
-          "shots": null,
+          "shots": 22,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 8,
+          "fouls": 12,
+          "saves": 1,
+          "cards": 1
         },
         "away": {
-          "shots": null,
+          "shots": 8,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 0,
+          "fouls": 14,
+          "saves": 8,
+          "cards": 2
         }
-      }
+      },
+      "statsSource": "espn",
+      "espnEventId": "712466"
     },
     {
       "fixtureId": 1208811,
@@ -2604,22 +2647,24 @@
       },
       "stats": {
         "home": {
-          "shots": null,
+          "shots": 9,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 3,
+          "fouls": 12,
+          "saves": 5,
+          "cards": 1
         },
         "away": {
-          "shots": null,
+          "shots": 9,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 5,
+          "fouls": 11,
+          "saves": 1,
+          "cards": 1
         }
-      }
+      },
+      "statsSource": "espn",
+      "espnEventId": "705012"
     },
     {
       "fixtureId": 1212945,
@@ -2645,22 +2690,24 @@
       },
       "stats": {
         "home": {
-          "shots": null,
+          "shots": 9,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 3,
+          "fouls": 8,
+          "saves": 2,
+          "cards": 4
         },
         "away": {
-          "shots": null,
+          "shots": 12,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 3,
+          "fouls": 10,
+          "saves": 1,
+          "cards": 1
         }
-      }
+      },
+      "statsSource": "espn",
+      "espnEventId": "705018"
     },
     {
       "fixtureId": 1224272,
@@ -2686,22 +2733,24 @@
       },
       "stats": {
         "home": {
-          "shots": null,
+          "shots": 8,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 5,
+          "fouls": 9,
+          "saves": 4,
+          "cards": 1
         },
         "away": {
-          "shots": null,
+          "shots": 15,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 8,
+          "fouls": 9,
+          "saves": 3,
+          "cards": 0
         }
-      }
+      },
+      "statsSource": "espn",
+      "espnEventId": "711736"
     },
     {
       "fixtureId": 1214052,
@@ -2727,22 +2776,24 @@
       },
       "stats": {
         "home": {
-          "shots": null,
+          "shots": 21,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 5,
+          "fouls": 10,
+          "saves": 1,
+          "cards": 1
         },
         "away": {
-          "shots": null,
+          "shots": 7,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 2,
+          "fouls": 9,
+          "saves": 6,
+          "cards": 2
         }
-      }
+      },
+      "statsSource": "espn",
+      "espnEventId": "706724"
     },
     {
       "fixtureId": 1208383,
@@ -2768,22 +2819,24 @@
       },
       "stats": {
         "home": {
-          "shots": null,
+          "shots": 12,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 10,
+          "fouls": 9,
+          "saves": 5,
+          "cards": 3
         },
         "away": {
-          "shots": null,
+          "shots": 14,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 7,
+          "fouls": 9,
+          "saves": 3,
+          "cards": 3
         }
-      }
+      },
+      "statsSource": "espn",
+      "espnEventId": "704639"
     },
     {
       "fixtureId": 1208819,
@@ -2809,22 +2862,24 @@
       },
       "stats": {
         "home": {
-          "shots": null,
+          "shots": 24,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 11,
+          "fouls": 14,
+          "saves": 0,
+          "cards": 2
         },
         "away": {
-          "shots": null,
+          "shots": 7,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 3,
+          "fouls": 9,
+          "saves": 7,
+          "cards": 0
         }
-      }
+      },
+      "statsSource": "espn",
+      "espnEventId": "705021"
     },
     {
       "fixtureId": 1208818,
@@ -2850,22 +2905,24 @@
       },
       "stats": {
         "home": {
-          "shots": null,
+          "shots": 20,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 7,
+          "fouls": 12,
+          "saves": 6,
+          "cards": 1
         },
         "away": {
-          "shots": null,
+          "shots": 12,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 4,
+          "fouls": 9,
+          "saves": 7,
+          "cards": 1
         }
-      }
+      },
+      "statsSource": "espn",
+      "espnEventId": "705020"
     },
     {
       "fixtureId": 1223963,
@@ -2891,22 +2948,24 @@
       },
       "stats": {
         "home": {
-          "shots": null,
+          "shots": 6,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 3,
+          "fouls": 13,
+          "saves": 2,
+          "cards": 2
         },
         "away": {
-          "shots": null,
+          "shots": 7,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 2,
+          "fouls": 16,
+          "saves": 4,
+          "cards": 2
         }
-      }
+      },
+      "statsSource": "espn",
+      "espnEventId": "712477"
     },
     {
       "fixtureId": 1208386,
@@ -2932,22 +2991,24 @@
       },
       "stats": {
         "home": {
-          "shots": null,
+          "shots": 25,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 3,
+          "fouls": 9,
+          "saves": 3,
+          "cards": 1
         },
         "away": {
-          "shots": null,
+          "shots": 18,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 3,
+          "fouls": 8,
+          "saves": 9,
+          "cards": 0
         }
-      }
+      },
+      "statsSource": "espn",
+      "espnEventId": "704642"
     },
     {
       "fixtureId": 1223971,
@@ -2973,22 +3034,24 @@
       },
       "stats": {
         "home": {
-          "shots": null,
+          "shots": 18,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 8,
+          "fouls": 14,
+          "saves": 1,
+          "cards": 2
         },
         "away": {
-          "shots": null,
+          "shots": 4,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 3,
+          "fouls": 14,
+          "saves": 4,
+          "cards": 1
         }
-      }
+      },
+      "statsSource": "espn",
+      "espnEventId": "712488"
     },
     {
       "fixtureId": 1208832,
@@ -3014,22 +3077,24 @@
       },
       "stats": {
         "home": {
-          "shots": null,
+          "shots": 2,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 1,
+          "fouls": 13,
+          "saves": 8,
+          "cards": 0
         },
         "away": {
-          "shots": null,
+          "shots": 19,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 8,
+          "fouls": 11,
+          "saves": 1,
+          "cards": 0
         }
-      }
+      },
+      "statsSource": "espn",
+      "espnEventId": "705033"
     },
     {
       "fixtureId": 1208396,
@@ -3055,22 +3120,24 @@
       },
       "stats": {
         "home": {
-          "shots": null,
+          "shots": 14,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 11,
+          "fouls": 7,
+          "saves": 4,
+          "cards": 2
         },
         "away": {
-          "shots": null,
+          "shots": 8,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 0,
+          "fouls": 10,
+          "saves": 2,
+          "cards": 0
         }
-      }
+      },
+      "statsSource": "espn",
+      "espnEventId": "704652"
     },
     {
       "fixtureId": 1208400,
@@ -3096,22 +3163,24 @@
       },
       "stats": {
         "home": {
-          "shots": null,
+          "shots": 7,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 5,
+          "fouls": 7,
+          "saves": 6,
+          "cards": 0
         },
         "away": {
-          "shots": null,
+          "shots": 23,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 8,
+          "fouls": 8,
+          "saves": 1,
+          "cards": 0
         }
-      }
+      },
+      "statsSource": "espn",
+      "espnEventId": "704656"
     },
     {
       "fixtureId": 1208827,
@@ -3137,22 +3206,24 @@
       },
       "stats": {
         "home": {
-          "shots": null,
+          "shots": 9,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 2,
+          "fouls": 21,
+          "saves": 1,
+          "cards": 1
         },
         "away": {
-          "shots": null,
+          "shots": 13,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 6,
+          "fouls": 10,
+          "saves": 2,
+          "cards": 0
         }
-      }
+      },
+      "statsSource": "espn",
+      "espnEventId": "705035"
     },
     {
       "fixtureId": 1374812,
@@ -3178,22 +3249,24 @@
       },
       "stats": {
         "home": {
-          "shots": null,
+          "shots": 23,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 4,
+          "fouls": 13,
+          "saves": 2,
+          "cards": 2
         },
         "away": {
-          "shots": null,
+          "shots": 8,
           "sot": null,
-          "corners": null,
-          "fouls": null,
-          "saves": null,
-          "cards": null
+          "corners": 6,
+          "fouls": 7,
+          "saves": 3,
+          "cards": 3
         }
-      }
+      },
+      "statsSource": "espn",
+      "espnEventId": "733620"
     },
     {
       "fixtureId": 200544214,
