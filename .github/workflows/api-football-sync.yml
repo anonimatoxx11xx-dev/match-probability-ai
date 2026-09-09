@@ -1,5 +1,4 @@
 name: API-Football Data Sync
-
 on:
   push:
     paths:
@@ -15,14 +14,11 @@ on:
         type: string
   schedule:
     - cron: '17 3 * * *'
-
 permissions:
   contents: write
-
 concurrency:
   group: api-football-sync
   cancel-in-progress: false
-
 jobs:
   sync:
     runs-on: ubuntu-latest
@@ -31,20 +27,15 @@ jobs:
       API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
       REQUEST_DELAY_MS: '6500'
       MAX_DETAIL_FIXTURES: '36'
-      SOFASCORE_DELAY_MS: '650'
+      SOFASCORE_DELAY_MS: '250'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
-
       - name: Check secret
         run: |
-          if [ -z "$API_FOOTBALL_KEY" ]; then
-            echo "API_FOOTBALL_KEY non configurata nei Secrets del repository"
-            exit 1
-          fi
-
+          if [ -z "$API_FOOTBALL_KEY" ]; then echo "API_FOOTBALL_KEY non configurata nei Secrets del repository"; exit 1; fi
       - name: Collect today's team names from ESPN
         run: |
           export TODAY=$(TZ=Europe/Rome date +%F)
@@ -52,71 +43,41 @@ jobs:
           const date=process.env.TODAY;
           const leagues=['ita.1','eng.1','esp.1','ger.1','fra.1','uefa.champions'];
           const names=new Set();
-          for(const slug of leagues){
-            try{
-              const r=await fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/${slug}/scoreboard?dates=${date.replaceAll('-','')}`);
-              if(!r.ok) continue;
-              const x=await r.json();
-              for(const e of x.events||[]){
-                const c=e.competitions?.[0];
-                for(const z of c?.competitors||[]){if(z.team?.displayName) names.add(z.team.displayName)}
-              }
-            }catch(_){ }
-          }
+          for(const slug of leagues){try{const r=await fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/${slug}/scoreboard?dates=${date.replaceAll('-','')}`);if(!r.ok)continue;const x=await r.json();for(const e of x.events||[])for(const z of e.competitions?.[0]?.competitors||[])if(z.team?.displayName)names.add(z.team.displayName);}catch(_){} }
           process.stdout.write([...names].join('|'));
           NODE
           echo "Squadre di oggi: $(cat /tmp/today_names.txt)"
-
       - name: Collect current historical season data
         run: |
           TODAY_TEAM_NAMES=$(cat /tmp/today_names.txt)
           TODAY_TEAM_NAMES="$TODAY_TEAM_NAMES" SEASON=2024 node scripts/api-football-sync.mjs > /tmp/current.json
           SOFASCORE_INPUT=/tmp/current.json SOFASCORE_DELAY_MS="$SOFASCORE_DELAY_MS" node scripts/sofascore-stats-sync.mjs
           node <<'NODE'
-          const fs = require('fs');
-          const a = JSON.parse(fs.readFileSync('/tmp/current.json','utf8'));
-          let old = null;
-          try { old = JSON.parse(fs.readFileSync('data/api-football/latest.json','utf8')); } catch (_) {}
-          const teams = new Map();
-          for (const t of [...(old?.teams||[]), ...(a.teams||[])]) teams.set(String(t.apiId), t);
-          const fixtures = [...(old?.fixtures||[]).filter(f => Number(f?.league?.season) !== 2024), ...(a.fixtures||[])];
-          const byId = new Map();
-          for (const f of fixtures) byId.set(String(f.fixtureId), f);
-          const out = {
-            generatedAt: new Date().toISOString(),
-            seasons: [2024, 2023],
-            mode: 'free-plan-historical-2024-refresh-plus-sofascore-stats-plus-preserved-2023',
-            today: a.today || old?.today || null,
-            todayTeamIds: a.todayTeamIds || old?.todayTeamIds || [],
-            todayTeamNames: a.todayTeamNames || old?.todayTeamNames || [],
-            leagues: a.leagues || old?.leagues || [],
-            statsSourcePriority: a.statsSourcePriority || ['sofascore','api-football','none'],
-            teams: [...teams.values()],
-            fixtures: [...byId.values()].sort((x,y)=>String(x.kickoff).localeCompare(String(y.kickoff)))
-          };
-          fs.writeFileSync('data/api-football/latest.json', JSON.stringify(out, null, 2));
-          const enriched = out.fixtures.filter(f => f.statsSource === 'sofascore').length;
-          console.log(`seasons=${out.seasons.join(',')} fixtures=${out.fixtures.length} teams=${out.teams.length} todayNames=${out.todayTeamNames.length} sofascoreStats=${enriched}`);
+          const fs=require('fs');
+          const a=JSON.parse(fs.readFileSync('/tmp/current.json','utf8'));
+          let old=null; try{old=JSON.parse(fs.readFileSync('data/api-football/latest.json','utf8'));}catch(_){ }
+          const teams=new Map(); for(const t of [...(old?.teams||[]),...(a.teams||[])])teams.set(String(t.apiId),t);
+          const fixtures=[...(old?.fixtures||[]).filter(f=>Number(f?.league?.season)!==2024),...(a.fixtures||[])];
+          const byId=new Map(); for(const f of fixtures)byId.set(String(f.fixtureId),f);
+          const out={generatedAt:new Date().toISOString(),seasons:[2024,2023],mode:'free-plan-historical-2024-refresh-plus-espn-stats-plus-preserved-2023',today:a.today||old?.today||null,todayTeamIds:a.todayTeamIds||old?.todayTeamIds||[],todayTeamNames:a.todayTeamNames||old?.todayTeamNames||[],leagues:a.leagues||old?.leagues||[],statsSourcePriority:a.statsSourcePriority||['espn','sofascore','api-football','none'],teams:[...teams.values()],fixtures:[...byId.values()].sort((x,y)=>String(x.kickoff).localeCompare(String(y.kickoff)))};
+          fs.writeFileSync('data/api-football/latest.json',JSON.stringify(out,null,2));
+          const enriched=out.fixtures.filter(f=>['espn','sofascore'].includes(f.statsSource)).length;
+          console.log(`seasons=${out.seasons.join(',')} fixtures=${out.fixtures.length} teams=${out.teams.length} statsEnriched=${enriched}`);
           NODE
-
       - name: Validate snapshot
         run: |
           node - <<'NODE'
-          const fs=require('fs');
-          const x=JSON.parse(fs.readFileSync('data/api-football/latest.json','utf8'));
-          if(!x.generatedAt || !Array.isArray(x.fixtures) || !Array.isArray(x.teams)) process.exit(1);
-          const stats=x.fixtures.filter(f=>f.statsSource==='sofascore');
-          console.log('fixtures='+x.fixtures.length,'teams='+x.teams.length,'sofascoreStats='+stats.length,'generatedAt='+x.generatedAt);
+          const fs=require('fs'); const x=JSON.parse(fs.readFileSync('data/api-football/latest.json','utf8'));
+          if(!x.generatedAt||!Array.isArray(x.fixtures)||!Array.isArray(x.teams))process.exit(1);
+          const stats=x.fixtures.filter(f=>['espn','sofascore'].includes(f.statsSource));
+          console.log('fixtures='+x.fixtures.length,'teams='+x.teams.length,'statsEnriched='+stats.length,'generatedAt='+x.generatedAt);
+          if(stats.length===0)process.exit(2);
           NODE
-
       - name: Commit snapshot
         run: |
           git config user.name 'match-probability-ai-bot'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add data/api-football/latest.json
-          if git diff --cached --quiet; then
-            echo 'Nessun cambiamento dati.'
-            exit 0
-          fi
-          git commit -m "chore: refresh historical stats with SofaScore"
+          if git diff --cached --quiet; then echo 'Nessun cambiamento dati.'; exit 0; fi
+          git commit -m "chore: refresh historical stats with ESPN"
           git push
