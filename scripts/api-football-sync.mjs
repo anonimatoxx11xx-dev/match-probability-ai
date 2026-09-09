@@ -79,6 +79,18 @@ function compactFixture(f) {
   };
 }
 
+function compactStatistics(base, response) {
+  const hs = response?.find(x => x.team?.id === base.home?.id)?.statistics || [];
+  const as = response?.find(x => x.team?.id === base.away?.id)?.statistics || [];
+  return {
+    ...base,
+    stats: {
+      home: { shots: statValue(hs, 'Total Shots'), sot: statValue(hs, 'Shots on Goal'), corners: statValue(hs, 'Corner Kicks'), fouls: statValue(hs, 'Fouls'), saves: statValue(hs, 'Goalkeeper Saves'), cards: statValue(hs, 'Yellow Cards') },
+      away: { shots: statValue(as, 'Total Shots'), sot: statValue(as, 'Shots on Goal'), corners: statValue(as, 'Corner Kicks'), fouls: statValue(as, 'Fouls'), saves: statValue(as, 'Goalkeeper Saves'), cards: statValue(as, 'Yellow Cards') },
+    },
+  };
+}
+
 function dateRome() {
   const p = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Rome', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date());
   return `${p.find(x => x.type === 'year')?.value}-${p.find(x => x.type === 'month')?.value}-${p.find(x => x.type === 'day')?.value}`;
@@ -134,18 +146,17 @@ const ordered = [...priority, ...normal];
 const uniqueIds = [...new Set(ordered.map(x => x.fixtureId))].slice(0, maxDetailFixtures);
 const detailed = new Map();
 
-// API-Football supports up to 20 fixture IDs in one request. Batching here is
-// critical on the free plan: it turns dozens of detail calls into 1-2 calls
-// and makes it much more likely that the historical stats are actually saved.
-const idBatches = [];
-for (let i = 0; i < uniqueIds.length; i += 20) idBatches.push(uniqueIds.slice(i, i + 20));
-
-for (let i = 0; i < idBatches.length && !quotaReached; i++) {
-  const ids = idBatches[i];
+// The free API-Football plan does NOT allow the `ids` parameter on /fixtures.
+// Use the documented statistics endpoint instead, one fixture per request.
+// With eight league-list calls + up to 36 statistics calls we stay well below
+// the 100 requests/day free-plan quota when the workflow runs once per day.
+for (let i = 0; i < uniqueIds.length && !quotaReached; i++) {
+  const id = uniqueIds[i];
+  const base = listFixtures.get(id);
   try {
-    const result = await api(`/fixtures?ids=${ids.join('-')}`);
-    for (const f of result.data.response || []) detailed.set(f.fixture?.id, compactFixture(f));
-    console.error(`detail-batch=${i + 1}/${idBatches.length} fixtures=${ids.length} remaining=${result.remaining ?? '?'}`);
+    const result = await api(`/fixtures/statistics?fixture=${id}`);
+    detailed.set(id, compactStatistics(base, result.data.response || []));
+    console.error(`detail=${i + 1}/${uniqueIds.length} fixture=${id} remaining=${result.remaining ?? '?'}`);
     if (result.remaining !== null && result.remaining <= 1) { quotaReached = true; break; }
   } catch (error) {
     if (isQuotaError(error)) {
@@ -155,7 +166,7 @@ for (let i = 0; i < idBatches.length && !quotaReached; i++) {
     }
     throw error;
   }
-  if (i + 1 < idBatches.length) await sleep(sleepMs);
+  if (i + 1 < uniqueIds.length) await sleep(sleepMs);
 }
 
 const fixtures = [];
@@ -165,7 +176,7 @@ fixtures.sort((a, b) => String(a.kickoff).localeCompare(String(b.kickoff)));
 const snapshot = {
   generatedAt: new Date().toISOString(),
   season,
-  mode: 'historical-bootstrap-priority-today-names-batched-details',
+  mode: 'historical-bootstrap-priority-today-names-free-plan-statistics',
   today,
   todayTeamIds: [...todayIds],
   todayTeamNames: [...todayTeamNames],
