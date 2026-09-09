@@ -87,3 +87,4 @@ jobs:
           if git diff --cached --quiet; then echo 'No changes'; exit 0; fi
           git commit -m 'fix: enrich away history from ESPN team schedules'
           git push
+# trigger
