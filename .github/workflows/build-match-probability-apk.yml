@@ -51,25 +51,22 @@ jobs:
       - name: Make Gradle executable
         run: chmod +x android/gradlew
 
-      - name: Build release APK
-        run: ./android/gradlew -p android assembleRelease --no-daemon
+      - name: Build debug APK
+        run: ./android/gradlew -p android assembleDebug --no-daemon
 
       - name: Verify and stage APK
         run: |
           set -euo pipefail
-          echo "Searching APK under: $GITHUB_WORKSPACE/app/android"
-          find "$GITHUB_WORKSPACE/app/android" -type f -name '*.apk' -print
-          APK="$(find "$GITHUB_WORKSPACE/app/android" -type f -name '*.apk' -print -quit)"
-          if [ -z "$APK" ]; then
-            echo "ERROR: no APK was produced"
-            find "$GITHUB_WORKSPACE/app/android/app/build/outputs" -maxdepth 8 -type f -print || true
-            exit 1
-          fi
-          echo "APK produced: $APK"
+          APK="$GITHUB_WORKSPACE/app/android/app/build/outputs/apk/debug/app-debug.apk"
+          echo "Expected signed debug APK: $APK"
+          test -f "$APK"
           mkdir -p "$GITHUB_WORKSPACE/artifacts"
           cp "$APK" "$GITHUB_WORKSPACE/artifacts/Match-Probability-AI.apk"
           test -s "$GITHUB_WORKSPACE/artifacts/Match-Probability-AI.apk"
+          echo "APK staged:"
           ls -lh "$GITHUB_WORKSPACE/artifacts/Match-Probability-AI.apk"
+          echo "Signing files inside APK:"
+          unzip -l "$GITHUB_WORKSPACE/artifacts/Match-Probability-AI.apk" | grep -E 'META-INF/.*\.(RSA|SF)$' || true
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
