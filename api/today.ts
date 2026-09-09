@@ -255,7 +255,7 @@ if (lid) {
     liveA.matches < 3 ? enrichRecentFromEspn(liveA, espnSlug, f.away.name, f.fixtureId) : Promise.resolve(false)
   ]);
 }
-const prediction = predict(h, a, base);
+const prediction = predict(h, a, base, liveH, liveA);
       return { fixtureId: f.fixtureId, date: f.date, league: f.league, status: f.status, home: f.home, away: f.away, prediction };
     }));
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
