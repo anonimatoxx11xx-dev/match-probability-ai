@@ -170,21 +170,51 @@ function predict(h: S, a: S, base: S | null) {
 function dateRome() { const p = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Rome', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date()); return `${p.find(x => x.type === 'year')?.value}-${p.find(x => x.type === 'month')?.value}-${p.find(x => x.type === 'day')?.value}`; }
 async function sofaFixtures(date: string) {
   const x = await sofa(`/sport/football/scheduled-events/${date}`);
-  return (x.events || []).filter((e: any) => e.homeTeam?.name && e.awayTeam?.name).map((e: any) => ({
-    fixtureId: String(e.id), date: new Date((e.startTimestamp || 0) * 1000).toISOString(),
-    league: { name: e.uniqueTournament?.name || e.tournament?.name || 'Calcio' },
-    status: e.status?.description || e.status?.type || 'Scheduled',
-    home: { name: e.homeTeam?.name, sofaId: e.homeTeam?.id }, away: { name: e.awayTeam?.name, sofaId: e.awayTeam?.id }
-  }));
+  const seen = new Set<string>(), out: any[] = [];
+  const allowed = new Map<string, string>();
+  for (const k of Object.keys(LEAGUES)) if (Number(LEAGUES[k]) > 0) allowed.set(canon(k), k);
+  for (const e of x.events || []) {
+    if (!e.homeTeam?.name || !e.awayTeam?.name) continue;
+    const raw = e.uniqueTournament?.name || e.tournament?.name || '';
+    const leagueKey = allowed.get(canon(raw));
+    if (!leagueKey) continue;
+    const id = String(e.id); if (seen.has(id)) continue; seen.add(id);
+    out.push({
+      fixtureId: id,
+      date: new Date((e.startTimestamp || 0) * 1000).toISOString(),
+      league: { name: LEAGUES[leagueKey] === 2 ? 'Champions League' : leagueKey },
+      status: e.status?.description || e.status?.type || 'Scheduled',
+      home: { name: e.homeTeam.name, sofaId: e.homeTeam.id },
+      away: { name: e.awayTeam.name, sofaId: e.awayTeam.id }
+    });
+  }
+  return out.sort((a,b) => String(a.date).localeCompare(String(b.date)));
 }
 async function espnFixtures(date: string) {
-  const compact = date.replace(/-/g, ''), out: any[] = [];
-  for (const slug of Object.keys(ESPN_LEAGUES)) try {
+  const compact = date.replace(/-/g, ''), out: any[] = [], seen = new Set<string>();
+  const slugs = Object.keys(ESPN_LEAGUES).filter(slug => Number(ESPN_LEAGUES[slug]?.[1]) > 0);
+  for (const slug of slugs) try {
     const x = await get(`${ESPN_BASE}/${slug}/scoreboard?dates=${compact}`);
-    for (const e of x.events || []) { const c = e.competitions?.[0], h = c?.competitors?.find((z: any) => z.homeAway === 'home'), a = c?.competitors?.find((z: any) => z.homeAway === 'away'); if (!h || !a) continue; out.push({ fixtureId: String(e.id), date: e.date, league: { name: ESPN_LEAGUES[slug][0] }, status: c.status?.type?.description || e.status?.type?.description || 'Scheduled', home: { name: h.team?.displayName || h.team?.name }, away: { name: a.team?.displayName || a.team?.name } }); }
+    for (const e of x.events || []) {
+      const c = e.competitions?.[0], h = c?.competitors?.find((z: any) => z.homeAway === 'home'), a = c?.competitors?.find((z: any) => z.homeAway === 'away');
+      if (!c || !h || !a) continue;
+      const id = String(e.id); if (seen.has(id)) continue;
+      const compSlug = c.league?.slug || e.league?.slug || null;
+      if (compSlug && compSlug !== slug) continue;
+      seen.add(id);
+      out.push({
+        fixtureId: id,
+        date: e.date,
+        league: { name: ESPN_LEAGUES[slug][0] },
+        status: c.status?.type?.description || e.status?.type?.description || 'Scheduled',
+        home: { name: h.team?.displayName || h.team?.name },
+        away: { name: a.team?.displayName || a.team?.name }
+      });
+    }
   } catch (err) { console.error('ESPN league failed', slug, err); }
-  return out;
+  return out.sort((a,b) => String(a.date).localeCompare(String(b.date)));
 }
+
 export default async function handler(req: any, res: any) {
   try {
     const date = dateRome(); let fs: any[] = []; let source = 'SofaScore';
@@ -200,24 +230,20 @@ export default async function handler(req: any, res: any) {
       const a = an.matches > 0 ? an : cloneS(maps.league.get(`${lid}:${n(at?.apiId)}`) || maps.all.get(String(at?.apiId)) || empty());
       const base = (lid ? maps.baseline.get(String(lid)) : null) || maps.globalBaseline;
       if (lid && (h.matches < 8 || a.matches < 8)) {
-        const [homeSofaId, awaySofaId] = await Promise.all([f.home.sofaId || resolveSofaTeamId(f.home.name), f.away.sofaId || resolveSofaTeamId(f.away.name)]);
-        const sofaResults = const sofaResults = await Promise.all([enrichRecentFromSofa(h, homeSofaId, f.fixtureId), enrichRecentFromSofa(a, awaySofaId, f.fixtureId)]);
-if (h.matches < 8 || a.matches < 8) {
-  const espnSlug = Object.keys(ESPN_LEAGUES).find(k => Number(ESPN_LEAGUES[k]?.[1]) === lid) || '';
+  const [homeSofaId, awaySofaId] = await Promise.all([f.home.sofaId || resolveSofaTeamId(f.home.name), f.away.sofaId || resolveSofaTeamId(f.away.name)]);
   await Promise.all([
-    h.matches < 8 ? enrichRecentFromEspn(h, espnSlug, f.home.name, f.fixtureId) : Promise.resolve(false),
-    a.matches < 8 ? enrichRecentFromEspn(a, espnSlug, f.away.name, f.fixtureId) : Promise.resolve(false)
+    enrichRecentFromSofa(h, homeSofaId, f.fixtureId),
+    enrichRecentFromSofa(a, awaySofaId, f.fixtureId)
   ]);
+  if (h.matches < 8 || a.matches < 8) {
+    const espnSlug = Object.keys(ESPN_LEAGUES).find(k => Number(ESPN_LEAGUES[k]?.[1]) === lid) || '';
+    await Promise.all([
+      h.matches < 8 ? enrichRecentFromEspn(h, espnSlug, f.home.name, f.fixtureId) : Promise.resolve(false),
+      a.matches < 8 ? enrichRecentFromEspn(a, espnSlug, f.away.name, f.fixtureId) : Promise.resolve(false)
+    ]);
+  }
 }
-if (h.matches < 8 || a.matches < 8) {
-  const espnSlug = Object.keys(ESPN_LEAGUES).find(k => Number(ESPN_LEAGUES[k]?.[1]) === lid) || '';
-  await Promise.all([
-    h.matches < 8 ? enrichRecentFromEspn(h, espnSlug, f.home.name, f.fixtureId) : Promise.resolve(false),
-    a.matches < 8 ? enrichRecentFromEspn(a, espnSlug, f.away.name, f.fixtureId) : Promise.resolve(false)
-  ]);
-}
-      }
-      const prediction = predict(h, a, base);
+const prediction = predict(h, a, base);
       return { fixtureId: f.fixtureId, date: f.date, league: f.league, status: f.status, home: f.home, away: f.away, prediction };
     }));
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
