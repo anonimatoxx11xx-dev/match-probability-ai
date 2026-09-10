@@ -17,14 +17,17 @@ function pred(home,away){
   return {lh,la,totalGoals:lh+la,p,cs:cs.sort((a,b)=>b[2]-a[2]).slice(0,5)};
 }
 
-// Tighter prediction interval: use the central 20%-80% historical band.
+// Tight prediction interval: central 30%-70% of the real historical values.
+// This is deliberately narrower than BUILD53 so the displayed range is useful,
+// while still adapting to the actual sample instead of inventing fixed numbers.
 function range(arr,k){
   const v=arr.map(x=>x.data?.[k]).filter(x=>x!=null&&Number.isFinite(x)).sort((a,b)=>a-b);
   if(!v.length)return'N/D';
   if(v.length===1){const x=Math.max(0,Math.round(v[0]));return`${x}-${x}`}
   const q=p=>{const pos=(v.length-1)*p,lo=Math.floor(pos),hi=Math.ceil(pos);return lo===hi?v[lo]:v[lo]+(v[hi]-v[lo])*(pos-lo)};
-  let lo=Math.floor(q(.20)),hi=Math.ceil(q(.80));
-  if(hi<=lo)hi=lo+1;
+  let lo=Math.floor(q(.30)),hi=Math.ceil(q(.70));
+  if(hi<lo)hi=lo;
+  if(hi-lo<2)hi=lo+2;
   return`${Math.max(0,lo)}-${Math.max(0,hi)}`;
 }
 
@@ -57,7 +60,7 @@ function card(t){
 
 function shell(d,matches,out,done){
   const total=matches.length,diag=diagnostics();
-  app.innerHTML=`<div class="shell"><header><div class="brand"><div class="ball">⚽</div><div><h1>Match Probability AI</h1><small>BUILD 53 · motore dati multi-source</small></div></div><button class="icon" id="r">↻</button></header><section class="hero"><div class="eyebrow">TEST APK · NO VERCEL</div><h2>Partite di oggi</h2><p>Le partite vengono mostrate subito. Cronologia e statistiche reali vengono completate in background, senza bloccare l'APK.</p></section><section class="card"><div class="match-meta">${esc(d)}</div><h3 style="margin:4px 0 0">${total} partite</h3><p>Analisi completata: <b>${done}/${total}</b>. Le probabilità 1/X/2 sono calcolate da Poisson e normalizzate matematicamente a <b>100%</b>.</p><div class="today-list">${out.map(card).join('')}</div><details class="details-content"><summary>Stato fonti live</summary>${diag.map(x=>`<div class="quality" style="text-align:left;margin-top:6px">${esc(x.name)} → <b>${x.ok?'OK':'KO'}</b>${x.error?` · ${esc(x.error)}`:''}</div>`).join('')}</details></section></div><nav><button class="active">◉<small>Oggi</small></button><button>⌂<small>Analisi</small></button><button>◇<small>Modello AI</small></button><button>⊙<small>Dati</small></button></nav>`;
+  app.innerHTML=`<div class="shell"><header><div class="brand"><div class="ball">⚽</div><div><h1>Match Probability AI</h1><small>BUILD 54 · motore dati multi-source</small></div></div><button class="icon" id="r">↻</button></header><section class="hero"><div class="eyebrow">TEST APK · NO VERCEL</div><h2>Partite di oggi</h2><p>Le partite vengono mostrate subito. Cronologia e statistiche reali vengono completate in background, senza bloccare l'APK.</p></section><section class="card"><div class="match-meta">${esc(d)}</div><h3 style="margin:4px 0 0">${total} partite</h3><p>Analisi completata: <b>${done}/${total}</b>. Le probabilità 1/X/2 sono calcolate da Poisson e normalizzate matematicamente a <b>100%</b>.</p><div class="today-list">${out.map(card).join('')}</div><details class="details-content"><summary>Stato fonti live</summary>${diag.map(x=>`<div class="quality" style="text-align:left;margin-top:6px">${esc(x.name)} → <b>${x.ok?'OK':'KO'}</b>${x.error?` · ${esc(x.error)}`:''}</div>`).join('')}</details></section></div><nav><button class="active">◉<small>Oggi</small></button><button>⌂<small>Analisi</small></button><button>◇<small>Modello AI</small></button><button>⊙<small>Dati</small></button></nav>`;
   document.querySelector('#r').onclick=build;
 }
 
@@ -73,7 +76,7 @@ async function analyzeOne(m){
 
 async function build(){
   const d=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Rome',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
-  app.innerHTML='<div class="shell"><section class="hero"><div class="eyebrow">BUILD 53 · APK NATIVA</div><h2>Partite di oggi</h2><p>Recupero rapido delle partite live…</p></section></div>';
+  app.innerHTML='<div class="shell"><section class="hero"><div class="eyebrow">BUILD 54 · APK NATIVA</div><h2>Partite di oggi</h2><p>Recupero rapido delle partite live…</p></section></div>';
   try{
     const matches=await todayMatches(d);
     if(!matches.length)throw Error('Nessuna partita disponibile dalle fonti live');
