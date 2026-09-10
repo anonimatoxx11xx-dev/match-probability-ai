@@ -33,6 +33,11 @@ jobs:
           s=p.read_text()
           s=s.replace("function choiceFor(t,index){const id=t.id||index,c=state.choice[id]||{};return{market:c.market||'shotsOnTarget',mode:c.mode||state.mode[id]||'total'}}", "function choiceFor(t,index){const c=state.choice[index]||{};return{market:c.market||'shotsOnTarget',mode:c.mode||state.mode[index]||'total'}}")
           p.write_text(s)
+          q=Path('src/main-ui-fast.js')
+          if q.exists():
+              x=q.read_text()
+              x=x.replace("))]];return `<article", "))];return `<article")
+              q.write_text(x)
           PY
       - name: Install dependencies
         run: npm install
