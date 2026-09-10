@@ -29,6 +29,7 @@ jobs:
         run: |
           python - <<'PY'
           from pathlib import Path
+          import re
           p=Path('src/main.js')
           s=p.read_text()
           s=s.replace("function choiceFor(t,index){const id=t.id||index,c=state.choice[id]||{};return{market:c.market||'shotsOnTarget',mode:c.mode||state.mode[id]||'total'}}", "function choiceFor(t,index){const c=state.choice[index]||{};return{market:c.market||'shotsOnTarget',mode:c.mode||state.mode[index]||'total'}}")
@@ -36,8 +37,13 @@ jobs:
           q=Path('src/main-ui-fast.js')
           if q.exists():
               x=q.read_text()
-              x=x.replace("))]];return `<article", "))];return `<article")
+              bad=r"sources=\[\.\.\.new Set\(\[\.\.\.\(c\.side==='home'\?h:c\.side==='away'\?a:\[\.\.\.h,\.\.\.a\]\)\.flatMap\(x=>x\.sources\|\|\[\]\)\)\]\];"
+              good="sources=[...new Set((c.side==='home'?h:c.side==='away'?a:[...h,...a]).flatMap(x=>x.sources||[]))];"
+              x,n=re.subn(bad,good,x)
+              if n==0:
+                  x=x.replace("sources=[...new Set([...(c.side==='home'?h:c.side==='away'?a:[...h,...a]).flatMap(x=>x.sources||[]))]];",good)
               q.write_text(x)
+              print('main-ui-fast.js source normalization replacements:', n)
           PY
       - name: Install dependencies
         run: npm install
