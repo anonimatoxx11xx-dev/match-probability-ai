@@ -25,6 +25,15 @@ jobs:
         uses: actions/setup-node@v5
         with:
           node-version: '22'
+      - name: Normalize interactive selection runtime
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('src/main.js')
+          s=p.read_text()
+          s=s.replace("function choiceFor(t,index){const id=t.id||index,c=state.choice[id]||{};return{market:c.market||'shotsOnTarget',mode:c.mode||state.mode[id]||'total'}}", "function choiceFor(t,index){const c=state.choice[index]||{};return{market:c.market||'shotsOnTarget',mode:c.mode||state.mode[index]||'total'}}")
+          p.write_text(s)
+          PY
       - name: Install dependencies
         run: npm install
       - name: Build web app
