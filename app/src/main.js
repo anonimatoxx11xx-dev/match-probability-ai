@@ -4,13 +4,13 @@ import { todayMatches, findTeamIds, teamHistory, enrichHistory, diagnostics } fr
 const app=document.querySelector('#app');
 const esc=x=>String(x??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]));
 const poisson=(k,l)=>{l=Math.max(.05,Math.min(6,Number(l)||.05));let p=Math.exp(-l);for(let i=1;i<=k;i++)p*=l/i;return p};
-const state={date:'',matches:[],out:[],done:0,tab:'today',filter:'all',busy:false};
+const state={date:'',matches:[],out:[],done:0,tab:'today',filter:'all',busy:false,mode:{}};
 
 const STAT_DEFS=[
   ['shots','Tiri','T','🎯'],['shotsOnTarget','Tiri in porta','P','🥅'],['corners','Corner','C','◈'],
-  ['fouls','Falli','F','⚑'],['yellow','Cartellini','G','🟨'],['offsides','Fuorigioco','O','↗']
+  ['fouls','Falli','F','⚑'],['yellow','Cartellini','G','🟨'],['offsides','Fuorigioco','O','↗'],
+  ['throwIns','Rimesse laterali','R','↔'],['saves','Parate','S','🧤']
 ];
-const statDef=k=>STAT_DEFS.find(x=>x[0]===k);
 
 function pred(home,away){
   let lh=1.52,la=1.12;
@@ -23,15 +23,21 @@ function pred(home,away){
   return {lh,la,totalGoals:lh+la,p:[winH/total,draw/total,winA/total]};
 }
 
-function values(stats,key){return stats.map(x=>x.data?.[key]).filter(x=>x!=null&&Number.isFinite(x))}
+function values(stats,key){return (stats||[]).map(x=>x.data?.[key]).filter(x=>x!=null&&Number.isFinite(x))}
 function quantile(v,p){if(!v.length)return null;const a=[...v].sort((x,y)=>x-y),pos=(a.length-1)*p,lo=Math.floor(pos),hi=Math.ceil(pos);return lo===hi?a[lo]:a[lo]+(a[hi]-a[lo])*(pos-lo)}
 function mean(v){return v.length?v.reduce((s,x)=>s+x,0)/v.length:null}
-function trend(v){if(v.length<4)return '→ stabile';const recent=mean(v.slice(0,2)),older=mean(v.slice(2));if(!recent||!older)return '→ stabile';const d=(recent-older)/Math.max(1,older);return d>.12?'↑ in crescita':d<-.12?'↓ in calo':'→ stabile'}
+function trend(v){if(v.length<4)return '→ stabile';const recent=mean(v.slice(0,2)),older=mean(v.slice(2));if(recent==null||older==null||older===0)return '→ stabile';const d=(recent-older)/Math.max(1,older);return d>.12?'↑ in crescita':d<-.12?'↓ in calo':'→ stabile'}
+function modeLabel(mode){return mode==='home'?'Casa':mode==='away'?'Trasferta':'Totale gara'}
 
-// Match-total forecast: home distribution + away distribution.
-function statForecast(homeStats,awayStats,key){
+function statForecast(homeStats,awayStats,key,mode='total'){
   const h=values(homeStats,key),a=values(awayStats,key);
-  if(!h.length&&!a.length)return null;
+  const source=mode==='home'?h:mode==='away'?a:null;
+  if(mode!=='total' && !source?.length)return null;
+  if(mode==='total'&&!h.length&&!a.length)return null;
+  if(mode!=='total'){
+    const expected=mean(source);const lo=Math.max(0,Math.floor(quantile(source,.25)));const hi=Math.max(lo,Math.ceil(quantile(source,.75)));const spread=Math.max(1,hi-lo);const consistency=Math.max(30,Math.min(96,Math.round(100-(spread/Math.max(1,expected||1))*75)));
+    return {expected,lo,hi,hm:mode==='home'?expected:null,am:mode==='away'?expected:null,consistency,sample:source.length,trend:trend(source)};
+  }
   const hm=mean(h),am=mean(a),expected=(hm??0)+(am??0);
   if(h.length&&a.length){
     const lo=Math.max(0,Math.floor(quantile(h,.25)+quantile(a,.25)));
@@ -44,52 +50,32 @@ function statForecast(homeStats,awayStats,key){
   return {expected,lo,hi,hm,am,consistency:Math.max(30,Math.min(80,Math.round(100-(spread/Math.max(1,expected))*75))),sample:one.length,trend:trend(one)};
 }
 
-function statSignals(t){
+function statSignals(t,mode='total'){
   const h=t.H?.stats||[],a=t.A?.stats||[];
-  return STAT_DEFS.map(([key,label,short,icon])=>({key,label,short,icon,...(statForecast(h,a,key)||{expected:null,lo:null,hi:null,consistency:0,sample:0})})).filter(x=>x.expected!=null);
+  return STAT_DEFS.map(([key,label,short,icon])=>({key,label,short,icon,...(statForecast(h,a,key,mode)||{expected:null,lo:null,hi:null,consistency:0,sample:0})})).filter(x=>x.expected!=null);
 }
+function allStatSignals(t){return statSignals(t,'total')}
 
 function aiStatInsight(t){
-  const sig=statSignals(t),data=[...(t.H?.stats||[]),...(t.A?.stats||[])];
+  const sig=allStatSignals(t),data=[...(t.H?.stats||[]),...(t.A?.stats||[])];
   const usable=sig.filter(x=>x.sample>0),quality=data.filter(x=>Object.keys(x.data||{}).length).length;
-  const strong=[...usable].sort((a,b)=>b.consistency-a.consistency).slice(0,3);
-  const best=strong[0];
-  const confidence=Math.max(40,Math.min(94,Math.round(46+Math.min(24,(t.H?.form?.length||0)+(t.A?.form?.length||0))+Math.min(18,quality*2)+Math.min(6,(best?.consistency||0)/16))));
+  const strong=[...usable].sort((a,b)=>b.consistency-a.consistency).slice(0,3),best=strong[0];
+  const confidence=Math.max(40,Math.min(94,Math.round(44+Math.min(26,(t.H?.form?.length||0)+(t.A?.form?.length||0))+Math.min(18,quality*2)+Math.min(6,(best?.consistency||0)/16))));
   let text='Dati statistici insufficienti per un segnale forte.';
   if(best)text=`Il segnale più leggibile è ${best.label.toLowerCase()}: ${best.lo}-${best.hi}, stima ${best.expected.toFixed(1)}. ${best.trend}. Coerenza ${best.consistency}%.`;
   return {signals:sig,quality,confidence,text,strong};
 }
-
 function confidenceClass(v){return v>=85?'high':v>=70?'mid':'low'}
-function metricCard(s){
-  return `<div class="metric stat-metric"><div class="metric-top"><span>${s.icon} ${esc(s.label)}</span><em class="signal ${confidenceClass(s.consistency)}">${s.consistency}%</em></div><b>${s.lo}-${s.hi}</b><small>stima ${s.expected.toFixed(1)} · ${esc(s.trend)}</small></div>`;
-}
-function statAnalysis(t){
-  const ai=aiStatInsight(t);
-  return `<div class="stat-ai-panel"><div class="stat-ai-head"><div class="ai-icon">✦</div><div><strong>AI: cosa emerge dalla gara</strong><p>${esc(ai.text)}</p></div></div><div class="stat-signal-list">${ai.strong.map((s,i)=>`<div><span><i>${i+1}</i>${s.icon} ${esc(s.label)}</span><b>${s.lo}-${s.hi}</b><small>stima ${s.expected.toFixed(1)} · ${esc(s.trend)} · coerenza ${s.consistency}%</small></div>`).join('')||'<div><span>Statistiche</span><b>In raccolta</b></div>'}</div></div>`;
-}
-function resultBlock(p){
-  const pct=p.p.map(x=>(x*100).toFixed(1)+'%'),mx=Math.max(...p.p);
-  return `<div class="secondary-result"><span>Esito orientativo</span><div>${[['1','Casa',pct[0]],['X','Pareggio',pct[1]],['2','Trasferta',pct[2]]].map((x,i)=>`<div class="result-mini ${p.p[i]===mx?'selected':''}"><small>${x[0]}</small><b>${x[2]}</b><em>${x[1]}</em></div>`).join('')}</div></div>`;
-}
+function metricCard(s,mode){const unit=mode==='total'?'totale':mode==='home'?'casa':'trasferta';return `<button class="metric stat-metric" data-stat-focus="${s.key}"><div class="metric-top"><span>${s.icon} ${esc(s.label)}</span><em class="signal ${confidenceClass(s.consistency)}">${s.consistency}%</em></div><b>${s.lo}-${s.hi}</b><small>stima ${s.expected.toFixed(1)} · ${unit} · ${esc(s.trend)}</small></button>`}
+function statAnalysis(t){const ai=aiStatInsight(t);return `<div class="stat-ai-panel"><div class="stat-ai-head"><div class="ai-icon">✦</div><div><strong>AI: cosa emerge dalla gara</strong><p>${esc(ai.text)}</p></div></div><div class="stat-signal-list">${ai.strong.map((s,i)=>`<div><span><i>${i+1}</i>${s.icon} ${esc(s.label)}</span><b>${s.lo}-${s.hi}</b><small>stima ${s.expected.toFixed(1)} · ${esc(s.trend)} · coerenza ${s.consistency}%</small></div>`).join('')||'<div><span>Statistiche</span><b>In raccolta</b></div>'}</div></div>`}
+function resultBlock(p){const pct=p.p.map(x=>(x*100).toFixed(1)+'%'),mx=Math.max(...p.p);return `<div class="secondary-result"><span>Esito orientativo</span><div>${[['1','Casa',pct[0]],['X','Pareggio',pct[1]],['2','Trasferta',pct[2]]].map((x,i)=>`<div class="result-mini ${p.p[i]===mx?'selected':''}"><small>${x[0]}</small><b>${x[2]}</b><em>${x[1]}</em></div>`).join('')}</div></div>`}
+function teamSplit(t){const rows=STAT_DEFS.map(([key,label,,icon])=>{const h=statForecast(t.H?.stats||[],[],key,'home'),a=statForecast([],t.A?.stats||[],key,'away');if(!h&&!a)return '';return `<div class="split-row"><span>${icon} ${esc(label)}</span><b>${h?h.expected.toFixed(1):'—'}</b><i>vs</i><b>${a?a.expected.toFixed(1):'—'}</b></div>`}).filter(Boolean).join('');return `<div class="team-compare"><div class="compare-head"><span>Casa</span><span>Media</span><span>Trasferta</span></div>${rows||'<div class="empty-stat">Dati insufficienti</div>'}</div>`}
 
 function card(t,index){
-  const h=t.H||{form:[],stats:[]},a=t.A||{form:[],stats:[]},p=pred(h.form,a.form),ai=aiStatInsight(t),signals=ai.signals;
-  const stats=[...h.stats,...a.stats],src=[...new Set(stats.flatMap(x=>x.sources||[]))];
-  const filtered=state.filter==='all'?signals:signals.filter(s=>s.key===state.filter);
-  const hasData=signals.length>0;
-  return `<article class="match-card ${index===0?'featured':''}">
-    <div class="match-head"><div><div class="match-meta">${esc(t.league)} · ${esc(t.time||'')}</div><span class="live-dot"></span><span class="tag">AI STAT ENGINE</span></div><span class="confidence ${confidenceClass(ai.confidence)}">${ai.confidence}% affidabilità dati</span></div>
-    <div class="teams"><div><b>${esc(t.home)}</b><small>CASA</small></div><span>VS</span><div><b>${esc(t.away)}</b><small>TRASFERTA</small></div></div>
-    ${statAnalysis(t)}
-    <div class="metrics-title"><b>Previsioni statistiche</b><span>${signals.length}/6 mercati</span></div>
-    <div class="metrics">${filtered.map(metricCard).join('')||'<div class="empty-stat">Nessun dato disponibile per questo mercato.</div>'}</div>
-    <div class="goal-line"><span>Gol attesi <b>${p.lh.toFixed(2)}–${p.la.toFixed(2)}</b></span><span>Totale <b>${p.totalGoals.toFixed(2)}</b></span></div>
-    ${resultBlock(p)}
-    <div class="history-line"><span>Storico <b>${h.form.length}/10</b> casa · <b>${a.form.length}/10</b> trasferta</span><span>${src.length?esc(src.join(' + ')):'raccolta dati…'}</span></div>
-    <details class="details-content"><summary>Apri dettaglio AI</summary><div class="analysis-grid">${signals.map(s=>`<div><span>${s.icon} ${esc(s.label)}</span><b>${s.lo}-${s.hi}</b><small>stima ${s.expected.toFixed(1)} · ${esc(s.trend)} · ${s.consistency}%</small></div>`).join('')}</div><div class="team-split"><span>Casa: ${signals.map(s=>{const f=statForecast(h.stats,[],s.key);return f?`${s.label} ${f.expected.toFixed(1)}`:''}).filter(Boolean).join(' · ')}</span><span>Trasferta: ${signals.map(s=>{const f=statForecast([],a.stats,s.key);return f?`${s.label} ${f.expected.toFixed(1)}`:''}).filter(Boolean).join(' · ')}</span></div><p class="muted">Le fasce sono stime statistiche del totale gara. Non vengono generati risultati esatti.</p></details>
-    ${!hasData?'<div class="loading-note">⟳ Dati storici ancora in raccolta</div>':''}
-  </article>`;
+  const h=t.H||{form:[],stats:[]},a=t.A||{form:[],stats:[]},p=pred(h.form,a.form),ai=aiStatInsight(t),mode=state.mode[t.id||index]||'total';
+  const signals=statSignals(t,mode),totalSignals=allStatSignals(t),stats=[...h.stats,...a.stats],src=[...new Set(stats.flatMap(x=>x.sources||[]))];
+  const filtered=state.filter==='all'?signals:signals.filter(s=>s.key===state.filter),hasData=totalSignals.length>0;
+  return `<article id="match-${index}" class="match-card ${index===0?'featured':''}"><div class="match-head"><div><div class="match-meta">${esc(t.league)} · ${esc(t.time||'')}</div><span class="live-dot"></span><span class="tag">AI STAT ENGINE</span></div><span class="confidence ${confidenceClass(ai.confidence)}">${ai.confidence}% affidabilità</span></div><div class="teams"><button class="team-title team-home" data-mode="home" data-match="${index}"><b>${esc(t.home)}</b><small>CASA · ultime ${h.form.length||0}</small></button><span>VS</span><button class="team-title team-away" data-mode="away" data-match="${index}"><b>${esc(t.away)}</b><small>TRASFERTA · ultime ${a.form.length||0}</small></button></div><div class="view-switch"><button data-mode="total" data-match="${index}" class="${mode==='total'?'active':''}">◉ Totale gara</button><button data-mode="home" data-match="${index}" class="${mode==='home'?'active':''}">⌂ Casa</button><button data-mode="away" data-match="${index}" class="${mode==='away'?'active':''}">↗ Trasferta</button></div>${statAnalysis(t)}<div class="metrics-title"><b>Previsioni statistiche · ${modeLabel(mode)}</b><span>${signals.length}/${STAT_DEFS.length} mercati</span></div><div class="metrics">${filtered.map(s=>metricCard(s,mode)).join('')||'<div class="empty-stat">Nessun dato disponibile per questo mercato.</div>'}</div><div class="goal-line"><span>Gol attesi <b>${p.lh.toFixed(2)}–${p.la.toFixed(2)}</b></span><span>Totale <b>${p.totalGoals.toFixed(2)}</b></span></div>${resultBlock(p)}<div class="history-line"><span>Storico <b>${h.form.length}/10</b> casa · <b>${a.form.length}/10</b> trasferta</span><span>${src.length?esc(src.join(' + ')):'raccolta dati…'}</span></div><details class="details-content"><summary>Confronta Casa ↔ Trasferta</summary>${teamSplit(t)}<p class="muted">Seleziona Casa o Trasferta per analizzare la distribuzione storica della singola squadra. Totale gara combina le due distribuzioni.</p></details>${!hasData?'<div class="loading-note">⟳ Dati storici ancora in raccolta</div>':''}</article>`;
 }
 
 function sourceState(x){const e=String(x.error||'');if(/429|rate/i.test(e))return{cls:'limited',label:'LIMITATA',text:'Limite richieste raggiunto'};return x.ok?{cls:'ok',label:'ATTIVA',text:'Risposta valida ricevuta'}:{cls:'ko',label:'OFFLINE',text:'Nessuna risposta valida'}}
@@ -97,51 +83,26 @@ function sourceCard(x){const s=sourceState(x);return `<div class="source-row ${s
 
 function render(){
   const matches=state.out.length?state.out:state.matches.map(m=>({...m,H:{form:[],stats:[]},A:{form:[],stats:[]},loading:true}));
-  const analyzed=matches.filter(x=>!x.loading).length,diag=diagnostics(),active=diag.filter(x=>x.ok).length;
-  let body='';
+  const analyzed=matches.filter(x=>!x.loading).length,diag=diagnostics(),active=diag.filter(x=>x.ok).length;let body='';
   if(state.tab==='today'){
-    const filterButtons=[['all','Tutti'],...STAT_DEFS.map(x=>[x[0],x[3]+' '+x[1]])];
-    const visible=state.filter==='all'?matches:matches.filter(m=>statSignals(m).some(s=>s.key===state.filter));
-    body=`<section class="hero"><div class="eyebrow">AI FOOTBALL INTELLIGENCE · BUILD 58</div><h2>Statistiche di oggi</h2><p>Previsioni quantitative su tiri, tiri in porta, corner, falli, cartellini e fuorigioco. <b>Nessun risultato esatto.</b></p><div class="hero-stats"><div><b>${state.matches.length||0}</b><span>partite</span></div><div><b>${analyzed}/${state.matches.length||0}</b><span>analizzate</span></div><div><b>${active}</b><span>fonti attive</span></div></div></section><section class="panel"><div class="filter-bar">${filterButtons.map(x=>`<button class="filter-chip ${state.filter===x[0]?'active':''}" data-filter="${x[0]}">${x[1]}</button>`).join('')}</div><div class="panel-head"><div><span class="eyebrow">${esc(state.date)}</span><h3>Analisi statistiche AI</h3></div><button class="refresh" id="r">↻</button></div><div class="today-list">${visible.map(card).join('')||'<div class="empty-panel">Nessuna partita contiene ancora dati per questo mercato.</div>'}</div></section>`;
+    const filterButtons=[['all','Tutti'],...STAT_DEFS.map(x=>[x[0],x[3]+' '+x[1]])];const visible=state.filter==='all'?matches:matches.filter(m=>statSignals(m).some(s=>s.key===state.filter));
+    body=`<section class="hero"><div class="eyebrow">AI FOOTBALL INTELLIGENCE · BUILD 59</div><h2>Statistiche di oggi</h2><p>Analisi interattiva di <b>8 mercati</b>: tiri, porta, corner, falli, cartellini, fuorigioco, rimesse laterali e parate.</p><div class="hero-stats"><div><b>${state.matches.length||0}</b><span>partite</span></div><div><b>${analyzed}/${state.matches.length||0}</b><span>analizzate</span></div><div><b>${active}</b><span>fonti attive</span></div></div></section><section class="panel"><div class="filter-bar">${filterButtons.map(x=>`<button class="filter-chip ${state.filter===x[0]?'active':''}" data-filter="${x[0]}">${x[1]}</button>`).join('')}</div><div class="panel-head"><div><span class="eyebrow">${esc(state.date)}</span><h3>Analisi statistiche AI</h3></div><button class="refresh" id="r">↻</button></div><div class="today-list">${visible.map(card).join('')||'<div class="empty-panel">Nessuna partita contiene ancora dati per questo mercato.</div>'}</div></section>`;
   }else if(state.tab==='ai'){
     const ranked=matches.map((m,i)=>({m,i,a:aiStatInsight(m)})).sort((x,y)=>(y.a.strong[0]?.consistency||0)-(x.a.strong[0]?.consistency||0));
-    body=`<section class="hero"><div class="eyebrow">MODELLO AI</div><h2>Centro decisionale</h2><p>L'AI seleziona i segnali più solidi per ogni gara. La classifica usa <b>coerenza storica + quantità dei dati</b>, non risultati inventati.</p></section><section class="panel"><div class="ai-summary"><div class="ai-orb">✦</div><div><b>AI Statistical Engine</b><p>${analyzed}/${matches.length} analizzate · ranking dei segnali più affidabili</p></div></div><div class="model-chips"><span>🎯 Tiri</span><span>◈ Corner</span><span>⚑ Falli</span><span>🟨 Cartellini</span></div><div class="ranking">${ranked.slice(0,10).map((x,pos)=>{const s=x.a.strong[0];return `<button class="rank-row stat-rank" data-open="${x.i}"><span class="rank-number">${pos+1}</span><div><b>${esc(x.m.home)} <i>vs</i> ${esc(x.m.away)}</b><small>${s?`${s.icon} ${esc(s.label)} ${s.lo}-${s.hi} · stima ${s.expected.toFixed(1)} · ${esc(s.trend)}`:'Dati in raccolta'}</small></div><strong>${s?.consistency||0}%</strong></button>`}).join('')||'<div class="empty-panel">Analisi in raccolta…</div>'}</div></section>`;
+    body=`<section class="hero"><div class="eyebrow">MODELLO AI</div><h2>Centro decisionale</h2><p>L'AI seleziona i segnali più solidi per ogni gara. Puoi aprire una partita e scegliere <b>Casa, Trasferta o Totale gara</b>.</p></section><section class="panel"><div class="ai-summary"><div class="ai-orb">✦</div><div><b>AI Statistical Engine</b><p>${analyzed}/${matches.length} analizzate · 8 mercati · ranking dei segnali più affidabili</p></div></div><div class="model-chips">${STAT_DEFS.map(x=>`<span>${x[3]} ${x[1]}</span>`).join('')}</div><div class="ranking">${ranked.slice(0,10).map((x,pos)=>{const s=x.a.strong[0];return `<button class="rank-row stat-rank" data-open="${x.i}"><span class="rank-number">${pos+1}</span><div><b>${esc(x.m.home)} <i>vs</i> ${esc(x.m.away)}</b><small>${s?`${s.icon} ${esc(s.label)} ${s.lo}-${s.hi} · stima ${s.expected.toFixed(1)} · ${esc(s.trend)}`:'Dati in raccolta'}</small></div><strong>${s?.consistency||0}%</strong></button>`}).join('')||'<div class="empty-panel">Analisi in raccolta…</div>'}</div></section>`;
   }else if(state.tab==='analysis'){
-    const analyzedMatches=matches.filter(x=>!x.loading),allSignals=analyzedMatches.flatMap(m=>statSignals(m));
-    const avg=k=>{const v=allSignals.filter(s=>s.key===k).map(s=>s.consistency);return v.length?Math.round(mean(v)):0};
-    const top=[...STAT_DEFS].map(([key,label,short,icon])=>({key,label,icon,value:avg(key)})).sort((a,b)=>b.value-a.value);
-    body=`<section class="hero"><div class="eyebrow">ANALISI</div><h2>Quadro statistico</h2><p>Una vista unica per capire dove il modello trova segnali più consistenti nelle partite di oggi.</p></section><section class="panel"><div class="feature-grid"><span>📊 <b>${analyzedMatches.length}</b><small>analisi completate</small></span><span>🧠 <b>Stat AI</b><small>6 mercati osservati</small></span><span>🌐 <b>${active}</b><small>fonti attive</small></span><span>⚡ <b>${state.done}/${state.matches.length}</b><small>aggiornamento</small></span></div><div class="section-label">Coerenza media per mercato</div><div class="market-bars">${top.map(s=>`<button class="market-bar" data-filter="${s.key}"><span>${s.icon} ${esc(s.label)}</span><div><i style="width:${s.value}%"></i></div><b>${s.value}%</b></button>`).join('')}</div><div class="section-label">Segnali migliori</div><div class="analysis-list">${analyzedMatches.slice(0,12).map(m=>{const ai=aiStatInsight(m),ss=ai.strong;return `<button class="analysis-row stat-analysis-row" data-open-match="${esc(m.id||'')}" data-open-name="${esc(m.home+' vs '+m.away)}"><div><b>${esc(m.home)} <i>vs</i> ${esc(m.away)}</b><small>${ss.map(s=>`${s.icon} ${esc(s.label)} ${s.lo}-${s.hi}`).join(' · ')||'Statistiche in raccolta'}</small></div><strong>${ss[0]?ss[0].consistency+'%':'—'}</strong></button>`}).join('')}</div></section>`;
+    const analyzedMatches=matches.filter(x=>!x.loading),allSignals=analyzedMatches.flatMap(m=>statSignals(m));const avg=k=>{const v=allSignals.filter(s=>s.key===k).map(s=>s.consistency);return v.length?Math.round(mean(v)):0};const top=[...STAT_DEFS].map(([key,label,short,icon])=>({key,label,icon,value:avg(key)})).sort((a,b)=>b.value-a.value);
+    body=`<section class="hero"><div class="eyebrow">ANALISI</div><h2>Quadro statistico</h2><p>Confronta i mercati e apri direttamente la partita per scegliere il lato <b>Casa / Trasferta</b>.</p></section><section class="panel"><div class="feature-grid"><span>📊 <b>${analyzedMatches.length}</b><small>analisi completate</small></span><span>🧠 <b>Stat AI</b><small>8 mercati osservati</small></span><span>🌐 <b>${active}</b><small>fonti attive</small></span><span>⚡ <b>${state.done}/${state.matches.length}</b><small>aggiornamento</small></span></div><div class="section-label">Coerenza media per mercato</div><div class="market-bars">${top.map(s=>`<button class="market-bar" data-filter="${s.key}"><span>${s.icon} ${esc(s.label)}</span><div><i style="width:${s.value}%"></i></div><b>${s.value}%</b></button>`).join('')}</div><div class="section-label">Segnali migliori</div><div class="analysis-list">${analyzedMatches.slice(0,12).map((m,i)=>{const ai=aiStatInsight(m),ss=ai.strong;return `<button class="analysis-row stat-analysis-row" data-open="${i}"><div><b>${esc(m.home)} <i>vs</i> ${esc(m.away)}</b><small>${ss.map(s=>`${s.icon} ${esc(s.label)} ${s.lo}-${s.hi}`).join(' · ')||'Statistiche in raccolta'}</small></div><strong>${ss[0]?ss[0].consistency+'%':'—'}</strong></button>`}).join('')}</div></section>`;
   }else{
-    const used=['FotMob','ESPN','SofaScore','TheSportsDB','OpenLigaDB'];
-    const rows=used.map(name=>diag.find(x=>x.name===name)||{name,ok:false,error:''});
-    body=`<section class="hero"><div class="eyebrow">DATI REALI</div><h2>Fonti & qualità</h2><p>Stato delle fonti che l'APK può interrogare direttamente. Una fonte limitata non viene spacciata per attiva.</p><div class="quality-pill"><span>●</span> ${active} fonti hanno risposto</div></section><section class="panel source-panel"><div class="panel-head"><div><span class="eyebrow">LIVE PROVIDERS</span><h3>Connessioni reali</h3></div><button class="refresh" id="r">↻</button></div>${rows.map(sourceCard).join('')}<div class="source-note"><b>Trasparenza</b><p>API-Football, Sportmonks, GoalServe, Sportradar e gli altri provider richiedono credenziali o piani dedicati: non vengono dichiarati collegati finché non sono realmente configurati nell'APK.</p></div></section>`;
+    const used=['FotMob','ESPN','SofaScore','TheSportsDB','OpenLigaDB'];const rows=used.map(name=>diag.find(x=>x.name===name)||{name,ok:false,error:''});
+    body=`<section class="hero"><div class="eyebrow">DATI REALI</div><h2>Fonti & qualità</h2><p>Controllo trasparente delle fonti interrogate direttamente dall'APK.</p><div class="quality-pill"><span>●</span> ${active} fonti hanno risposto</div></section><section class="panel source-panel"><div class="panel-head"><div><span class="eyebrow">LIVE PROVIDERS</span><h3>Connessioni reali</h3></div><button class="refresh" id="r">↻</button></div>${rows.map(sourceCard).join('')}<div class="source-note"><b>Trasparenza</b><p>I provider che richiedono chiavi o piani dedicati non vengono dichiarati collegati finché non sono realmente configurati nell'APK.</p></div></section>`;
   }
-  app.innerHTML=`<div class="app-shell"><header class="app-header"><div class="brand"><div class="brand-mark">⚽</div><div><b>Match Probability</b><small>AI FOOTBALL LAB · BUILD 58</small></div></div><button class="header-btn" id="r">↻</button></header>${body}<nav>${[['today','⌂','Oggi'],['analysis','◈','Analisi'],['ai','✦','AI Model'],['data','◎','Dati']].map(x=>`<button class="${state.tab===x[0]?'active':''}" data-tab="${x[0]}"><span>${x[1]}</span><small>${x[2]}</small></button>`).join('')}</nav></div>`;
-  document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{state.tab=b.dataset.tab;render()});
-  document.querySelectorAll('[data-filter]').forEach(b=>b.onclick=()=>{state.filter=b.dataset.filter;state.tab='today';render()});
-  document.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>{state.tab='today';render();setTimeout(()=>document.querySelector('.match-card')?.scrollIntoView({behavior:'smooth',block:'start'}),50)});
-  document.querySelectorAll('[data-open-match]').forEach(b=>b.onclick=()=>{state.tab='today';render();setTimeout(()=>document.querySelector('.match-card')?.scrollIntoView({behavior:'smooth',block:'start'}),50)});
-  document.querySelectorAll('#r').forEach(b=>b.onclick=()=>build());
+  app.innerHTML=`<div class="app-shell"><header class="app-header"><div class="brand"><div class="brand-mark">⚽</div><div><b>Match Probability</b><small>AI FOOTBALL LAB · BUILD 59</small></div></div><button class="header-btn" id="r">↻</button></header>${body}<nav>${[['today','⌂','Oggi'],['analysis','◈','Analisi'],['ai','✦','AI Model'],['data','◎','Dati']].map(x=>`<button class="${state.tab===x[0]?'active':''}" data-tab="${x[0]}"><span>${x[1]}</span><small>${x[2]}</small></button>`).join('')}</nav></div>`;
+  document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{state.tab=b.dataset.tab;render()});document.querySelectorAll('[data-filter]').forEach(b=>b.onclick=()=>{state.filter=b.dataset.filter;state.tab='today';render()});document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{state.mode[b.dataset.match]=b.dataset.mode;render()});document.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>{const i=Number(b.dataset.open);state.tab='today';render();setTimeout(()=>document.querySelector(`#match-${i}`)?.scrollIntoView({behavior:'smooth',block:'start'}),50)});document.querySelectorAll('[data-stat-focus]').forEach(b=>b.onclick=()=>{state.filter=b.dataset.statFocus;render()});document.querySelectorAll('#r').forEach(b=>b.onclick=()=>build());
 }
 
-async function analyzeOne(m){
-  const [hi,ai]=await Promise.all([findTeamIds(m.home),findTeamIds(m.away)]);
-  const [hf,af]=await Promise.all([teamHistory(m.home,hi),teamHistory(m.away,ai)]);
-  const [hstats,astats]=await Promise.all([Promise.all(hf.slice(0,5).map(x=>enrichHistory(x,m.home))),Promise.all(af.slice(0,5).map(x=>enrichHistory(x,m.away)))]);
-  return {...m,H:{form:hf,stats:hstats},A:{form:af,stats:astats},loading:false};
-}
+async function analyzeOne(m){const [hi,ai]=await Promise.all([findTeamIds(m.home),findTeamIds(m.away)]);const [hf,af]=await Promise.all([teamHistory(m.home,hi),teamHistory(m.away,ai)]);const [hstats,astats]=await Promise.all([Promise.all(hf.slice(0,5).map(x=>enrichHistory(x,m.home))),Promise.all(af.slice(0,5).map(x=>enrichHistory(x,m.away)))]);return {...m,H:{form:hf,stats:hstats},A:{form:af,stats:astats},loading:false)}
 
-async function build(){
-  if(state.busy)return;state.busy=true;state.tab='today';state.filter='all';
-  state.date=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Rome',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
-  app.innerHTML='<div class="boot"><div class="boot-orb">✦</div><div class="eyebrow">AI FOOTBALL INTELLIGENCE</div><h2>Match Probability AI</h2><p>Raccolta dati reali e costruzione delle previsioni statistiche…</p><div class="loader"></div></div>';
-  try{
-    const matches=await todayMatches(state.date);if(!matches.length)throw Error('Nessuna partita disponibile dalle fonti live');
-    state.matches=matches;state.out=matches.map(m=>({...m,H:{form:[],stats:[]},A:{form:[],stats:[]},loading:true}));state.done=0;render();
-    let next=0;
-    const worker=async()=>{while(true){const i=next++;if(i>=matches.length)return;try{state.out[i]=await analyzeOne(matches[i])}catch(e){state.out[i]={...matches[i],H:{form:[],stats:[]},A:{form:[],stats:[]},loading:false,error:String(e?.message||e)}}state.done++;render()}};
-    await Promise.all([worker(),worker()]);
-  }catch(e){state.matches=[];state.out=[];app.innerHTML=`<div class="boot"><div class="eyebrow">ERRORE DATI</div><h2>Impossibile caricare le partite</h2><p class="error">${esc(e?.message||e)}</p><button class="secondary" id="r">Riprova</button></div>`;document.querySelector('#r').onclick=build}
-  finally{state.busy=false}
-}
+async function build(){if(state.busy)return;state.busy=true;state.tab='today';state.filter='all';state.mode={};state.date=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Rome',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());app.innerHTML='<div class="boot"><div class="boot-orb">✦</div><div class="eyebrow">AI FOOTBALL INTELLIGENCE</div><h2>Match Probability AI</h2><p>Raccolta dati reali e costruzione delle previsioni statistiche…</p><div class="loader"></div></div>';try{const matches=await todayMatches(state.date);if(!matches.length)throw Error('Nessuna partita disponibile dalle fonti live');state.matches=matches;state.out=matches.map(m=>({...m,H:{form:[],stats:[]},A:{form:[],stats:[]},loading:true}));state.done=0;render();let next=0;const worker=async()=>{while(true){const i=next++;if(i>=matches.length)return;try{state.out[i]=await analyzeOne(matches[i])}catch(e){state.out[i]={...matches[i],H:{form:[],stats:[]},A:{form:[],stats:[]},loading:false,error:String(e?.message||e)}}state.done++;render()}};await Promise.all([worker(),worker()])}catch(e){state.matches=[];state.out=[];app.innerHTML=`<div class="boot"><div class="eyebrow">ERRORE DATI</div><h2>Impossibile caricare le partite</h2><p class="error">${esc(e?.message||e)}</p><button class="secondary" id="r">Riprova</button>`;document.querySelector('#r').onclick=build}finally{state.busy=false}}
+
 build();
