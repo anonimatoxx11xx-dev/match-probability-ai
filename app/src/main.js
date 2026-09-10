@@ -18,7 +18,6 @@ function pred(home,away){
 }
 
 // Tighter prediction interval: use the central 20%-80% historical band.
-// This avoids the very wide mean +/- deviation ranges that were shown before.
 function range(arr,k){
   const v=arr.map(x=>x.data?.[k]).filter(x=>x!=null&&Number.isFinite(x)).sort((a,b)=>a-b);
   if(!v.length)return'N/D';
@@ -58,7 +57,7 @@ function card(t){
 
 function shell(d,matches,out,done){
   const total=matches.length,diag=diagnostics();
-  app.innerHTML=`<div class="shell"><header><div class="brand"><div class="ball">⚽</div><div><h1>Match Probability AI</h1><small>BUILD 53 · motore dati multi-source</small></div></div><button class="icon" id="r">↻</button></header><section class="hero"><div class="eyebrow">TEST APK · NO VERCEL</div><h2>Partite di oggi</h2><p>Le partite vengono mostrate subito. Cronologia e statistiche reali vengono completate in background, senza bloccare l'APK.</p></section><section class="card"><div class="match-meta">${esc(d)}</div><h3 style="margin:4px 0 0">${total} partite</h3><p>Analisi completata: <b>${done}/${total}</b>. Le probabilità 1/X/2 sono calcolate da Poisson e normalizzate matematicamente a <b>100%</b>.</p><div class="today-list">${out.map(card).join('')}</div><details class="details-content"><summary>Stato fonti live</summary>${diag.map(x=>`<div class="quality" style="text-align:left;margin-top:6px">${esc(x.name)} → <b>${x.ok?'OK':'KO'}</b>${x.error?` · ${esc(x.error)}`:''}</div>`).join('')}</details></section></div><nav><button class="active">◉<small>Oggi</small></button><button>⌂<small>Analisi</small></button><button>◇<small>Modello AI</small></button><button>⊙<small>Dati</small></button></button></nav>`;
+  app.innerHTML=`<div class="shell"><header><div class="brand"><div class="ball">⚽</div><div><h1>Match Probability AI</h1><small>BUILD 53 · motore dati multi-source</small></div></div><button class="icon" id="r">↻</button></header><section class="hero"><div class="eyebrow">TEST APK · NO VERCEL</div><h2>Partite di oggi</h2><p>Le partite vengono mostrate subito. Cronologia e statistiche reali vengono completate in background, senza bloccare l'APK.</p></section><section class="card"><div class="match-meta">${esc(d)}</div><h3 style="margin:4px 0 0">${total} partite</h3><p>Analisi completata: <b>${done}/${total}</b>. Le probabilità 1/X/2 sono calcolate da Poisson e normalizzate matematicamente a <b>100%</b>.</p><div class="today-list">${out.map(card).join('')}</div><details class="details-content"><summary>Stato fonti live</summary>${diag.map(x=>`<div class="quality" style="text-align:left;margin-top:6px">${esc(x.name)} → <b>${x.ok?'OK':'KO'}</b>${x.error?` · ${esc(x.error)}`:''}</div>`).join('')}</details></section></div><nav><button class="active">◉<small>Oggi</small></button><button>⌂<small>Analisi</small></button><button>◇<small>Modello AI</small></button><button>⊙<small>Dati</small></button></nav>`;
   document.querySelector('#r').onclick=build;
 }
 
