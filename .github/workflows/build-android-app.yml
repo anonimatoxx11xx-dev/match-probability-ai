@@ -37,13 +37,14 @@ jobs:
           q=Path('src/main-ui-fast.js')
           if q.exists():
               x=q.read_text()
+              x=x.replace("import { todayMatches, findTeamIds, enrichHistory, diagnostics, clearProviderCache } from './provider-engine.js';", "import { todayMatches } from './schedule-engine.js';\nimport { findTeamIds, enrichHistory, diagnostics, clearProviderCache } from './provider-engine.js';")
               bad=r"sources=\[\.\.\.new Set\(\[\.\.\.\(c\.side==='home'\?h:c\.side==='away'\?a:\[\.\.\.h,\.\.\.a\]\)\.flatMap\(x=>x\.sources\|\|\[\]\)\)\]\];"
               good="sources=[...new Set((c.side==='home'?h:c.side==='away'?a:[...h,...a]).flatMap(x=>x.sources||[]))];"
               x,n=re.subn(bad,good,x)
               if n==0:
                   x=x.replace("sources=[...new Set([...(c.side==='home'?h:c.side==='away'?a:[...h,...a]).flatMap(x=>x.sources||[]))]];",good)
               q.write_text(x)
-              print('main-ui-fast.js source normalization replacements:', n)
+              print('main-ui-fast.js replacements:',n)
           PY
       - name: Install dependencies
         run: npm install
