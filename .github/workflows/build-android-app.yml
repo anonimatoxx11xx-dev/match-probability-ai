@@ -38,6 +38,7 @@ jobs:
           if q.exists():
               x=q.read_text()
               x=x.replace("import { todayMatches, findTeamIds, enrichHistory, diagnostics, clearProviderCache } from './provider-engine.js';", "import { todayMatches } from './schedule-engine.js';\nimport { findTeamIds, enrichHistory, diagnostics, clearProviderCache } from './provider-engine.js';")
+              x=x.replace('BUILD 66','BUILD 67')
               bad=r"sources=\[\.\.\.new Set\(\[\.\.\.\(c\.side==='home'\?h:c\.side==='away'\?a:\[\.\.\.h,\.\.\.a\]\)\.flatMap\(x=>x\.sources\|\|\[\]\)\)\]\];"
               good="sources=[...new Set((c.side==='home'?h:c.side==='away'?a:[...h,...a]).flatMap(x=>x.sources||[]))];"
               x,n=re.subn(bad,good,x)
