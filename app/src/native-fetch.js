@@ -87,7 +87,7 @@ if (Capacitor.isNativePlatform()) {
     if (/site\.api\.espn\.com\/apis\/site\/v2\/sports\/soccer\/all\/scoreboard/i.test(url)) {
       const match = url.match(/[?&]dates=(\d{8})/);
       const date = match?.[1] || '';
-      const leagues = ['uefa.champions','eng.1','eng.2','eng.3','eng.4','ita.1','ita.2','esp.1','esp.2','ger.1','ger.2','fra.1','fra.2','usa.1','bra.1','mex.1','por.1','ned.1','ned.2','bel.1','sco.1','sco.2','tur.1','gre.1','den.1','swe.1','nor.1','aut.1','conmebol.america'];
+      const leagues = ['uefa.champions','eng.1','ita.1','esp.1','ger.1','fra.1','usa.1','bra.1','mex.1','por.1','ned.1','bel.1','sco.1','tur.1','gre.1'];
       const responses = await Promise.all(leagues.map(league => nativeGet(`https://site.api.espn.com/apis/site/v2/sports/soccer/${league}/scoreboard?dates=${date}`)));
       const events = [];
       const seen = new Set();
