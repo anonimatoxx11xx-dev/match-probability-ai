@@ -6,6 +6,7 @@ const assert=(v,m)=>{if(!v)fail(m)};
 console.log(`VERIFY DAY ${day}`);
 const matches=await todayMatches(day);
 console.log(`FIXTURES ${matches.length}`);
+console.log('FIRST FIXTURES',matches.slice(0,10).map(x=>({source:x.source,league:x.league,home:x.home,away:x.away,sofa:x.sofaIdHome&&x.sofaIdAway}))); 
 assert(matches.length>0,'No real fixtures returned');
 assert(matches.every(x=>x.home&&x.away&&x.time&&x.eventId),'Fixture with missing team/time/event id');
 assert(new Set(matches.map(x=>x.id)).size===matches.length,'Duplicate fixture ids');
