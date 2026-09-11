@@ -25,7 +25,7 @@ jobs:
         uses: actions/setup-node@v5
         with:
           node-version: '22'
-      - name: Normalize interactive selection runtime
+      - name: Normalize UI and inject fast bulk history engine
         run: |
           python - <<'PY'
           from pathlib import Path
@@ -35,17 +35,41 @@ jobs:
           s=s.replace("function choiceFor(t,index){const id=t.id||index,c=state.choice[id]||{};return{market:c.market||'shotsOnTarget',mode:c.mode||state.mode[id]||'total'}}", "function choiceFor(t,index){const c=state.choice[index]||{};return{market:c.market||'shotsOnTarget',mode:c.mode||state.mode[index]||'total'}}")
           p.write_text(s)
           q=Path('src/main-ui-fast.js')
-          if q.exists():
-              x=q.read_text()
-              x=x.replace("import { todayMatches, findTeamIds, enrichHistory, diagnostics, clearProviderCache } from './provider-engine.js';", "import { todayMatches } from './schedule-engine.js';\nimport { findTeamIds, enrichHistory, diagnostics, clearProviderCache } from './provider-engine.js';")
-              x=x.replace('BUILD 66','BUILD 67')
-              bad=r"sources=\[\.\.\.new Set\(\[\.\.\.\(c\.side==='home'\?h:c\.side==='away'\?a:\[\.\.\.h,\.\.\.a\]\)\.flatMap\(x=>x\.sources\|\|\[\]\)\)\]\];"
-              good="sources=[...new Set((c.side==='home'?h:c.side==='away'?a:[...h,...a]).flatMap(x=>x.sources||[]))];"
-              x,n=re.subn(bad,good,x)
-              if n==0:
-                  x=x.replace("sources=[...new Set([...(c.side==='home'?h:c.side==='away'?a:[...h,...a]).flatMap(x=>x.sources||[]))]];",good)
-              q.write_text(x)
-              print('main-ui-fast.js replacements:',n)
+          x=q.read_text()
+          x=x.replace('BUILD 66','BUILD 73').replace('BUILD 67','BUILD 73').replace('BUILD 68','BUILD 73')
+          bad=r"sources=\[\.\.\.new Set\(\[\.\.\.\(c\.side==='home'\?h:c\.side==='away'\?a:\[\.\.\.h,\.\.\.a\]\)\.flatMap\(x=>x\.sources\|\|\[\]\)\)\]\];"
+          good="sources=[...new Set((c.side==='home'?h:c.side==='away'?a:[...h,...a]).flatMap(x=>x.sources||[]))];"
+          x,n=re.subn(bad,good,x)
+          if n==0:
+              x=x.replace("sources=[...new Set([...(c.side==='home'?h:c.side==='away'?a:[...h,...a]).flatMap(x=>x.sources||[]))]];",good)
+          marker='const teamCache=new Map();'
+          bulk=r'''
+const bulkHistoryCache=new Map();
+let bulkHistoryPromise=null;
+function addBulk(map,r){const k=norm(r.team);if(!k)return;if(!map.has(k))map.set(k,[]);const a=map.get(k);if(!a.some(x=>String(x.eventId)===String(r.eventId)))a.push(r);a.sort((a,b)=>new Date(b.time)-new Date(a.time));if(a.length>15)a.length=15}
+async function prepareBulkHistory(date){
+  if(bulkHistoryCache.has(date))return bulkHistoryCache.get(date);
+  if(bulkHistoryPromise)return bulkHistoryPromise;
+  bulkHistoryPromise=(async()=>{
+    const map=new Map(),days=[];
+    for(let i=1;i<=45;i++){const d=new Date(`${date}T12:00:00Z`);d.setUTCDate(d.getUTCDate()-i);days.push(d.toISOString().slice(0,10))}
+    let cursor=0;
+    const worker=async()=>{while(cursor<days.length){const d=days[cursor++];let j=await get(`https://api.sofascore.com/api/v1/sport/football/scheduled-events/${d}/inverse`);if(!j?.events?.length)j=await get(`https://api.sofascore.com/api/v1/sport/football/scheduled-events/${d}`);for(const e of j?.events||[]){const st=String(e?.status?.type||'').toLowerCase();if(st!=='finished'||!e.homeTeam||!e.awayTeam)continue;const hg=n(e.homeScore),ag=n(e.awayScore);if(hg==null||ag==null)continue;const time=e.startTimestamp?new Date(e.startTimestamp*1000).toISOString():'';addBulk(map,{team:e.homeTeam.name,eventId:e.id,time,home:true,gf:hg,ga:ag,opp:e.awayTeam.name});addBulk(map,{team:e.awayTeam.name,eventId:e.id,time,home:false,gf:ag,ga:hg,opp:e.homeTeam.name})}}};
+    await Promise.all(Array.from({length:4},worker));
+    bulkHistoryCache.set(date,map);bulkHistoryPromise=null;return map;
+  })();
+  return bulkHistoryPromise;
+}
+'''
+          x=x.replace(marker,marker+'\n'+bulk)
+          pat=r"async function fastHistory\(name,ids\)\{.*?\n\}"
+          m=re.search(pat,x,re.S)
+          if m:
+              legacy=m.group(0).replace('async function fastHistory','async function legacyFastHistory',1)
+              replacement=legacy+r'''\nasync function fastHistory(name,ids){const map=await prepareBulkHistory(state.date);const rows=map.get(norm(name))||[];if(rows.length)return rows.slice(0,12);return legacyFastHistory(name,ids)}'''
+              x=x[:m.start()]+replacement+x[m.end():]
+          q.write_text(x)
+          print('bulk history injected:', 'prepareBulkHistory' in x, 'legacy fallback:', 'legacyFastHistory' in x)
           PY
       - name: Install dependencies
         run: npm install
