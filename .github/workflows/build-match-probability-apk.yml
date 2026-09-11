@@ -2,11 +2,6 @@ name: Build Match Probability AI APK
 
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - 'app/**'
-      - '.github/workflows/build-match-probability-apk.yml'
 
 permissions:
   contents: read
@@ -24,50 +19,36 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: ${{ env.JAVA_VERSION }}
-
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 22
-
       - name: Install npm dependencies
         run: npm install
-
       - name: Build web bundle
         run: npm run build
-
       - name: Add Android platform
         run: npx cap add android
-
       - name: Sync Capacitor
         run: npx cap sync android
-
       - name: Make Gradle executable
         run: chmod +x android/gradlew
-
       - name: Build debug APK
         run: ./android/gradlew -p android assembleDebug --no-daemon
-
       - name: Verify and stage APK
         run: |
           set -euo pipefail
           APK="$GITHUB_WORKSPACE/app/android/app/build/outputs/apk/debug/app-debug.apk"
-          echo "Expected signed debug APK: $APK"
           test -f "$APK"
           mkdir -p "$GITHUB_WORKSPACE/artifacts"
           cp "$APK" "$GITHUB_WORKSPACE/artifacts/Match-Probability-AI.apk"
           test -s "$GITHUB_WORKSPACE/artifacts/Match-Probability-AI.apk"
-          echo "APK staged:"
-          ls -lh "$GITHUB_WORKSPACE/artifacts/Match-Probability-AI.apk"
-          echo "Signing files inside APK:"
           unzip -l "$GITHUB_WORKSPACE/artifacts/Match-Probability-AI.apk" | grep -E 'META-INF/.*\.(RSA|SF)$' || true
-
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
