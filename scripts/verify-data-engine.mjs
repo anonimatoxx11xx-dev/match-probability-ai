@@ -7,6 +7,7 @@ console.log(`VERIFY DAY ${day}`);
 const matches=await todayMatches(day);
 console.log(`FIXTURES ${matches.length}`);
 console.log('SAMPLE PROVIDER ROWS',JSON.stringify(matches.slice(0,3).map(x=>({home:x.home,away:x.away,league:x.league,country:x.country,source:x.source,sofaEventId:x.sofaEventId,espnEventId:x.espnEventId,espnIdHome:x.espnIdHome,espnIdAway:x.espnIdAway}))));
+if(matches[0]?.espnIdHome){const u=`https://site.web.api.espn.com/apis/site/v2/sports/soccer/all/teams/${matches[0].espnIdHome}/schedule`;const r=await fetch(u);const t=await r.text();console.log('ESPN SCHEDULE DEBUG',r.status,t.slice(0,1200));}
 assert(matches.length>=40,`Only ${matches.length} fixtures returned`);
 assert(matches.every(x=>x.home&&x.away&&x.time&&x.eventId),'Fixture with missing team/time/event id');
 assert(new Set(matches.map(x=>x.home+'|'+x.away+'|'+x.time)).size===matches.length,'Duplicate fixture rows');
