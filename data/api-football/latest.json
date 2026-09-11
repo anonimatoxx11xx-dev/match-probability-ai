@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-10T04:55:47.364Z",
+  "generatedAt": "2026-09-11T04:55:25.784Z",
   "season": 2026,
   "mode": "merged-api-football-plus-football-data-multi-season",
   "providers": [
@@ -646,6 +646,66 @@
       "leagueId": 2
     },
     {
+      "apiId": 100000613,
+      "name": "Fenerbahçe SK",
+      "leagueId": 2
+    },
+    {
+      "apiId": 100000100,
+      "name": "AS Roma",
+      "leagueId": 2
+    },
+    {
+      "apiId": 100000674,
+      "name": "PSV",
+      "leagueId": 2
+    },
+    {
+      "apiId": 100001887,
+      "name": "FK Shakhtar Donetsk",
+      "leagueId": 2
+    },
+    {
+      "apiId": 100000005,
+      "name": "FC Bayern München",
+      "leagueId": 2
+    },
+    {
+      "apiId": 100005721,
+      "name": "FK Bodø/Glimt",
+      "leagueId": 2
+    },
+    {
+      "apiId": 100000066,
+      "name": "Manchester United FC",
+      "leagueId": 2
+    },
+    {
+      "apiId": 100010233,
+      "name": "Sabah FK",
+      "leagueId": 2
+    },
+    {
+      "apiId": 100007397,
+      "name": "Como 1907",
+      "leagueId": 2
+    },
+    {
+      "apiId": 100000721,
+      "name": "RB Leipzig",
+      "leagueId": 2
+    },
+    {
+      "apiId": 100000930,
+      "name": "SK Slavia Praha",
+      "leagueId": 2
+    },
+    {
+      "apiId": 100000546,
+      "name": "Racing Club de Lens",
+      "leagueId": 2
+    },
+    {
       "apiId": 100000457,
       "name": "US Cremonese",
       "leagueId": 135
@@ -721,11 +781,6 @@
       "leagueId": 2
     },
     {
-      "apiId": 100000674,
-      "name": "PSV",
-      "leagueId": 2
-    },
-    {
       "apiId": 100003929,
       "name": "Royale Union Saint-Gilloise",
       "leagueId": 2
@@ -756,16 +811,6 @@
       "leagueId": 2
     },
     {
-      "apiId": 100000930,
-      "name": "SK Slavia Praha",
-      "leagueId": 2
-    },
-    {
-      "apiId": 100005721,
-      "name": "FK Bodø/Glimt",
-      "leagueId": 2
-    },
-    {
       "apiId": 100000654,
       "name": "PAE Olympiakos SFP",
       "leagueId": 2
@@ -783,11 +828,6 @@
     {
       "apiId": 100000102,
       "name": "Atalanta BC",
-      "leagueId": 2
-    },
-    {
-      "apiId": 100000005,
-      "name": "FC Bayern München",
       "leagueId": 2
     },
     {
@@ -901,11 +941,6 @@
       "leagueId": 2
     },
     {
-      "apiId": 100001887,
-      "name": "FK Shakhtar Donetsk",
-      "leagueId": 2
-    },
-    {
       "apiId": 100000907,
       "name": "AC Sparta Praha",
       "leagueId": 2
@@ -938,11 +973,6 @@
     {
       "apiId": 100002021,
       "name": "SK Sturm Graz",
-      "leagueId": 2
-    },
-    {
-      "apiId": 100000721,
-      "name": "RB Leipzig",
       "leagueId": 2
     }
   ],
@@ -178573,6 +178603,270 @@
       },
       "source": "football-data.org",
       "sourceMatchId": 575334,
+      "sourceSeason": 2026
+    },
+    {
+      "fixtureId": 200575335,
+      "kickoff": "2026-09-10T16:45:00Z",
+      "status": "FT",
+      "league": {
+        "id": 2,
+        "name": "Champions League",
+        "country": "Europe",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000613,
+        "name": "Fenerbahçe SK"
+      },
+      "away": {
+        "id": 100000100,
+        "name": "AS Roma"
+      },
+      "goals": {
+        "home": 1,
+        "away": 1
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 575335,
+      "sourceSeason": 2026
+    },
+    {
+      "fixtureId": 200575336,
+      "kickoff": "2026-09-10T16:45:00Z",
+      "status": "FT",
+      "league": {
+        "id": 2,
+        "name": "Champions League",
+        "country": "Europe",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000674,
+        "name": "PSV"
+      },
+      "away": {
+        "id": 100001887,
+        "name": "FK Shakhtar Donetsk"
+      },
+      "goals": {
+        "home": 1,
+        "away": 1
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 575336,
+      "sourceSeason": 2026
+    },
+    {
+      "fixtureId": 200575337,
+      "kickoff": "2026-09-10T19:00:00Z",
+      "status": "FT",
+      "league": {
+        "id": 2,
+        "name": "Champions League",
+        "country": "Europe",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000005,
+        "name": "FC Bayern München"
+      },
+      "away": {
+        "id": 100005721,
+        "name": "FK Bodø/Glimt"
+      },
+      "goals": {
+        "home": 5,
+        "away": 0
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 575337,
+      "sourceSeason": 2026
+    },
+    {
+      "fixtureId": 200575338,
+      "kickoff": "2026-09-10T19:00:00Z",
+      "status": "FT",
+      "league": {
+        "id": 2,
+        "name": "Champions League",
+        "country": "Europe",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000066,
+        "name": "Manchester United FC"
+      },
+      "away": {
+        "id": 100010233,
+        "name": "Sabah FK"
+      },
+      "goals": {
+        "home": 4,
+        "away": 0
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 575338,
+      "sourceSeason": 2026
+    },
+    {
+      "fixtureId": 200575339,
+      "kickoff": "2026-09-10T19:00:00Z",
+      "status": "FT",
+      "league": {
+        "id": 2,
+        "name": "Champions League",
+        "country": "Europe",
+        "season": 2026
+      },
+      "home": {
+        "id": 100007397,
+        "name": "Como 1907"
+      },
+      "away": {
+        "id": 100000721,
+        "name": "RB Leipzig"
+      },
+      "goals": {
+        "home": 4,
+        "away": 1
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 575339,
+      "sourceSeason": 2026
+    },
+    {
+      "fixtureId": 200575340,
+      "kickoff": "2026-09-10T19:00:00Z",
+      "status": "FT",
+      "league": {
+        "id": 2,
+        "name": "Champions League",
+        "country": "Europe",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000930,
+        "name": "SK Slavia Praha"
+      },
+      "away": {
+        "id": 100000546,
+        "name": "Racing Club de Lens"
+      },
+      "goals": {
+        "home": 2,
+        "away": 3
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 575340,
       "sourceSeason": 2026
     }
   ]
