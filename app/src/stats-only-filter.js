@@ -1,5 +1,6 @@
 const ONLY_VERIFIED_STATS = true;
 const VERIFIED_KEY = 'mp_verified_match_keys_v2';
+const VERIFIED_LEAGUES_KEY = 'mp_verified_leagues_v2';
 
 function norm(value) {
   return String(value || '')
@@ -14,18 +15,18 @@ function pairKey(home, away) {
   return `${norm(home)}__${norm(away)}`;
 }
 
-function readVerified() {
+function readSet(key) {
   try {
-    const value = JSON.parse(localStorage.getItem(VERIFIED_KEY) || '[]');
+    const value = JSON.parse(localStorage.getItem(key) || '[]');
     return new Set(Array.isArray(value) ? value : []);
   } catch (_) {
     return new Set();
   }
 }
 
-function writeVerified(set) {
+function writeSet(key, set) {
   try {
-    localStorage.setItem(VERIFIED_KEY, JSON.stringify([...set]));
+    localStorage.setItem(key, JSON.stringify([...set]));
   } catch (_) {}
 }
 
@@ -54,24 +55,30 @@ function replaceBuild78() {
 }
 
 function captureVerifiedCards(cards) {
-  const verified = readVerified();
+  const verified = readSet(VERIFIED_KEY);
+  const leagues = readSet(VERIFIED_LEAGUES_KEY);
+
   cards.forEach(card => {
     if (!hasVerifiedStats(card)) return;
     const info = cardInfo(card);
-    if (info.home && info.away) verified.add(pairKey(info.home, info.away));
+    if (!info.home || !info.away) return;
+    verified.add(pairKey(info.home, info.away));
+    if (info.league) leagues.add(norm(info.league));
   });
-  writeVerified(verified);
-  return verified;
+
+  writeSet(VERIFIED_KEY, verified);
+  writeSet(VERIFIED_LEAGUES_KEY, leagues);
+  return { verified, leagues };
 }
 
-function filterToday(cards, verified) {
+function filterToday(cards) {
   let visible = 0;
   cards.forEach(card => {
     const keep = hasVerifiedStats(card);
     card.style.display = keep ? '' : 'none';
     if (keep) visible++;
   });
-  return visible || verified.size;
+  return visible;
 }
 
 function updateTodayCounters(visible) {
@@ -128,27 +135,14 @@ function hideEmptyAiRows(verified) {
   }
 }
 
-function hideUnverifiedLeagues(verified) {
+function hideUnverifiedLeagues(leagues) {
   const buttons = [...document.querySelectorAll('.analysis-league')];
   if (!buttons.length) return;
-
-  const verifiedLeagues = new Set();
-  document.querySelectorAll('.match-card').forEach(card => {
-    if (!hasVerifiedStats(card)) return;
-    const info = cardInfo(card);
-    if (info.league) verifiedLeagues.add(norm(info.league));
-  });
 
   let shown = 0;
   buttons.forEach(button => {
     const name = norm(button.querySelector('b')?.textContent || '');
-    const keep = verifiedLeagues.has(name) || [...verified].some(key => {
-      const card = [...document.querySelectorAll('.match-card')].find(c => {
-        const info = cardInfo(c);
-        return pairKey(info.home, info.away) === key && norm(info.league) === name;
-      });
-      return !!card;
-    });
+    const keep = leagues.has(name);
     button.style.display = keep ? '' : 'none';
     if (keep) shown++;
   });
@@ -170,15 +164,18 @@ function applyStatsOnlyFilter() {
   replaceBuild78();
 
   const cards = [...document.querySelectorAll('.match-card')];
-  const verified = cards.length ? captureVerifiedCards(cards) : readVerified();
+  let verified = readSet(VERIFIED_KEY);
+  let leagues = readSet(VERIFIED_LEAGUES_KEY);
 
   if (cards.length) {
-    const visible = filterToday(cards, verified);
-    updateTodayCounters(visible);
+    const captured = captureVerifiedCards(cards);
+    verified = captured.verified;
+    leagues = captured.leagues;
+    updateTodayCounters(filterToday(cards));
   }
 
   hideEmptyAiRows(verified);
-  hideUnverifiedLeagues(verified);
+  hideUnverifiedLeagues(leagues);
 }
 
 let scheduled = false;
