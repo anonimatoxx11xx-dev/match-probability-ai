@@ -66,7 +66,7 @@ async function prepareBulkHistory(date){
           m=re.search(pat,x,re.S)
           if m:
               legacy=m.group(0).replace('async function fastHistory','async function legacyFastHistory',1)
-              replacement=legacy+r'''\nasync function fastHistory(name,ids){const map=await prepareBulkHistory(state.date);const rows=map.get(norm(name))||[];if(rows.length)return rows.slice(0,12);return legacyFastHistory(name,ids)}'''
+              replacement=legacy+"\nasync function fastHistory(name,ids){const map=await prepareBulkHistory(state.date);const rows=map.get(norm(name))||[];if(rows.length)return rows.slice(0,12);return legacyFastHistory(name,ids)}"
               x=x[:m.start()]+replacement+x[m.end():]
           q.write_text(x)
           print('bulk history injected:', 'prepareBulkHistory' in x, 'legacy fallback:', 'legacyFastHistory' in x)
