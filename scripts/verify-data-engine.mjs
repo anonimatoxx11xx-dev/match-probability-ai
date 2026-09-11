@@ -14,8 +14,12 @@ assert(realCompetition/matches.length>=0.95,`Only ${realCompetition}/${matches.l
 const sample=matches.filter(x=>/russian-premier-league|saudi-pro-league/i.test(x.espnSeasonSlug||'')).slice(0,3);
 assert(sample.length>=2,'Not enough supported league fixtures for historical verification');
 const analyzed=await Promise.all(sample.map(x=>analyzeMatch(x)));
-for(const x of analyzed)console.log(`${x.home} vs ${x.away} | ids=${x.homeData.espnId||'-'} | H2H=${x.h2hCount} | history=${x.H.form.length}/${x.A.form.length}`);
+for(const x of analyzed)console.log(`${x.home} vs ${x.away} | H2H=${x.h2hCount} | history=${x.H.form.length}/${x.A.form.length} | stats=${x.verifiedStats}`);
 assert(analyzed.every(x=>x.homeData.espnId&&x.awayData.espnId),'ESPN team ID lookup failed');
 assert(analyzed.every(x=>x.H.form.length>0&&x.A.form.length>0),'Historical team matches were not recovered');
 assert(analyzed.some(x=>x.h2hCount>0),'H2H returned zero meetings for every supported sample');
-console.log('PASS: full-day fixtures, competition labels, team history and automatic H2H are available.');
+assert(analyzed.every(x=>x.verifiedStats>=4),'Historical match statistics were not recovered');
+const statRows=analyzed.flatMap(x=>[...(x.H.form||[]),...(x.A.form||[])]).filter(x=>Object.values(x.data||{}).some(Number.isFinite));
+assert(statRows.length>=8,`Only ${statRows.length} historical rows contain real statistics`);
+assert(statRows.some(x=>Number.isFinite(x.data?.shots)||Number.isFinite(x.data?.corners)||Number.isFinite(x.data?.fouls)),'No usable shots/corners/fouls statistics recovered');
+console.log(`PASS: fixtures + competitions + team history + H2H + real historical statistics are available (${statRows.length} stat rows).`);
