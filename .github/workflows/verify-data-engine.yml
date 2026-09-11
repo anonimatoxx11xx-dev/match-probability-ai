@@ -1,0 +1,30 @@
+name: Verify Match Probability AI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'app/**'
+      - 'scripts/**'
+      - '.github/workflows/verify-data-engine.yml'
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install app dependencies
+        working-directory: app
+        run: npm install
+      - name: Test real daily fixtures and H2H
+        run: node scripts/verify-data-engine.mjs
+      - name: Build web app
+        working-directory: app
+        run: npm run build
