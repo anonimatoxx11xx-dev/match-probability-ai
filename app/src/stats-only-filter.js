@@ -1,6 +1,7 @@
 const ONLY_VERIFIED_STATS = true;
-const VERIFIED_KEY = 'mp_verified_match_keys_v2';
-const VERIFIED_LEAGUES_KEY = 'mp_verified_leagues_v2';
+const VERIFIED_KEY = 'mp_verified_match_keys_v3';
+const VERIFIED_LEAGUES_KEY = 'mp_verified_leagues_v3';
+const VERIFIED_SCOPE_KEY = 'mp_verified_scope_v3';
 
 function norm(value) {
   return String(value || '')
@@ -27,6 +28,22 @@ function readSet(key) {
 function writeSet(key, set) {
   try {
     localStorage.setItem(key, JSON.stringify([...set]));
+  } catch (_) {}
+}
+
+function currentScope() {
+  const date = document.querySelector('.hero-copy h2')?.textContent?.trim();
+  return date || new Date().toISOString().slice(0, 10);
+}
+
+function resetIfNewDay() {
+  const scope = currentScope();
+  try {
+    if (localStorage.getItem(VERIFIED_SCOPE_KEY) !== scope) {
+      localStorage.setItem(VERIFIED_SCOPE_KEY, scope);
+      localStorage.removeItem(VERIFIED_KEY);
+      localStorage.removeItem(VERIFIED_LEAGUES_KEY);
+    }
   } catch (_) {}
 }
 
@@ -122,7 +139,11 @@ function hideEmptyAiRows(verified) {
     const parts = text.split(/\s+vs\s+/i);
     const keep = parts.length === 2 && verified.has(pairKey(parts[0], parts[1]));
     row.style.display = keep ? '' : 'none';
-    if (keep) shown++;
+    if (keep) {
+      shown++;
+      const rank = row.querySelector('span');
+      if (rank) rank.textContent = String(shown);
+    }
   });
 
   const head = document.querySelector('.ai-board-head small');
@@ -162,6 +183,7 @@ function hideUnverifiedLeagues(leagues) {
 function applyStatsOnlyFilter() {
   if (!ONLY_VERIFIED_STATS) return;
   replaceBuild78();
+  resetIfNewDay();
 
   const cards = [...document.querySelectorAll('.match-card')];
   let verified = readSet(VERIFIED_KEY);
