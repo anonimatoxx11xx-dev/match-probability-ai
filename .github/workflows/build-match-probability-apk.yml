@@ -2,6 +2,9 @@ name: Build Match Probability AI APK
 
 on:
   workflow_dispatch:
+  workflow_run:
+    workflows: ["Verify Match Probability AI"]
+    types: [completed]
 
 permissions:
   contents: read
@@ -11,14 +14,17 @@ env:
 
 jobs:
   build-apk:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     defaults:
       run:
         working-directory: app
     steps:
-      - name: Checkout
+      - name: Checkout verified commit
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
