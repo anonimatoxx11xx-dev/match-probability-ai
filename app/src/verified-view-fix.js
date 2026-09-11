@@ -1,46 +1,43 @@
-const KEY='mp_verified_view_v1';
+const VERIFIED_KEY='mp_verified_match_keys_v3';
+const VERIFIED_LEAGUES_KEY='mp_verified_leagues_v3';
 const esc=x=>String(x??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]));
-
-function read(){try{return JSON.parse(sessionStorage.getItem(KEY)||'[]')}catch{return[]}}
-function write(rows){try{sessionStorage.setItem(KEY,JSON.stringify(rows.slice(0,100)))}catch{}}
-function capture(){
-  const cards=[...document.querySelectorAll('.match-card')];
-  if(!cards.length)return;
-  const rows=read();
-  for(const c of cards){
-    const proof=c.querySelector('.match-proof')?.textContent||'';
-    if(!/profili statistici/i.test(proof))continue;
-    const names=[...c.querySelectorAll('.team-name b')].map(x=>x.textContent.trim());
-    if(names.length<2)continue;
-    const league=(c.querySelector('.match-meta span')?.textContent||'').replace(/^\s*·\s*/,'').split(' · ').pop().trim();
-    const time=[...c.querySelectorAll('.match-meta span')].map(x=>x.textContent).find(x=>x.includes('◷'))?.replace('◷','').trim()||'';
-    const probs=[...c.querySelectorAll('.prob-grid b')].map(x=>x.textContent.trim());
-    const id=c.id.replace(/^match-/,'');
-    const item={id,home:names[0],away:names[1],league,time,probs,proof:proof.trim()};
-    const i=rows.findIndex(x=>x.id===id); if(i>=0)rows[i]=item; else rows.push(item);
-  }
-  write(rows);
+const norm=x=>String(x||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim();
+const key=(h,a)=>`${norm(h)}__${norm(a)}`;
+function setRead(k){try{const v=JSON.parse(localStorage.getItem(k)||'[]');return new Set(Array.isArray(v)?v:[])}catch{return new Set()}}
+function setWrite(k,s){try{localStorage.setItem(k,JSON.stringify([...s]))}catch{}}
+function verifiedRows(){
+  const rows=[];for(const c of document.querySelectorAll('.match-card')){
+    const proof=c.querySelector('.match-proof')?.textContent||'';if(!/profili statistici/i.test(proof))continue;
+    const n=[...c.querySelectorAll('.team-name b')].map(x=>x.textContent.trim());if(n.length<2)continue;
+    const meta=c.querySelector('.match-meta > span')?.textContent||'';
+    const league=meta.replace(/^.*?·\s*/,'').trim()||'Altra competizione';
+    rows.push({home:n[0],away:n[1],league});
+  }return rows;
 }
-function fixAI(){
-  const board=document.querySelector('.ai-board');
-  if(!board)return;
-  const ranks=board.querySelectorAll('.ai-rank');
-  if(ranks.length)return;
-  const rows=read(); if(!rows.length)return;
-  const sorted=[...rows].sort((a,b)=>Math.max(...(b.probs.map(x=>parseInt(x)||0))) - Math.max(...(a.probs.map(x=>parseInt(x)||0))));
-  const head=board.querySelector('.ai-board-head small'); if(head)head.textContent=`${sorted.length} analizzate · solo statistiche verificate`;
-  board.insertAdjacentHTML('beforeend',sorted.map((x,i)=>`<button class="ai-rank" type="button"><span>${i+1}</span><b>${esc(x.home)} vs ${esc(x.away)}</b><strong>${Math.max(...(x.probs.map(v=>parseInt(v)||0)))}%</strong></button>`).join(''));
+function capture(){const ks=setRead(VERIFIED_KEY),ls=setRead(VERIFIED_LEAGUES_KEY);for(const r of verifiedRows()){ks.add(key(r.home,r.away));ls.add(norm(r.league))}setWrite(VERIFIED_KEY,ks);setWrite(VERIFIED_LEAGUES_KEY,ls);return{ks,ls}}
+function fixToday(){
+  const cards=[...document.querySelectorAll('.match-card')];if(!cards.length)return;
+  let visible=0;for(const c of cards){const keep=/profili statistici/i.test(c.querySelector('.match-proof')?.textContent||'');c.style.display=keep?'':'none';if(keep)visible++}
+  const h=document.querySelector('.today-head h2');if(h)h.textContent=`Partite di oggi (${visible})`;
+  const p=document.querySelector('.progress77 b');if(p)p.textContent=`${visible} con dati verificati`;
+  const stats=document.querySelector('.hero-stats');if(stats){const cells=stats.querySelectorAll(':scope > div');if(cells[0]?.querySelector('b'))cells[0].querySelector('b').textContent=String(visible);if(cells[0]?.querySelector('small'))cells[0].querySelector('small').textContent='Partite con dati';if(cells[3]?.querySelector('b'))cells[3].querySelector('b').textContent=String(visible);if(cells[3]?.querySelector('small'))cells[3].querySelector('small').textContent='Statistiche verificate'}
 }
-function fixAnalysis(){
-  const page=document.querySelector('.page77');
-  const h1=page?.querySelector('h1');
-  if(!page||!h1||!/^Quadro dei campionati/i.test(h1.textContent))return;
-  if(page.querySelector('.analysis-league'))return;
-  const rows=read(); if(!rows.length)return;
-  const map=new Map(); for(const x of rows){const k=x.league||'Altra competizione';map.set(k,(map.get(k)||0)+1)}
-  h1.textContent=`Campionati con dati (${map.size})`;
-  const p=page.querySelector('p'); if(p)p.textContent='Mostro solo i campionati che hanno almeno una partita con statistiche verificabili.';
-  page.insertAdjacentHTML('beforeend',[...map.entries()].sort((a,b)=>b[1]-a[1]).map(([name,n])=>`<button class="analysis-league" data-league="${esc(name)}"><span>🏆</span><b>${esc(name)}</b><strong>${n}</strong></button>`).join(''));
+function fixAI(ks){
+  const rows=[...document.querySelectorAll('.ai-rank')];if(!rows.length)return;let shown=0;
+  for(const r of rows){const text=r.querySelector('b')?.textContent||'';const parts=text.split(/\s+vs\s+/i);const keep=parts.length===2&&ks.has(key(parts[0],parts[1]));r.style.display=keep?'':'none';if(keep){shown++;const n=r.querySelector('span');if(n)n.textContent=String(shown)}}
+  const head=document.querySelector('.ai-board-head small');if(head)head.textContent=`${shown} analizzate · solo statistiche verificate`;
 }
-function run(){capture();fixAI();fixAnalysis()}
-let timer=0;new MutationObserver(()=>{clearTimeout(timer);timer=setTimeout(run,80)}).observe(document.documentElement,{childList:true,subtree:true});run();
+function fixAnalysis(ls){
+  const page=document.querySelector('.page77');if(!page)return;const buttons=[...page.querySelectorAll('.analysis-league')];if(!buttons.length)return;let shown=0;
+  for(const b of buttons){const name=norm(b.querySelector('b')?.textContent||'');const keep=ls.has(name);b.style.display=keep?'':'none';if(keep)shown++}
+  const h=page.querySelector('h1');if(h&&(/Quadro dei campionati|Campionati con dati/i.test(h.textContent||'')))h.textContent=`Campionati con dati (${shown})`;
+  const p=page.querySelector('p');if(p)p.textContent='Mostro solo i campionati che hanno almeno una partita con statistiche verificabili.';
+}
+function run(){
+  document.querySelectorAll('.eyebrow,.app-header small').forEach(e=>{if(/BUILD 77/.test(e.textContent||''))e.textContent=e.textContent.replace(/BUILD 77/g,'BUILD 78')});
+  const captured=capture();fixToday();fixAI(captured.ks);fixAnalysis(captured.ls);
+}
+let timer=0;function schedule(){clearTimeout(timer);timer=setTimeout(run,120)}
+window.addEventListener('mp:verified-ready',schedule);
+new MutationObserver(schedule).observe(document.documentElement,{childList:true,subtree:true});
+run();
