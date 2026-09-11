@@ -1,3 +1,4 @@
+# APK release is gated by this workflow succeeding.
 name: Verify Match Probability AI
 
 on:
@@ -23,9 +24,6 @@ jobs:
       - name: Install app dependencies
         working-directory: app
         run: npm install
-      # This successful job is the release gate for the APK workflow.
-      - name: Install app dependencies gate marker
-        run: node -e "console.log('APK release gate: data verification must pass before workflow_run build')"
       - name: Test real daily fixtures and H2H
         run: node scripts/verify-data-engine.mjs
       - name: Build web app
