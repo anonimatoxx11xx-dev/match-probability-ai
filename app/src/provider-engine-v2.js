@@ -1,6 +1,8 @@
 const F='https://www.fotmob.com';
 const S='https://api.sofascore.com/api/v1';
 const E='https://site.api.espn.com/apis/site/v2/sports/soccer/all';
+const ESPN_SOCCER='https://site.api.espn.com/apis/site/v2/sports/soccer';
+const ESPN_LEAGUES=['eng.1','eng.2','eng.3','eng.4','esp.1','esp.2','ger.1','ger.2','ita.1','ita.2','fra.1','fra.2','ned.1','ned.2','bel.1','tur.1','aut.1','por.1','sco.2','den.1','swe.1','nor.1','usa.1','mex.1','arg.1','bra.1','uefa.champions','uefa.europa','conmebol.america'];
 const cache=new Map(),status={};
 const headers={Accept:'application/json','User-Agent':'Mozilla/5.0'};
 const dayOf=(x,tz='Europe/Rome')=>{if(!x)return'';const d=new Date(x);if(Number.isNaN(d.getTime()))return'';return new Intl.DateTimeFormat('en-CA',{timeZone:tz,year:'numeric',month:'2-digit',day:'2-digit'}).format(d)};
@@ -18,6 +20,17 @@ function fot(j,date){const out=[];for(const g of j?.leagues||j?.competitions||[]
 function espn(j,date){return(j?.events||[]).map(e=>{const c=e.competitions?.[0]?.competitors||[],h=c.find(x=>x.homeAway==='home')||c[0],a=c.find(x=>x.homeAway==='away')||c[1];if(!h?.team?.displayName||!a?.team?.displayName)return null;const tm=e.date||'';return dayOf(tm)===date?{id:'espn-'+e.id,eventId:String(e.id),espnEventId:String(e.id),espnIdHome:String(h.team.id||''),espnIdAway:String(a.team.id||''),espnSeasonSlug:e.season?.slug||'',home:h.team.displayName,away:a.team.displayName,league:espnLeague(e),country:e.league?.country?.name||'',time:tm,status:String(e.status?.type?.name||'notstarted').toLowerCase(),source:'ESPN'}:null}).filter(Boolean)}
 function merge(rows,date){const m=new Map();for(const r of rows){if(!r.home||!r.away||dayOf(r.time)!==date)continue;const k=norm(r.home)+'|'+norm(r.away)+'|'+date,cur=m.get(k);if(!cur){m.set(k,r);continue}const x={...cur,...r};for(const key of ['sofaIdHome','sofaIdAway','sofaEventId','sofaTournamentId','sofaSeasonId','espnIdHome','espnIdAway','espnEventId','espnSeasonSlug','fotId','fotIdHome','fotIdAway'])if(!x[key])x[key]=cur[key]||r[key]||null;x.source=[...new Set([...(cur.source||'').split('+'),...(r.source||'').split('+')].filter(Boolean))].join('+');const rl=r.league&&r.league!=='Altra competizione'?r.league:'';const cl=cur.league&&cur.league!=='Altra competizione'?cur.league:'';x.league=rl||cl||'Altra competizione';x.country=cur.country||r.country||'';m.set(k,x)}return[...m.values()].sort((a,b)=>new Date(a.time)-new Date(b.time))}
 async function enrichSofa(rows){const missing=rows.filter(x=>x.sofaEventId&&(!x.league||x.league==='Altra competizione'||!x.sofaTournamentId||!x.sofaSeasonId));for(let i=0;i<missing.length;i+=8){const batch=missing.slice(i,i+8);await Promise.all(batch.map(async x=>{const j=await get(`${S}/event/${x.sofaEventId}`,'SofaScore');const e=j?.event;if(!e)return;if(!x.league||x.league==='Altra competizione')x.league=league(e);if(!x.country)x.country=country(e);if(!x.sofaTournamentId)x.sofaTournamentId=uniqueTournamentId(e);if(!x.sofaSeasonId)x.sofaSeasonId=e.season?.id||e.season_id||null;if(!x.sofaIdHome)x.sofaIdHome=e.homeTeam?.id||e.home_team?.id||null;if(!x.sofaIdAway)x.sofaIdAway=e.awayTeam?.id||e.away_team?.id||null;if(!x.status)x.status=String(e.status?.type||e.status?.name||'').toLowerCase()}))}return rows}
-export async function todayMatches(date){const [s,f,e]=await Promise.all([get(`${S}/sport/football/scheduled-events/${date}`,'SofaScore'),get(`${F}/api/matches?date=${date.replaceAll('-','')}`,'FotMob'),get(`${E}/scoreboard?dates=${date.replaceAll('-','')}`,'ESPN')]);const sofaRows=(s?.events||[]).map(sofa).filter(Boolean);const fotRows=fot(f,date),espnRows=espn(e,date);const out=await enrichSofa(merge([...sofaRows,...fotRows,...espnRows],date));status.SofaScore={ok:sofaRows.length>0,error:sofaRows.length?'':(status.SofaScore?.error||'No daily fixtures')};status.FotMob={ok:fotRows.length>0,error:fotRows.length?'':(status.FotMob?.error||'No daily fixtures')};status.ESPN={ok:espnRows.length>0,error:espnRows.length?'':(status.ESPN?.error||'No daily fixtures')};return out}
+async function todayMatches(date){
+  const [s,f,e]=await Promise.all([get(`${S}/sport/football/scheduled-events/${date}`,'SofaScore'),get(`${F}/api/matches?date=${date.replaceAll('-','')}`,'FotMob'),get(`${E}/scoreboard?dates=${date.replaceAll('-','')}`,'ESPN')]);
+  const leagueResults=await Promise.all(ESPN_LEAGUES.map(slug=>get(`${ESPN_SOCCER}/${slug}/scoreboard?dates=${date.replaceAll('-','')}`,`ESPN:${slug}`)));
+  const sofaRows=(s?.events||[]).map(sofa).filter(Boolean);
+  const fotRows=fot(f,date);
+  const espnRows=[...espn(e,date),...leagueResults.flatMap(j=>espn(j,date))];
+  const out=await enrichSofa(merge([...sofaRows,...fotRows,...espnRows],date));
+  status.SofaScore={ok:sofaRows.length>0,error:sofaRows.length?'':(status.SofaScore?.error||'No daily fixtures')};
+  status.FotMob={ok:fotRows.length>0,error:fotRows.length?'':(status.FotMob?.error||'No daily fixtures')};
+  status.ESPN={ok:espnRows.length>0,error:espnRows.length?'':(status.ESPN?.error||'No daily fixtures')};
+  return out
+}
 export function diagnostics(){return Object.entries(status).map(([name,x])=>({name,ok:Boolean(x?.ok),error:x?.error||''}))}
 export function clearProviderCache(){cache.clear();for(const k of Object.keys(status))delete status[k]}
