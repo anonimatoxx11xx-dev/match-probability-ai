@@ -10,6 +10,8 @@ console.log('FIRST FIXTURES',matches.slice(0,10).map(x=>({source:x.source,league
 assert(matches.length>=40,`Only ${matches.length} fixtures returned`);
 assert(matches.every(x=>x.home&&x.away&&x.time&&x.eventId),'Fixture with missing team/time/event id');
 assert(new Set(matches.map(x=>x.home+'|'+x.away+'|'+x.time)).size===matches.length,'Duplicate fixture rows');
+const realCompetition=matches.filter(x=>x.league&&x.league!=='Altra competizione').length;
+assert(realCompetition/matches.length>=0.95,`Only ${realCompetition}/${matches.length} fixtures have a competition label`);
 const sample=matches.slice(0,5);
 const analyzed=await Promise.all(sample.map(x=>analyzeMatch(x)));
 console.log('SAMPLE ANALYSIS');
