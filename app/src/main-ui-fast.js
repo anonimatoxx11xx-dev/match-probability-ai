@@ -1,5 +1,6 @@
 import './style.css';
-import { todayMatches, diagnostics, clearProviderCache } from './provider-engine.js';
+import { todayMatches } from './fixture-engine.js';
+import { diagnostics, clearProviderCache } from './provider-engine.js';
 import { analyzeMatch, clearAnalysisCache } from './analysis-engine.js';
 const app=document.querySelector('#app');
 const BUILD='74';
