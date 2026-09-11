@@ -2,14 +2,11 @@ name: Build Android APK
 
 on:
   workflow_dispatch:
-  push:
-    paths:
-      - 'app/**'
-      - '.github/workflows/build-android-app.yml'
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     defaults:
       run:
         working-directory: app
@@ -25,26 +22,6 @@ jobs:
         uses: actions/setup-node@v5
         with:
           node-version: '22'
-      - name: Optimize fast analysis UI
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-          import re
-          q=Path('src/main-ui-fast.js')
-          x=q.read_text()
-          x=x.replace('BUILD 66','BUILD 73').replace('BUILD 67','BUILD 73').replace('BUILD 68','BUILD 73')
-          x=x.replace('Array.from({length:6},(_,p)=>','Array.from({length:2},(_,p)=>')
-          x=x.replace('for(let i=0;i<70;i+=7)','for(let i=0;i<21;i+=7)')
-          x=x.replace('await Promise.all([worker(),worker(),worker(),worker()]);','await Promise.all(Array.from({length:12},()=>worker()));')
-          x=x.replace('hf.slice(0,8).map','hf.slice(0,3).map').replace('af.slice(0,8).map','af.slice(0,3).map')
-          q.write_text(x)
-
-          p=Path('src/provider-engine.js')
-          if p.exists():
-              s=p.read_text()
-              s=s.replace("const providers=['SofaScore','FotMob','ESPN','TheSportsDB','API-Football']", "const providers=['SofaScore','FotMob']")
-              p.write_text(s)
-          PY
       - name: Install dependencies
         run: npm install
       - name: Build web app
@@ -55,7 +32,7 @@ jobs:
         run: npx cap sync android
       - name: Build debug APK
         working-directory: app/android
-        run: ./gradlew assembleDebug
+        run: ./gradlew assembleDebug --no-daemon
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
