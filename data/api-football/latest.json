@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-11T04:55:25.784Z",
+  "generatedAt": "2026-09-12T04:53:59.501Z",
   "season": 2026,
   "mode": "merged-api-football-plus-football-data-multi-season",
   "providers": [
@@ -178867,6 +178867,182 @@
       },
       "source": "football-data.org",
       "sourceMatchId": 575340,
+      "sourceSeason": 2026
+    },
+    {
+      "fixtureId": 200565797,
+      "kickoff": "2026-09-11T18:30:00Z",
+      "status": "FT",
+      "league": {
+        "id": 78,
+        "name": "Bundesliga",
+        "country": "Germany",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000028,
+        "name": "1. FC Union Berlin"
+      },
+      "away": {
+        "id": 100000006,
+        "name": "FC Schalke 04"
+      },
+      "goals": {
+        "home": 1,
+        "away": 3
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 565797,
+      "sourceSeason": 2026
+    },
+    {
+      "fixtureId": 200558606,
+      "kickoff": "2026-09-11T18:45:00Z",
+      "status": "FT",
+      "league": {
+        "id": 135,
+        "name": "Serie A",
+        "country": "Italy",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000454,
+        "name": "Venezia FC"
+      },
+      "away": {
+        "id": 100000099,
+        "name": "ACF Fiorentina"
+      },
+      "goals": {
+        "home": 2,
+        "away": 4
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 558606,
+      "sourceSeason": 2026
+    },
+    {
+      "fixtureId": 200559689,
+      "kickoff": "2026-09-11T18:45:00Z",
+      "status": "FT",
+      "league": {
+        "id": 61,
+        "name": "Ligue 1",
+        "country": "France",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000529,
+        "name": "Stade Rennais FC 1901"
+      },
+      "away": {
+        "id": 100000516,
+        "name": "Olympique de Marseille"
+      },
+      "goals": {
+        "home": 1,
+        "away": 0
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 559689,
+      "sourceSeason": 2026
+    },
+    {
+      "fixtureId": 200564669,
+      "kickoff": "2026-09-11T19:00:00Z",
+      "status": "FT",
+      "league": {
+        "id": 140,
+        "name": "La Liga",
+        "country": "Spain",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000559,
+        "name": "Sevilla FC"
+      },
+      "away": {
+        "id": 100000095,
+        "name": "Valencia CF"
+      },
+      "goals": {
+        "home": 1,
+        "away": 0
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 564669,
       "sourceSeason": 2026
     }
   ]
