@@ -51,6 +51,13 @@ jobs:
       - name: Install npm dependencies
         run: npm install
 
+      - name: Select Build80 UI entrypoint
+        run: |
+          set -euo pipefail
+          test -f src/main-ui-build80.js
+          sed -i "s#src/main-ui-build79.js#src/main-ui-build80.js#" index.html
+          grep -q "main-ui-build80.js" index.html
+
       - name: Build web bundle
         run: npm run build
 
