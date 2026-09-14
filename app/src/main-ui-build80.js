@@ -13,9 +13,6 @@ const upgradeBuildLabel=()=>{
 new MutationObserver(upgradeBuildLabel).observe(document.documentElement,{subtree:true,childList:true,characterData:true});
 upgradeBuildLabel();
 
-// BUILD 80: force the WebView back to the real document top after every UI render.
-// The previous version used behavior:'instant', which is not consistently supported
-// by Android WebView and could leave the new page visually offset by hundreds of px.
 const forceTop=()=>{
   document.documentElement.scrollTop=0;
   document.body.scrollTop=0;
@@ -23,12 +20,31 @@ const forceTop=()=>{
 };
 try{history.scrollRestoration='manual'}catch(_e){}
 
+// BUILD 80 HARD FIX: Build79 renders the page body inside <header> because the
+// legacy template is missing the closing header tag. Normalize that UI-only DOM
+// structure after every render. Build78/79 engines and data are untouched.
+let normalizing=false;
+const normalizeLayout=()=>{
+  if(normalizing)return;
+  const app=document.querySelector('#app>.app');
+  const header=app?.querySelector(':scope > header');
+  if(!app||!header)return;
+  const move=[...header.children].filter(el=>!el.classList.contains('brand')&&!el.classList.contains('header-icons'));
+  if(!move.length)return;
+  normalizing=true;
+  move.forEach(el=>app.appendChild(el));
+  normalizing=false;
+  forceTop();
+};
+
 const resetScrollOnNavigation=()=>{
   document.addEventListener('click',e=>{
     const target=e.target?.closest?.('[data-tab],[data-league]');
     if(!target)return;
+    normalizeLayout();
     forceTop();
     requestAnimationFrame(()=>{
+      normalizeLayout();
       forceTop();
       requestAnimationFrame(forceTop);
       setTimeout(forceTop,0);
@@ -38,8 +54,13 @@ const resetScrollOnNavigation=()=>{
 };
 resetScrollOnNavigation();
 
-// Also guard programmatic render() calls: when a section is rebuilt, reset the
-// document position on the next frame without touching the Build78/79 engines.
-new MutationObserver(()=>{
-  if(document.querySelector('#app')?.firstElementChild) requestAnimationFrame(forceTop);
-}).observe(document.querySelector('#app'),{childList:true});
+const layoutObserver=new MutationObserver(()=>{
+  normalizeLayout();
+  if(document.querySelector('#app')?.firstElementChild)requestAnimationFrame(forceTop);
+});
+const observeApp=()=>{
+  const root=document.querySelector('#app');
+  if(root)layoutObserver.observe(root,{childList:true,subtree:false});
+  normalizeLayout();
+};
+observeApp();
