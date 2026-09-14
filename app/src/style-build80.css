@@ -1,0 +1,34 @@
+@import './style-build79.css';
+
+/* BUILD 80 — visual polish only. Build78/79 engines remain untouched. */
+html,body{min-height:100%;overflow-x:hidden}
+body{padding-bottom:env(safe-area-inset-bottom,0px)}
+.app{padding-bottom:calc(150px + env(safe-area-inset-bottom,0px))}
+header{padding-top:env(safe-area-inset-top,0px);height:calc(70px + env(safe-area-inset-top,0px))}
+nav{bottom:calc(8px + env(safe-area-inset-bottom,0px));padding-bottom:calc(6px + env(safe-area-inset-bottom,0px))}
+.match-list{padding-bottom:8px}
+.match-card{scroll-margin-bottom:150px}
+.today-head{position:relative;z-index:2}
+.hero{scroll-margin-top:76px}
+.page{padding-bottom:30px}
+.panel-list,.stats,.ai-list,.sources{margin-bottom:20px}
+
+/* More breathing room around the match information on compact screens. */
+@media(max-width:700px){
+  .app{padding-left:9px;padding-right:9px;padding-bottom:calc(148px + env(safe-area-inset-bottom,0px))}
+  header{height:calc(64px + env(safe-area-inset-top,0px))}
+  nav{width:calc(100% - 18px);bottom:calc(7px + env(safe-area-inset-bottom,0px))}
+  .match-card{padding-bottom:12px}
+  .match-list{gap:11px}
+  .proof{padding-bottom:2px}
+}
+
+@media(max-width:430px){
+  .app{padding-bottom:calc(152px + env(safe-area-inset-bottom,0px))}
+  nav{width:calc(100% - 16px)}
+  .hero{border-radius:26px}
+  .hero-stats{overflow:hidden}
+  .hero-stats div{min-width:0}
+  .match-main{padding-right:143px}
+  .ai-box{right:6px}
+}
