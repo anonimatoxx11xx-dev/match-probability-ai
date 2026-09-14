@@ -16,12 +16,13 @@ permissions:
 
 env:
   JAVA_VERSION: '21'
+  BUILD_TOOLS_VERSION: '35.0.0'
 
 jobs:
   build-apk:
     if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'push' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     defaults:
       run:
         working-directory: app
@@ -30,37 +31,101 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: ${{ env.JAVA_VERSION }}
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 22
+
+      - name: Install Android build tools
+        working-directory: .
+        run: |
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "build-tools;${BUILD_TOOLS_VERSION}"
+
       - name: Install npm dependencies
         run: npm install
+
       - name: Build web bundle
         run: npm run build
+
       - name: Add Android platform
         run: npx cap add android
+
       - name: Sync Capacitor
         run: npx cap sync android
+
       - name: Make Gradle executable
         run: chmod +x android/gradlew
+
       - name: Build debug APK
         run: ./android/gradlew -p android assembleDebug --no-daemon
-      - name: Verify and stage APK
+
+      - name: Zipalign and re-sign APK with APK Signature Scheme v2+
+        working-directory: .
         run: |
           set -euo pipefail
-          APK="$GITHUB_WORKSPACE/app/android/app/build/outputs/apk/debug/app-debug.apk"
-          test -f "$APK"
+          TOOLS="$ANDROID_HOME/build-tools/${BUILD_TOOLS_VERSION}"
+          INPUT="$GITHUB_WORKSPACE/app/android/app/build/outputs/apk/debug/app-debug.apk"
+          ALIGNED="$GITHUB_WORKSPACE/app/android/app/build/outputs/apk/debug/app-debug-aligned.apk"
+          FINAL="$GITHUB_WORKSPACE/artifacts/Match-Probability-AI.apk"
           mkdir -p "$GITHUB_WORKSPACE/artifacts"
-          cp "$APK" "$GITHUB_WORKSPACE/artifacts/Match-Probability-AI.apk"
-          test -s "$GITHUB_WORKSPACE/artifacts/Match-Probability-AI.apk"
-          unzip -t "$GITHUB_WORKSPACE/artifacts/Match-Probability-AI.apk"
-          unzip -l "$GITHUB_WORKSPACE/artifacts/Match-Probability-AI.apk" | grep -E 'META-INF/.*\.(RSA|SF)$' || true
+
+          test -x "$TOOLS/zipalign"
+          test -x "$TOOLS/apksigner"
+          test -f "$INPUT"
+
+          # Android R+ requires resources.arsc to be uncompressed and 4-byte aligned.
+          # Align BEFORE signing so APK Signature Scheme v2 covers the final bytes.
+          "$TOOLS/zipalign" -f -p 4 "$INPUT" "$ALIGNED"
+
+          # Remove the old Gradle signature by rebuilding the final signature over the aligned APK.
+          # Use the standard debug keystore available in the Android SDK.
+          DEBUG_KEYSTORE="$HOME/.android/debug.keystore"
+          if [ ! -f "$DEBUG_KEYSTORE" ]; then
+            keytool -genkeypair -v \
+              -keystore "$DEBUG_KEYSTORE" \
+              -storepass android \
+              -alias androiddebugkey \
+              -keypass android \
+              -keyalg RSA -keysize 2048 \
+              -validity 10000 \
+              -dname 'CN=Android Debug,O=Android,C=US'
+          fi
+
+          "$TOOLS/apksigner" sign \
+            --ks "$DEBUG_KEYSTORE" \
+            --ks-pass pass:android \
+            --key-pass pass:android \
+            --ks-key-alias androiddebugkey \
+            --min-sdk-version 23 \
+            --max-sdk-version 35 \
+            --v1-signing-enabled true \
+            --v2-signing-enabled true \
+            --v3-signing-enabled true \
+            --v4-signing-enabled false \
+            --out "$FINAL" "$ALIGNED"
+
+          # Mandatory verification: signature schemes + ZIP integrity + resources.arsc alignment.
+          "$TOOLS/apksigner" verify --verbose --print-certs "$FINAL"
+          unzip -t "$FINAL"
+          python3 - <<'PY'
+          import struct, zipfile
+          apk = 'artifacts/Match-Probability-AI.apk'
+          with zipfile.ZipFile(apk) as z:
+              info = z.getinfo('resources.arsc')
+              assert info.compress_type == zipfile.ZIP_STORED, 'resources.arsc is compressed'
+              data_offset = info.header_offset + 30 + len(info.filename.encode()) + len(info.extra)
+              assert data_offset % 4 == 0, f'resources.arsc data offset {data_offset} is not 4-byte aligned'
+              print('resources.arsc: STORED and 4-byte aligned at', data_offset)
+          PY
+          test -s "$FINAL"
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
