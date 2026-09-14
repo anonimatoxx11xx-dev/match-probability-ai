@@ -13,3 +13,14 @@ const upgradeBuildLabel=()=>{
 };
 new MutationObserver(upgradeBuildLabel).observe(document.documentElement,{subtree:true,childList:true,characterData:true});
 upgradeBuildLabel();
+
+// When changing sections, always return to the top. Without this, the browser keeps
+// the previous scroll position and can leave a large empty area above the new page.
+const resetScrollOnNavigation=()=>{
+  document.addEventListener('click',e=>{
+    const target=e.target?.closest?.('[data-tab],[data-league]');
+    if(!target)return;
+    requestAnimationFrame(()=>window.scrollTo({top:0,left:0,behavior:'instant'}));
+  },true);
+};
+resetScrollOnNavigation();
