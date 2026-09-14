@@ -2,6 +2,11 @@ name: Build Match Probability AI APK
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'app/**'
+      - '.github/workflows/build-match-probability-apk.yml'
   workflow_run:
     workflows: ["Verify Match Probability AI"]
     types: [completed]
@@ -14,7 +19,7 @@ env:
 
 jobs:
   build-apk:
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'push' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     defaults:
@@ -54,6 +59,7 @@ jobs:
           mkdir -p "$GITHUB_WORKSPACE/artifacts"
           cp "$APK" "$GITHUB_WORKSPACE/artifacts/Match-Probability-AI.apk"
           test -s "$GITHUB_WORKSPACE/artifacts/Match-Probability-AI.apk"
+          unzip -t "$GITHUB_WORKSPACE/artifacts/Match-Probability-AI.apk"
           unzip -l "$GITHUB_WORKSPACE/artifacts/Match-Probability-AI.apk" | grep -E 'META-INF/.*\.(RSA|SF)$' || true
       - name: Upload APK
         uses: actions/upload-artifact@v4
