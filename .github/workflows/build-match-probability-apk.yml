@@ -84,9 +84,10 @@ jobs:
           # Align BEFORE signing so APK Signature Scheme v2 covers the final bytes.
           "$TOOLS/zipalign" -f -p 4 "$INPUT" "$ALIGNED"
 
-          # Remove the old Gradle signature by rebuilding the final signature over the aligned APK.
-          # Use the standard debug keystore available in the Android SDK.
+          # Re-sign the aligned bytes. apksigner removes any old signature and creates
+          # fresh V1/V2/V3 signatures over the final APK contents.
           DEBUG_KEYSTORE="$HOME/.android/debug.keystore"
+          mkdir -p "$HOME/.android"
           if [ ! -f "$DEBUG_KEYSTORE" ]; then
             keytool -genkeypair -v \
               -keystore "$DEBUG_KEYSTORE" \
@@ -115,7 +116,7 @@ jobs:
           "$TOOLS/apksigner" verify --verbose --print-certs "$FINAL"
           unzip -t "$FINAL"
           python3 - <<'PY'
-          import struct, zipfile
+          import zipfile
           apk = 'artifacts/Match-Probability-AI.apk'
           with zipfile.ZipFile(apk) as z:
               info = z.getinfo('resources.arsc')
