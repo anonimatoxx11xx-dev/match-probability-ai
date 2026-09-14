@@ -2,7 +2,6 @@
 import './main-ui-build79.js';
 import './style-build80.css';
 
-// Keep the proven Build79 rendering/data path intact while presenting this release as Build80.
 const upgradeBuildLabel=()=>{
   const root=document.querySelector('#app');
   if(!root)return;
@@ -14,13 +13,33 @@ const upgradeBuildLabel=()=>{
 new MutationObserver(upgradeBuildLabel).observe(document.documentElement,{subtree:true,childList:true,characterData:true});
 upgradeBuildLabel();
 
-// When changing sections, always return to the top. Without this, the browser keeps
-// the previous scroll position and can leave a large empty area above the new page.
+// BUILD 80: force the WebView back to the real document top after every UI render.
+// The previous version used behavior:'instant', which is not consistently supported
+// by Android WebView and could leave the new page visually offset by hundreds of px.
+const forceTop=()=>{
+  document.documentElement.scrollTop=0;
+  document.body.scrollTop=0;
+  window.scrollTo(0,0);
+};
+try{history.scrollRestoration='manual'}catch(_e){}
+
 const resetScrollOnNavigation=()=>{
   document.addEventListener('click',e=>{
     const target=e.target?.closest?.('[data-tab],[data-league]');
     if(!target)return;
-    requestAnimationFrame(()=>window.scrollTo({top:0,left:0,behavior:'instant'}));
+    forceTop();
+    requestAnimationFrame(()=>{
+      forceTop();
+      requestAnimationFrame(forceTop);
+      setTimeout(forceTop,0);
+      setTimeout(forceTop,80);
+    });
   },true);
 };
 resetScrollOnNavigation();
+
+// Also guard programmatic render() calls: when a section is rebuilt, reset the
+// document position on the next frame without touching the Build78/79 engines.
+new MutationObserver(()=>{
+  if(document.querySelector('#app')?.firstElementChild) requestAnimationFrame(forceTop);
+}).observe(document.querySelector('#app'),{childList:true});
