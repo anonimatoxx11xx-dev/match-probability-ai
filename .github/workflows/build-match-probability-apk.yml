@@ -80,12 +80,14 @@ jobs:
           test -x "$TOOLS/apksigner"
           test -f "$INPUT"
 
-          # Android R+ requires resources.arsc to be uncompressed and 4-byte aligned.
-          # Align BEFORE signing so APK Signature Scheme v2 covers the final bytes.
-          "$TOOLS/zipalign" -f -p 4 "$INPUT" "$ALIGNED"
+          # Android 11+ requires resources.arsc to be STORED and 4-byte aligned.
+          # zipalign MUST run before apksigner because v2+ signs the final APK bytes.
+          # -P 16 additionally aligns uncompressed native .so files for modern Android.
+          "$TOOLS/zipalign" -P 16 -f 4 "$INPUT" "$ALIGNED"
 
-          # Re-sign the aligned bytes. apksigner removes any old signature and creates
-          # fresh V1/V2/V3 signatures over the final APK contents.
+          # Verify the actual ZIP alignment before signing.
+          "$TOOLS/zipalign" -c -P 16 -v 4 "$ALIGNED"
+
           DEBUG_KEYSTORE="$HOME/.android/debug.keystore"
           mkdir -p "$HOME/.android"
           if [ ! -f "$DEBUG_KEYSTORE" ]; then
@@ -99,6 +101,7 @@ jobs:
               -dname 'CN=Android Debug,O=Android,C=US'
           fi
 
+          # Sign the already-aligned APK. apksigner preserves ZIP alignment/compression.
           "$TOOLS/apksigner" sign \
             --ks "$DEBUG_KEYSTORE" \
             --ks-pass pass:android \
@@ -112,19 +115,34 @@ jobs:
             --v4-signing-enabled false \
             --out "$FINAL" "$ALIGNED"
 
-          # Mandatory verification: signature schemes + ZIP integrity + resources.arsc alignment.
+          # Mandatory verification after signing.
           "$TOOLS/apksigner" verify --verbose --print-certs "$FINAL"
+          "$TOOLS/zipalign" -c -P 16 -v 4 "$FINAL"
           unzip -t "$FINAL"
+
+          # Verify resources.arsc using the LOCAL ZIP header.
+          # Python's ZipInfo.extra describes the central-directory extra field;
+          # zipalign changes the LOCAL header padding, so checking ZipInfo.extra
+          # can report a false failure even when the APK is correctly aligned.
           python3 - <<'PY'
+          import struct
           import zipfile
+
           apk = 'artifacts/Match-Probability-AI.apk'
           with zipfile.ZipFile(apk) as z:
               info = z.getinfo('resources.arsc')
               assert info.compress_type == zipfile.ZIP_STORED, 'resources.arsc is compressed'
-              data_offset = info.header_offset + 30 + len(info.filename.encode()) + len(info.extra)
-              assert data_offset % 4 == 0, f'resources.arsc data offset {data_offset} is not 4-byte aligned'
-              print('resources.arsc: STORED and 4-byte aligned at', data_offset)
+              with open(apk, 'rb') as f:
+                  f.seek(info.header_offset)
+                  local = f.read(30)
+                  sig, = struct.unpack_from('<I', local, 0)
+                  assert sig == 0x04034B50, f'bad local ZIP header: {sig:#x}'
+                  name_len, extra_len = struct.unpack_from('<HH', local, 26)
+                  data_offset = info.header_offset + 30 + name_len + extra_len
+                  assert data_offset % 4 == 0, f'resources.arsc data offset {data_offset} is not 4-byte aligned'
+                  print('resources.arsc: STORED and 4-byte aligned at', data_offset)
           PY
+
           test -s "$FINAL"
 
       - name: Upload APK
