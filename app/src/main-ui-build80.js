@@ -20,19 +20,22 @@ const forceTop=()=>{
 };
 try{history.scrollRestoration='manual'}catch(_e){}
 
-// BUILD 80 HARD FIX: Build79 renders the page body inside <header> because the
-// legacy template is missing the closing header tag. Normalize that UI-only DOM
-// structure after every render. Build78/79 engines and data are untouched.
+// BUILD 80 HARD FIX v2: the legacy Build79 template can leave the rendered
+// page inside <header>. Move the actual page sections out of header regardless
+// of nesting depth. This is UI-only; Build78/79 engines and data are untouched.
 let normalizing=false;
 const normalizeLayout=()=>{
   if(normalizing)return;
   const app=document.querySelector('#app>.app');
-  const header=app?.querySelector(':scope > header');
-  if(!app||!header)return;
-  const move=[...header.children].filter(el=>!el.classList.contains('brand')&&!el.classList.contains('header-icons'));
-  if(!move.length)return;
+  if(!app)return;
+  const header=app.querySelector(':scope > header');
+  if(!header)return;
+
+  const sections=[...header.querySelectorAll('.hero,.page,nav')];
+  if(!sections.length)return;
+
   normalizing=true;
-  move.forEach(el=>app.appendChild(el));
+  sections.forEach(el=>app.appendChild(el));
   normalizing=false;
   forceTop();
 };
@@ -47,8 +50,8 @@ const resetScrollOnNavigation=()=>{
       normalizeLayout();
       forceTop();
       requestAnimationFrame(forceTop);
-      setTimeout(forceTop,0);
-      setTimeout(forceTop,80);
+      setTimeout(()=>{normalizeLayout();forceTop()},0);
+      setTimeout(()=>{normalizeLayout();forceTop()},80);
     });
   },true);
 };
@@ -60,7 +63,7 @@ const layoutObserver=new MutationObserver(()=>{
 });
 const observeApp=()=>{
   const root=document.querySelector('#app');
-  if(root)layoutObserver.observe(root,{childList:true,subtree:false});
+  if(root)layoutObserver.observe(root,{childList:true,subtree:true});
   normalizeLayout();
 };
 observeApp();
