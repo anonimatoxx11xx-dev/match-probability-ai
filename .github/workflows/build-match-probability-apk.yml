@@ -51,12 +51,12 @@ jobs:
       - name: Install npm dependencies
         run: npm install
 
-      - name: Select Build87 UI entrypoint
+      - name: Select Build88 UI entrypoint
         run: |
           set -euo pipefail
-          test -f src/main-ui-build87.js
-          sed -i "s#src/main-ui-build79.js#src/main-ui-build87.js#" index.html
-          grep -q "main-ui-build87.js" index.html
+          test -f src/main-ui-build88.js
+          sed -i "s#src/main-ui-build79.js#src/main-ui-build88.js#" index.html
+          grep -q "main-ui-build88.js" index.html
 
       - name: Fix legacy Build79 header template
         run: |
@@ -99,60 +99,33 @@ jobs:
           ALIGNED="$GITHUB_WORKSPACE/app/android/app/build/outputs/apk/debug/app-debug-aligned.apk"
           FINAL="$GITHUB_WORKSPACE/artifacts/Match-Probability-AI.apk"
           mkdir -p "$GITHUB_WORKSPACE/artifacts"
-
           test -x "$TOOLS/zipalign"
           test -x "$TOOLS/apksigner"
           test -f "$INPUT"
-
           "$TOOLS/zipalign" -P 16 -f 4 "$INPUT" "$ALIGNED"
           "$TOOLS/zipalign" -c -P 16 -v 4 "$ALIGNED"
-
           DEBUG_KEYSTORE="$HOME/.android/debug.keystore"
           mkdir -p "$HOME/.android"
           if [ ! -f "$DEBUG_KEYSTORE" ]; then
-            keytool -genkeypair -v \
-              -keystore "$DEBUG_KEYSTORE" \
-              -storepass android \
-              -alias androiddebugkey \
-              -keypass android \
-              -keyalg RSA -keysize 2048 \
-              -validity 10000 \
-              -dname 'CN=Android Debug,O=Android,C=US'
+            keytool -genkeypair -v -keystore "$DEBUG_KEYSTORE" -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname 'CN=Android Debug,O=Android,C=US'
           fi
-
-          "$TOOLS/apksigner" sign \
-            --ks "$DEBUG_KEYSTORE" \
-            --ks-pass pass:android \
-            --key-pass pass:android \
-            --ks-key-alias androiddebugkey \
-            --min-sdk-version 23 \
-            --max-sdk-version 35 \
-            --v1-signing-enabled true \
-            --v2-signing-enabled true \
-            --v3-signing-enabled true \
-            --v4-signing-enabled false \
-            --out "$FINAL" "$ALIGNED"
-
+          "$TOOLS/apksigner" sign --ks "$DEBUG_KEYSTORE" --ks-pass pass:android --key-pass pass:android --ks-key-alias androiddebugkey --min-sdk-version 23 --max-sdk-version 35 --v1-signing-enabled true --v2-signing-enabled true --v3-signing-enabled true --v4-signing-enabled false --out "$FINAL" "$ALIGNED"
           "$TOOLS/apksigner" verify --verbose --print-certs "$FINAL"
           "$TOOLS/zipalign" -c -P 16 -v 4 "$FINAL"
           unzip -t "$FINAL"
-
           python3 - <<'PY'
-          import struct
-          import zipfile
-          apk = 'artifacts/Match-Probability-AI.apk'
+          import struct,zipfile
+          apk='artifacts/Match-Probability-AI.apk'
           with zipfile.ZipFile(apk) as z:
-              info = z.getinfo('resources.arsc')
-              assert info.compress_type == zipfile.ZIP_STORED, 'resources.arsc is compressed'
-              with open(apk, 'rb') as f:
-                  f.seek(info.header_offset)
-                  local = f.read(30)
-                  sig, = struct.unpack_from('<I', local, 0)
-                  assert sig == 0x04034B50, f'bad local ZIP header: {sig:#x}'
-                  name_len, extra_len = struct.unpack_from('<HH', local, 26)
-                  data_offset = info.header_offset + 30 + name_len + extra_len
-                  assert data_offset % 4 == 0, f'resources.arsc data offset {data_offset} is not 4-byte aligned'
-                  print('resources.arsc: STORED and 4-byte aligned at', data_offset)
+              info=z.getinfo('resources.arsc')
+              assert info.compress_type==zipfile.ZIP_STORED,'resources.arsc is compressed'
+              with open(apk,'rb') as f:
+                  f.seek(info.header_offset); local=f.read(30)
+                  sig,=struct.unpack_from('<I',local,0); assert sig==0x04034B50
+                  name_len,extra_len=struct.unpack_from('<HH',local,26)
+                  data_offset=info.header_offset+30+name_len+extra_len
+                  assert data_offset%4==0,f'resources.arsc data offset {data_offset} is not 4-byte aligned'
+                  print('resources.arsc: STORED and 4-byte aligned at',data_offset)
           PY
           test -s "$FINAL"
 
