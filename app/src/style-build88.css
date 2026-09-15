@@ -1,0 +1,24 @@
+/* BUILD 88 — definitive touch/scroll correction. UI only; Build78 engine/data untouched. */
+html,body,#app{width:100%!important;min-height:100%!important;height:auto!important;overflow-x:hidden!important;overflow-y:auto!important;touch-action:pan-y!important;-webkit-overflow-scrolling:touch!important}
+body{position:relative!important;padding-bottom:0!important}
+#app{position:relative!important}
+#app>.app{position:relative!important;width:100%!important;max-width:1100px!important;height:auto!important;min-height:100dvh!important;overflow:visible!important;touch-action:pan-y!important;pointer-events:auto!important;padding-top:26px!important;padding-bottom:170px!important}
+#app>.app::after{pointer-events:none!important}
+#app>.app>header{position:sticky!important;top:0!important;z-index:50!important;pointer-events:auto!important}
+#app>.app>.hero,#app>.app>.page,#app>.app>.content,#app>.app>main{position:relative!important;z-index:1!important;pointer-events:auto!important}
+.match-card,.match-card *{touch-action:pan-y!important}
+.match-card button,.match-card a,.header-icons button,nav button,.tabs button,.league-tabs button{touch-action:manipulation!important;pointer-events:auto!important}
+/* Bottom navigation remains visible but cannot create an invisible touch layer outside its buttons. */
+#app>.app>nav{position:fixed!important;left:8px!important;right:8px!important;bottom:max(8px,env(safe-area-inset-bottom,8px))!important;width:auto!important;height:82px!important;z-index:9999!important;pointer-events:auto!important;touch-action:manipulation!important}
+#app>.app>nav::before,#app>.app>nav::after{pointer-events:none!important}
+#app>.app>nav button{position:relative!important;z-index:2!important}
+/* Keep the card readable and give the page real scrollable length. */
+.match-card{position:relative!important;z-index:1!important;margin-bottom:12px!important}
+.market-line{overflow-x:auto!important;overflow-y:hidden!important;touch-action:pan-x!important}
+@media(max-width:600px){
+  html,body,#app{overflow-y:auto!important;touch-action:pan-y!important}
+  #app>.app{padding:28px 8px 175px!important;min-height:100dvh!important;height:auto!important;overflow:visible!important}
+  #app>.app>header{position:sticky!important;top:0!important}
+  #app>.app>nav{left:8px!important;right:8px!important;bottom:max(6px,env(safe-area-inset-bottom,6px))!important;height:82px!important}
+  .page{padding-bottom:20px!important}
+}
