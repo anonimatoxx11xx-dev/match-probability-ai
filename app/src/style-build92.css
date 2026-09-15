@@ -1,0 +1,104 @@
+/* BUILD 92 — clean Today layout. No scroll-container hacks. UI ONLY. */
+@import './style-build85.css';
+
+/* Return the page to ordinary document flow. No fixed #app, no forced scroll owner. */
+html,body{
+  margin:0!important;
+  width:100%!important;
+  min-height:100vh!important;
+}
+body{position:relative!important;}
+#app{width:100%!important;position:relative!important;}
+#app>.app{
+  width:100%!important;
+  max-width:940px!important;
+  min-height:100vh!important;
+  height:auto!important;
+  margin:0 auto!important;
+  padding:calc(7px + env(safe-area-inset-top,0px)) 8px calc(24px + env(safe-area-inset-bottom,0px))!important;
+  position:relative!important;
+}
+#app>.app>header{
+  position:relative!important;
+  top:auto!important;
+  height:64px!important;
+  min-height:64px!important;
+  max-height:64px!important;
+  margin:0 0 8px!important;
+}
+
+/* Bottom navigation belongs to document flow, so it can never cover a match. */
+#app>.app>nav{
+  position:relative!important;
+  left:auto!important;
+  right:auto!important;
+  top:auto!important;
+  bottom:auto!important;
+  transform:none!important;
+  width:100%!important;
+  height:82px!important;
+  margin:20px 0 4px!important;
+  z-index:10!important;
+  pointer-events:auto!important;
+}
+#app>.app>nav button{pointer-events:auto!important;}
+
+/* Match cards: three-column team row, AI panel below. Nothing is allowed to
+   extend the card horizontally on a phone. */
+.match-card{width:100%!important;max-width:100%!important;min-width:0!important;}
+.match-main{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) 36px minmax(0,1fr)!important;
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  padding-right:0!important;
+  gap:6px!important;
+  min-height:96px!important;
+  margin-top:8px!important;
+}
+.team{min-width:0!important;max-width:100%!important;}
+.team.home{justify-content:flex-end!important;}
+.team.away{justify-content:flex-start!important;}
+.team-copy{min-width:0!important;max-width:calc(100% - 46px)!important;}
+.team-copy b{max-width:100%!important;overflow:hidden!important;text-overflow:ellipsis!important;}
+.crest{width:46px!important;height:46px!important;flex:0 0 46px!important;}
+.crest img{width:40px!important;height:40px!important;}
+.vs{width:36px!important;}
+.ai-box{
+  position:relative!important;
+  right:auto!important;
+  top:auto!important;
+  grid-column:1 / -1!important;
+  grid-row:2!important;
+  width:100%!important;
+  max-width:100%!important;
+  margin:4px 0 0!important;
+  box-sizing:border-box!important;
+}
+.market-line{max-width:100%!important;}
+
+/* Keep the Today heading and tabs inside the phone width. */
+.hero,.today-head,.league-tabs,.view-tabs,.match-list,.markets-footer{max-width:100%!important;min-width:0!important;}
+.league-tabs,.market-line,.markets-footer>div{scrollbar-width:none;}
+
+@media(max-width:600px){
+  #app>.app{padding-left:8px!important;padding-right:8px!important;}
+  .hero{margin-top:4px!important;}
+  .match-card{padding:11px 10px 10px!important;}
+  .match-main{grid-template-columns:minmax(0,1fr) 32px minmax(0,1fr)!important;gap:4px!important;}
+  .vs{width:32px!important;}
+  .crest{width:42px!important;height:42px!important;flex-basis:42px!important;}
+  .crest img{width:36px!important;height:36px!important;}
+  .team-copy{max-width:calc(100% - 47px)!important;}
+  .team-copy b{font-size:13px!important;}
+  #app>.app>nav{height:82px!important;margin-top:20px!important;}
+}
+@media(max-width:430px){
+  .match-main{grid-template-columns:minmax(0,1fr) 30px minmax(0,1fr)!important;}
+  .vs{width:30px!important;}
+  .crest{width:40px!important;height:40px!important;flex-basis:40px!important;}
+  .crest img{width:34px!important;height:34px!important;}
+  .team{gap:4px!important;}
+  .team-copy{max-width:calc(100% - 44px)!important;}
+}
