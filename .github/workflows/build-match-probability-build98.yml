@@ -1,4 +1,4 @@
-name: Build Match Probability AI Build98
+name: Build Match Probability AI Build99
 on:
   workflow_dispatch:
   push:
@@ -6,6 +6,7 @@ on:
     paths:
       - 'app/src/main-ui-build98.js'
       - 'app/src/style-build98.css'
+      - 'app/src/main-ui-build99.js'
       - 'app/src/main-ui-build97.js'
       - '.github/workflows/build-match-probability-build98.yml'
 permissions:
@@ -36,12 +37,12 @@ jobs:
         run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "build-tools;${BUILD_TOOLS_VERSION}"
       - name: Install npm dependencies
         run: npm install --no-audit --no-fund --prefer-online
-      - name: Select Build98 UI entrypoint
+      - name: Select Build99 UI entrypoint
         run: |
           set -euo pipefail
-          test -f src/main-ui-build98.js
-          sed -i "s#src/main-ui-build[0-9]*.js#src/main-ui-build98.js#" index.html
-          grep -q "main-ui-build98.js" index.html
+          test -f src/main-ui-build99.js
+          sed -i "s#src/main-ui-build[0-9]*.js#src/main-ui-build99.js#" index.html
+          grep -q "main-ui-build99.js" index.html
       - name: Fix legacy Build79 header template
         run: |
           python3 - <<'PY'
@@ -57,8 +58,7 @@ jobs:
           p=Path('src/main-ui-build79.js'); s=p.read_text()
           old="if(!verified(t))return '';const p=probs(t),fav=state.favorites.has(String(t.id));return `<article class=\"match-card\">"
           new="if(!verified(t))return '';const p=probs(t),fav=state.favorites.has(String(t.id));const b98Payload=side=>JSON.stringify(Object.fromEntries(STAT.slice(0,6).map(x=>[x[0],forecast(t,x[0],side)])));return `<article class=\"match-card\" data-b98-home='${esc(b98Payload('home'))}' data-b98-away='${esc(b98Payload('away'))}'>"
-          if old not in s:
-            raise SystemExit('matchCard insertion point not found')
+          if old not in s: raise SystemExit('matchCard insertion point not found')
           p.write_text(s.replace(old,new,1))
           PY
           grep -q 'data-b98-home' src/main-ui-build79.js
@@ -87,12 +87,12 @@ jobs:
           "$TOOLS/zipalign" -c -P 16 -v 4 "$FINAL"
           unzip -t "$FINAL"
           test -s "$FINAL"
-          unzip -p "$FINAL" assets/public/assets/index-*.js | grep -q 'BUILD 98'
+          unzip -p "$FINAL" assets/public/assets/index-*.js | grep -q 'BUILD 99'
           unzip -p "$FINAL" assets/public/assets/index-*.js | grep -q 'data-b98-home'
           unzip -p "$FINAL" assets/public/assets/index-*.js | grep -q 'data-b98-away'
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: Match-Probability-AI-BUILD98
+          name: Match-Probability-AI-BUILD99
           path: artifacts/Match-Probability-AI.apk
           retention-days: 30
