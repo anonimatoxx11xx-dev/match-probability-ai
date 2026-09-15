@@ -1,22 +1,27 @@
 @import './style-build79.css';
 
-/* BUILD 80 — layout correction. Build78 engine remains untouched. */
+/* BUILD 80 — polished mobile layout. Build78 engine/data untouched. */
 html,body,#app{margin:0!important;padding-top:0!important;min-height:100%;overflow-x:hidden}
+html{scroll-behavior:smooth}
 body{padding-bottom:env(safe-area-inset-bottom,0px)!important}
 #app{display:block!important;position:relative!important;top:0!important}
-#app>.app{display:block!important;position:relative!important;top:0!important;transform:none!important;margin-top:0!important;padding-top:7px!important;padding-bottom:calc(152px + env(safe-area-inset-bottom,0px))!important}
+#app>.app{display:block!important;position:relative!important;top:0!important;transform:none!important;margin-top:0!important;padding-top:7px!important;padding-bottom:calc(210px + env(safe-area-inset-bottom,0px))!important}
 #app>.app>header{position:relative!important;top:auto!important;left:auto!important;height:64px!important;min-height:64px!important;max-height:64px!important;padding-top:0!important;margin:0!important;transform:none!important;background:linear-gradient(#020914 78%,transparent)!important;z-index:200}
 #app>.app>.hero,#app>.app>.page{position:relative!important;top:0!important;transform:none!important}
 #app>.app>.hero{margin-top:4px!important}
 #app>.app>.page{padding-top:28px!important;padding-bottom:30px!important}
-#app>.app>nav{position:fixed!important;left:50%!important;bottom:calc(7px + env(safe-area-inset-bottom,0px))!important;transform:translateX(-50%)!important;z-index:100!important}
-.match-list{padding-bottom:8px}
-.match-card{scroll-margin-bottom:160px}
+#app>.app>nav{position:fixed!important;left:50%!important;bottom:calc(9px + env(safe-area-inset-bottom,0px))!important;transform:translateX(-50%)!important;z-index:100!important}
+.match-list{padding-bottom:190px!important;scroll-padding-bottom:190px!important}
+.match-card{scroll-margin-bottom:190px!important}
 .today-head{position:relative;z-index:2}
 .panel-list,.stats,.ai-list,.sources{margin-bottom:20px}
+.league-tabs,.market-line{overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
+.league-tabs button,.market-line button{flex:none}
+.view-tabs{overflow:hidden}
+.view-tabs button{min-width:0}
 
 @media(max-width:700px){
-  #app>.app{padding-left:9px!important;padding-right:9px!important;padding-bottom:calc(152px + env(safe-area-inset-bottom,0px))!important}
+  #app>.app{padding-left:9px!important;padding-right:9px!important;padding-bottom:calc(210px + env(safe-area-inset-bottom,0px))!important}
   #app>.app>header{height:64px!important}
   #app>.app>nav{width:calc(100% - 18px)!important}
   .match-card{padding-bottom:12px}
@@ -25,7 +30,7 @@ body{padding-bottom:env(safe-area-inset-bottom,0px)!important}
 }
 
 @media(max-width:430px){
-  #app>.app{padding-bottom:calc(156px + env(safe-area-inset-bottom,0px))!important}
+  #app>.app{padding-bottom:calc(215px + env(safe-area-inset-bottom,0px))!important}
   #app>.app>nav{width:calc(100% - 16px)!important}
   .hero{border-radius:26px}
   .hero-stats{overflow:hidden}
