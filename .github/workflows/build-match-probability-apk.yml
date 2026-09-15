@@ -102,7 +102,7 @@ jobs:
           if [ ! -f "$DEBUG_KEYSTORE" ]; then
             keytool -genkeypair -v -keystore "$DEBUG_KEYSTORE" -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname 'CN=Android Debug,O=Android,C=US'
           fi
-          "$TOOLS/apksigner" sign --ks "$DEBUG_KEYSTORE" --ks-pass pass:android --key-pass android --ks-key-alias androiddebugkey --min-sdk-version 23 --max-sdk-version 35 --v1-signing-enabled true --v2-signing-enabled true --v3-signing-enabled true --v4-signing-enabled false --out "$FINAL" "$ALIGNED"
+          "$TOOLS/apksigner" sign --ks "$DEBUG_KEYSTORE" --ks-pass pass:android --key-pass pass:android --ks-key-alias androiddebugkey --min-sdk-version 23 --max-sdk-version 35 --v1-signing-enabled true --v2-signing-enabled true --v3-signing-enabled true --v4-signing-enabled false --out "$FINAL" "$ALIGNED"
           "$TOOLS/apksigner" verify --verbose --print-certs "$FINAL"
           "$TOOLS/zipalign" -c -P 16 -v 4 "$FINAL"
           unzip -t "$FINAL"
