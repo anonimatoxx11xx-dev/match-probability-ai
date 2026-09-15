@@ -31,65 +31,47 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
-
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: ${{ env.JAVA_VERSION }}
-
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 22
-
       - name: Install Android build tools
         working-directory: .
-        run: |
-          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "build-tools;${BUILD_TOOLS_VERSION}"
-
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "build-tools;${BUILD_TOOLS_VERSION}"
       - name: Install npm dependencies
         run: npm install
-
-      - name: Select Build88 UI entrypoint
+      - name: Select Build89 UI entrypoint
         run: |
           set -euo pipefail
-          test -f src/main-ui-build88.js
-          sed -i "s#src/main-ui-build79.js#src/main-ui-build88.js#" index.html
-          grep -q "main-ui-build88.js" index.html
-
+          test -f src/main-ui-build89.js
+          sed -i "s#src/main-ui-build79.js#src/main-ui-build89.js#" index.html
+          grep -q "main-ui-build89.js" index.html
       - name: Fix legacy Build79 header template
         run: |
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
-          p = Path('src/main-ui-build79.js')
-          s = p.read_text()
-          old = '</div></div>${body}<nav>'
-          new = '</div></header>${body}<nav>'
-          count = s.count(old)
-          assert count == 1, f'expected exactly one malformed header template, found {count}'
-          p.write_text(s.replace(old, new, 1))
-          check = p.read_text()
-          assert new in check, 'header close patch was not applied'
-          print('Build79 UI header template fixed: </header> inserted before page body')
+          p=Path('src/main-ui-build79.js'); s=p.read_text()
+          old='</div></div>${body}<nav>'; new='</div></header>${body}<nav>'
+          count=s.count(old)
+          assert count==1, f'expected exactly one malformed header template, found {count}'
+          p.write_text(s.replace(old,new,1))
           PY
-
       - name: Build web bundle
         run: npm run build
-
       - name: Add Android platform
         run: npx cap add android
-
       - name: Sync Capacitor
         run: npx cap sync android
-
       - name: Make Gradle executable
         run: chmod +x android/gradlew
-
       - name: Build debug APK
         run: ./android/gradlew -p android assembleDebug --no-daemon
-
       - name: Zipalign and re-sign APK with APK Signature Scheme v2+
         working-directory: .
         run: |
@@ -99,13 +81,10 @@ jobs:
           ALIGNED="$GITHUB_WORKSPACE/app/android/app/build/outputs/apk/debug/app-debug-aligned.apk"
           FINAL="$GITHUB_WORKSPACE/artifacts/Match-Probability-AI.apk"
           mkdir -p "$GITHUB_WORKSPACE/artifacts"
-          test -x "$TOOLS/zipalign"
-          test -x "$TOOLS/apksigner"
-          test -f "$INPUT"
+          test -x "$TOOLS/zipalign"; test -x "$TOOLS/apksigner"; test -f "$INPUT"
           "$TOOLS/zipalign" -P 16 -f 4 "$INPUT" "$ALIGNED"
           "$TOOLS/zipalign" -c -P 16 -v 4 "$ALIGNED"
-          DEBUG_KEYSTORE="$HOME/.android/debug.keystore"
-          mkdir -p "$HOME/.android"
+          DEBUG_KEYSTORE="$HOME/.android/debug.keystore"; mkdir -p "$HOME/.android"
           if [ ! -f "$DEBUG_KEYSTORE" ]; then
             keytool -genkeypair -v -keystore "$DEBUG_KEYSTORE" -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname 'CN=Android Debug,O=Android,C=US'
           fi
@@ -118,17 +97,16 @@ jobs:
           apk='artifacts/Match-Probability-AI.apk'
           with zipfile.ZipFile(apk) as z:
               info=z.getinfo('resources.arsc')
-              assert info.compress_type==zipfile.ZIP_STORED,'resources.arsc is compressed'
+              assert info.compress_type==zipfile.ZIP_STORED
               with open(apk,'rb') as f:
                   f.seek(info.header_offset); local=f.read(30)
                   sig,=struct.unpack_from('<I',local,0); assert sig==0x04034B50
                   name_len,extra_len=struct.unpack_from('<HH',local,26)
                   data_offset=info.header_offset+30+name_len+extra_len
-                  assert data_offset%4==0,f'resources.arsc data offset {data_offset} is not 4-byte aligned'
-                  print('resources.arsc: STORED and 4-byte aligned at',data_offset)
+                  assert data_offset%4==0
+                  print('resources.arsc aligned:',data_offset)
           PY
           test -s "$FINAL"
-
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
