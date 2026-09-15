@@ -1,31 +1,15 @@
-/* BUILD 91 — final Today screen layout stabilization. UI ONLY. */
+/* BUILD 91 — SINGLE SCROLL OWNER FOR ANDROID WEBVIEW. UI ONLY. */
 @import './style-build90.css';
-
-html,body,#app{height:auto!important;min-height:100%!important;overflow-x:hidden!important;touch-action:pan-y!important;-webkit-overflow-scrolling:touch!important;}
-html{overflow-y:auto!important;overscroll-behavior-y:auto!important;}
-body{overflow:visible!important;position:relative!important;margin:0!important;}
-#app{overflow:visible!important;position:relative!important;}
-#app>.app{height:auto!important;min-height:max-content!important;max-height:none!important;overflow:visible!important;padding-bottom:180px!important;}
-
-/* The app navigation stays above Android's system navigation area. */
-#app>.app>nav{position:fixed!important;left:8px!important;right:8px!important;bottom:56px!important;top:auto!important;width:auto!important;height:82px!important;margin:0!important;z-index:99999!important;pointer-events:none!important;touch-action:none!important;transform:none!important;}
-#app>.app>nav button{pointer-events:auto!important;touch-action:manipulation!important;}
-#app>.app>nav::before,#app>.app>nav::after{pointer-events:none!important;}
-
-/* Never let a match card become a scroll container. */
-.match-list,.match-card,.page,.hero,.today-head{overflow:visible!important;}
-.match-card{position:relative!important;z-index:1!important;margin-bottom:14px!important;}
-.market-line{overflow-x:auto!important;overflow-y:hidden!important;touch-action:pan-x!important;}
-
-/* Keep the final card reachable above the navigation bar. */
-.match-list{padding-bottom:8px!important;}
-.load-more{margin-bottom:18px!important;}
-.markets-footer{padding-bottom:18px!important;}
-
-@media(max-width:700px){
-  #app>.app{padding:24px 8px 180px!important;}
-  #app>.app>nav{left:8px!important;right:8px!important;bottom:56px!important;height:82px!important;}
-}
-@media(max-width:430px){
-  #app>.app{padding-bottom:180px!important;}
-}
+html,body{width:100%!important;height:100%!important;margin:0!important;padding:0!important;overflow:hidden!important;touch-action:auto!important}
+body{position:relative!important}
+#app{position:fixed!important;inset:0!important;width:100%!important;height:100dvh!important;min-height:0!important;overflow-x:hidden!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior-y:contain!important;touch-action:pan-y!important}
+#app>.app{position:relative!important;width:100%!important;height:auto!important;min-height:100%!important;max-height:none!important;overflow:visible!important;padding:0 8px 160px!important;touch-action:pan-y!important}
+#app>.app>header{position:sticky!important;top:0!important;z-index:50!important}
+#app>.app>nav{position:fixed!important;left:8px!important;right:8px!important;bottom:max(8px,env(safe-area-inset-bottom,8px))!important;width:auto!important;height:82px!important;margin:0!important;z-index:99999!important;pointer-events:none!important;touch-action:none!important;transform:none!important}
+#app>.app>nav::before,#app>.app>nav::after{pointer-events:none!important}
+#app>.app>nav button{pointer-events:auto!important;touch-action:manipulation!important}
+.match-list,.match-card,.page,.hero,.today-head{overflow:visible!important}
+.match-card{position:relative!important;z-index:1!important;margin-bottom:14px!important}
+.market-line{overflow-x:auto!important;overflow-y:hidden!important;touch-action:pan-x!important}
+.match-card button,.match-card a,.tabs button,.league-tabs button,.view-tabs button,.header-icons button{pointer-events:auto!important;touch-action:manipulation!important}
+@media(max-width:600px){#app{height:100dvh!important;overflow-y:auto!important}#app>.app{min-height:100%!important;height:auto!important;padding:0 8px 160px!important}}
