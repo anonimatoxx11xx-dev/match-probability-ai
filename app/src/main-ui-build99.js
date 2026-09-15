@@ -1,36 +1,22 @@
-/* BUILD 99 — stop legacy Build97 popup from replacing Build98. UI ONLY. Build78 engine/data untouched. */
+/* BUILD 99 — analysis popup fix. UI ONLY. Build78 engine/data untouched. */
 import './main-ui-build98.js';
 
-function bindBuild99(){
-  document.querySelectorAll('.match-card').forEach(card=>{
-    if(card.dataset.b99==='1')return;
-    card.dataset.b99='1';
-    card.addEventListener('click',e=>{
-      if(e.target.closest('button,.fav,a,input'))return;
-      e.stopPropagation();
-    },true);
-  });
-}
+const clean=s=>(s||'').replace(/\s+/g,' ').trim();
+const esc=s=>clean(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function side(card,key){try{return JSON.parse(card.getAttribute(key)||'{}')}catch{return{}}}
+function close(){document.querySelector('.b99-modal')?.remove();document.body.classList.remove('b99-open')}
+function rows(data){const meta=[['shots','🎯','Tiri'],['shotsOnTarget','▥','Tiri in porta'],['corners','⚑','Corner'],['fouls','◉','Falli'],['yellow','🟨','Cartellini'],['offsides','↗','Fuorigioco']];return meta.map(([k,i,l])=>{const r=data?.[k];const v=r&&Number.isFinite(r.lo)&&Number.isFinite(r.hi)?`${r.lo}–${r.hi}`:'—';return `<div class="b98-signal${v==='—'?' b98-muted':''}"><span>${i}</span><b>${l}</b><em>${v}</em></div>`}).join('')}
+function form(card,cls,name){const t=card.querySelector(`.team.${cls}`);const a=[...t?.querySelectorAll('.form')||[]].map(x=>clean(x.textContent)).filter(x=>/^[WDL]$/.test(x)).slice(0,5);return `<div class="b98-form-row"><b>${esc(name)}</b><div>${a.length?a.map(x=>`<i class="${x.toLowerCase()}">${x}</i>`).join(''):'<i>—</i>'}</div></div>`}
+function open(card){close();const teams=[...card.querySelectorAll('.team-copy b')].map(x=>clean(x.textContent));const probs=[...card.querySelectorAll('.prob b')].map(x=>parseInt(clean(x.textContent),10));const home=side(card,'data-b98-home'),away=side(card,'data-b98-away');const meta=clean(card.querySelector('.match-meta')?.textContent);const league=clean(card.querySelector('.match-meta span')?.textContent)||'ANALISI PARTITA';const best=Math.max(...probs.filter(Number.isFinite),0);const m=document.createElement('div');m.className='b98-modal b99-modal';m.innerHTML=`<div class="b98-sheet" role="dialog" aria-modal="true"><button class="b98-close" aria-label="Chiudi">×</button><div class="b98-head"><div><span class="b98-kicker">${esc(league)}</span><h2>${esc(teams[0]||'Casa')} <i>VS</i> ${esc(teams[1]||'Ospite')}</h2><p>${esc(meta)}</p></div><span class="b98-badge">AI ${best?best+'%':'READY'}</span></div><section class="b98-panel b98-ai"><div class="b98-panel-title"><b>AI MATCH SCORE</b><span>1X2</span></div>${['Casa','Pareggio','Ospite'].map((l,i)=>{const n=Number.isFinite(probs[i])?Math.max(0,Math.min(100,probs[i])):0;return `<div class="b98-prob"><div><span>${l}</span><strong>${n}%</strong></div><div class="b98-track"><i style="width:${n}%"></i></div></div>`}).join('')}</section><section class="b98-panel"><div class="b98-panel-title"><b>SEGNALI</b><span>CASA / OSPITE</span></div><div class="b98-signal-grid"><div class="b98-side"><div class="b98-side-head"><span class="b98-home-icon">⌂</span><div><b>${esc(teams[0]||'Casa')}</b><small>Casa · dati verificati</small></div></div>${rows(home)}</div><div class="b98-side"><div class="b98-side-head"><span class="b98-away-icon">◆</span><div><b>${esc(teams[1]||'Ospite')}</b><small>Ospite · dati verificati</small></div></div>${rows(away)}</div></div></section><section class="b98-panel"><div class="b98-panel-title"><b>FORMA RECENTE</b><span>ULTIME 5</span></div>${form(card,'home',teams[0]||'Casa')}${form(card,'away',teams[1]||'Ospite')}</section><div class="b98-actions"><button data-a="fav">☆ Preferita</button><button data-a="share">Condividi</button><button data-a="close">Chiudi</button></div><div class="b98-foot">I valori Casa/Ospite provengono dai rispettivi campioni statistici disponibili.</div></div>`;document.body.appendChild(m);document.body.classList.add('b99-open');m.addEventListener('click',e=>{if(e.target===m||e.target.closest('.b98-close,[data-a="close"]'))close()});m.querySelector('[data-a="fav"]').onclick=()=>card.querySelector('.fav')?.click();m.querySelector('[data-a="share"]').onclick=async()=>{const text=`${teams[0]||'Casa'} vs ${teams[1]||'Ospite'} — AI 1X2: ${probs.join(' / ')}`;try{await navigator.clipboard?.writeText(text)}catch{}}}
 
-function labelBuild99(){
-  const root=document.querySelector('#app');
-  if(!root)return;
-  const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
-  while(w.nextNode()){
-    const n=w.currentNode;
-    if(n.nodeValue)n.nodeValue=n.nodeValue.replace(/BUILD (79|80|81|82|83|84|85|86|87|88|89|90|91|92|93|94|95|96|97|98)/g,'BUILD 99');
-  }
-}
+/* Capture on document, before the legacy Build98 card listener. This prevents
+   the old combined-signal popup from opening. No overflow/scroll changes. */
+function intercept(e){const card=e.target.closest?.('.match-card');if(!card||e.target.closest('button,.fav,a,input'))return;e.preventDefault();e.stopImmediatePropagation();open(card)}
+document.addEventListener('click',intercept,true);
 
-function initBuild99(){bindBuild99();labelBuild99()}
-const observer=new MutationObserver(()=>requestAnimationFrame(initBuild99));
-function startBuild99(){
-  const root=document.querySelector('#app');
-  if(!root||root.dataset.b99observer==='1')return;
-  root.dataset.b99observer='1';
-  observer.observe(root,{childList:true,subtree:true,characterData:true});
-  initBuild99();
-}
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',startBuild99,{once:true});
-else startBuild99();
-window.addEventListener('load',startBuild99,{once:true});
+function label(){const root=document.querySelector('#app');if(!root)return;const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);while(w.nextNode()){const n=w.currentNode;if(n.nodeValue)n.nodeValue=n.nodeValue.replace(/BUILD (79|80|81|82|83|84|85|86|87|88|89|90|91|92|93|94|95|96|97|98)/g,'BUILD 99')}}
+function init(){label()}
+const observer=new MutationObserver(()=>requestAnimationFrame(init));
+function start(){const root=document.querySelector('#app');if(!root||root.dataset.b99observer==='1')return;root.dataset.b99observer='1';observer.observe(root,{childList:true,subtree:true,characterData:true});init()}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
+window.addEventListener('load',start,{once:true});
