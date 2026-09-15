@@ -1,0 +1,96 @@
+name: Build Match Probability AI Build98
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'app/src/main-ui-build98.js'
+      - 'app/src/style-build98.css'
+      - 'app/src/main-ui-build97.js'
+      - '.github/workflows/build-match-probability-build98.yml'
+permissions:
+  contents: read
+env:
+  JAVA_VERSION: '21'
+  BUILD_TOOLS_VERSION: '35.0.0'
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install Android build tools
+        working-directory: .
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "build-tools;${BUILD_TOOLS_VERSION}"
+      - name: Install npm dependencies
+        run: npm install
+      - name: Select Build98 UI entrypoint
+        run: |
+          set -euo pipefail
+          test -f src/main-ui-build98.js
+          sed -i "s#src/main-ui-build[0-9]*.js#src/main-ui-build98.js#" index.html
+          grep -q "main-ui-build98.js" index.html
+      - name: Fix legacy Build79 header template
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('src/main-ui-build79.js'); s=p.read_text()
+          old='</div></div>${body}<nav>'; new='</div></header>${body}<nav>'
+          if s.count(old)==1: p.write_text(s.replace(old,new,1))
+          PY
+      - name: Add real home/away forecast payload to match cards
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('src/main-ui-build79.js'); s=p.read_text()
+          old="if(!verified(t))return '';const p=probs(t),fav=state.favorites.has(String(t.id));return `<article class=\"match-card\">"
+          new="if(!verified(t))return '';const p=probs(t),fav=state.favorites.has(String(t.id));const b98Payload=side=>JSON.stringify(Object.fromEntries(STAT.slice(0,6).map(x=>[x[0],forecast(t,x[0],side)])));return `<article class=\"match-card\" data-b98-home='${esc(b98Payload('home'))}' data-b98-away='${esc(b98Payload('away'))}'>"
+          if old not in s:
+            raise SystemExit('matchCard insertion point not found')
+          p.write_text(s.replace(old,new,1))
+          PY
+          grep -q 'data-b98-home' src/main-ui-build79.js
+          grep -q 'data-b98-away' src/main-ui-build79.js
+      - name: Build web bundle
+        run: npm run build
+      - name: Add Android platform
+        run: npx cap add android
+      - name: Sync Capacitor
+        run: npx cap sync android
+      - name: Build debug APK
+        run: chmod +x android/gradlew && ./android/gradlew -p android assembleDebug --no-daemon
+      - name: Sign and verify APK
+        working-directory: .
+        run: |
+          set -euo pipefail
+          TOOLS="$ANDROID_HOME/build-tools/${BUILD_TOOLS_VERSION}"
+          INPUT="$GITHUB_WORKSPACE/app/android/app/build/outputs/apk/debug/app-debug.apk"
+          ALIGNED="$GITHUB_WORKSPACE/app/android/app/build/outputs/apk/debug/app-debug-aligned.apk"
+          FINAL="$GITHUB_WORKSPACE/artifacts/Match-Probability-AI.apk"
+          mkdir -p "$GITHUB_WORKSPACE/artifacts" "$HOME/.android"
+          "$TOOLS/zipalign" -P 16 -f 4 "$INPUT" "$ALIGNED"
+          if [ ! -f "$HOME/.android/debug.keystore" ]; then keytool -genkeypair -v -keystore "$HOME/.android/debug.keystore" -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname 'CN=Android Debug,O=Android,C=US'; fi
+          "$TOOLS/apksigner" sign --ks "$HOME/.android/debug.keystore" --ks-pass pass:android --key-pass pass:android --ks-key-alias androiddebugkey --min-sdk-version 23 --max-sdk-version 35 --v1-signing-enabled true --v2-signing-enabled true --v3-signing-enabled true --v4-signing-enabled false --out "$FINAL" "$ALIGNED"
+          "$TOOLS/apksigner" verify --verbose --print-certs "$FINAL"
+          "$TOOLS/zipalign" -c -P 16 -v 4 "$FINAL"
+          unzip -t "$FINAL"
+          test -s "$FINAL"
+          unzip -p "$FINAL" assets/public/assets/index-*.js | grep -q 'BUILD 98'
+          unzip -p "$FINAL" assets/public/assets/index-*.js | grep -q 'data-b98-home'
+          unzip -p "$FINAL" assets/public/assets/index-*.js | grep -q 'data-b98-away'
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Match-Probability-AI-BUILD98
+          path: artifacts/Match-Probability-AI.apk
+          retention-days: 30
