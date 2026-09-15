@@ -1,0 +1,73 @@
+/* BUILD 90 — Android WebView scrolling foundation. UI only; Build78 engine/data untouched. */
+@import './style-build89.css';
+
+/* Make HTML the only document scroll owner. Body must remain visible, not a nested scroller. */
+html{
+  width:100%!important;
+  height:auto!important;
+  min-height:100%!important;
+  overflow-x:hidden!important;
+  overflow-y:scroll!important;
+  overscroll-behavior-y:auto!important;
+  touch-action:pan-y!important;
+}
+body{
+  width:100%!important;
+  height:auto!important;
+  min-height:100dvh!important;
+  margin:0!important;
+  overflow:visible!important;
+  position:relative!important;
+  overscroll-behavior-y:auto!important;
+  touch-action:pan-y!important;
+}
+#app{
+  width:100%!important;
+  height:auto!important;
+  min-height:0!important;
+  overflow:visible!important;
+  position:relative!important;
+  touch-action:pan-y!important;
+}
+#app>.app{
+  width:100%!important;
+  height:auto!important;
+  min-height:max-content!important;
+  overflow:visible!important;
+  position:relative!important;
+  padding-bottom:220px!important;
+  touch-action:pan-y!important;
+}
+
+/* Keep the header visible without creating a scroll container. */
+#app>.app>header{position:sticky!important;top:0!important;z-index:50!important}
+
+/* Bottom bar is visually fixed, but its container cannot steal swipe/touch events. */
+#app>.app>nav{
+  position:fixed!important;
+  left:8px!important;
+  right:8px!important;
+  bottom:max(8px,env(safe-area-inset-bottom,8px))!important;
+  width:auto!important;
+  height:82px!important;
+  margin:0!important;
+  z-index:9999!important;
+  pointer-events:none!important;
+  touch-action:none!important;
+}
+#app>.app>nav::before,#app>.app>nav::after{pointer-events:none!important}
+#app>.app>nav button{pointer-events:auto!important;touch-action:manipulation!important;position:relative!important;z-index:2!important}
+
+/* Ensure the final card can always be scrolled above the system/navigation area. */
+.match-list{overflow:visible!important}
+.match-card{position:relative!important;z-index:1!important;margin-bottom:14px!important;pointer-events:auto!important;touch-action:pan-y!important}
+.match-card button,.match-card a,.tabs button,.league-tabs button,.header-icons button{pointer-events:auto!important;touch-action:manipulation!important}
+.market-line{overflow-x:auto!important;overflow-y:hidden!important;touch-action:pan-x!important}
+
+@media(max-width:600px){
+  html{overflow-y:scroll!important;touch-action:pan-y!important}
+  body{overflow:visible!important;touch-action:pan-y!important}
+  #app>.app{padding:24px 8px 220px!important;min-height:max-content!important;height:auto!important;overflow:visible!important}
+  #app>.app>header{position:sticky!important;top:0!important}
+  #app>.app>nav{left:8px!important;right:8px!important;bottom:max(6px,env(safe-area-inset-bottom,6px))!important;height:82px!important}
+}
