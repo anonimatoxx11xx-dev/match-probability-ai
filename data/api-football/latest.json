@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-14T04:56:40.458Z",
+  "generatedAt": "2026-09-15T04:57:23.701Z",
   "season": 2026,
   "mode": "merged-api-football-plus-football-data-multi-season",
   "providers": [
@@ -180759,6 +180759,226 @@
       },
       "source": "football-data.org",
       "sourceMatchId": 564674,
+      "sourceSeason": 2026
+    },
+    {
+      "fixtureId": 200558602,
+      "kickoff": "2026-09-14T16:30:00Z",
+      "status": "FT",
+      "league": {
+        "id": 135,
+        "name": "Serie A",
+        "country": "Italy",
+        "season": 2026
+      },
+      "home": {
+        "id": 100007397,
+        "name": "Como 1907"
+      },
+      "away": {
+        "id": 100000112,
+        "name": "Parma Calcio 1913"
+      },
+      "goals": {
+        "home": 2,
+        "away": 1
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 558602,
+      "sourceSeason": 2026
+    },
+    {
+      "fixtureId": 200558603,
+      "kickoff": "2026-09-14T16:30:00Z",
+      "status": "FT",
+      "league": {
+        "id": 135,
+        "name": "Serie A",
+        "country": "Italy",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000586,
+        "name": "Torino FC"
+      },
+      "away": {
+        "id": 100000100,
+        "name": "AS Roma"
+      },
+      "goals": {
+        "home": 0,
+        "away": 2
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 558603,
+      "sourceSeason": 2026
+    },
+    {
+      "fixtureId": 200558601,
+      "kickoff": "2026-09-14T18:45:00Z",
+      "status": "FT",
+      "league": {
+        "id": 135,
+        "name": "Serie A",
+        "country": "Italy",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000108,
+        "name": "FC Internazionale Milano"
+      },
+      "away": {
+        "id": 100000115,
+        "name": "Udinese Calcio"
+      },
+      "goals": {
+        "home": 5,
+        "away": 3
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 558601,
+      "sourceSeason": 2026
+    },
+    {
+      "fixtureId": 200560579,
+      "kickoff": "2026-09-14T19:00:00Z",
+      "status": "FT",
+      "league": {
+        "id": 39,
+        "name": "Premier League",
+        "country": "England",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000341,
+        "name": "Leeds United FC"
+      },
+      "away": {
+        "id": 100000067,
+        "name": "Newcastle United FC"
+      },
+      "goals": {
+        "home": 4,
+        "away": 1
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 560579,
+      "sourceSeason": 2026
+    },
+    {
+      "fixtureId": 200564671,
+      "kickoff": "2026-09-14T19:00:00Z",
+      "status": "FT",
+      "league": {
+        "id": 140,
+        "name": "La Liga",
+        "country": "Spain",
+        "season": 2026
+      },
+      "home": {
+        "id": 100000094,
+        "name": "Villarreal CF"
+      },
+      "away": {
+        "id": 100000090,
+        "name": "Real Betis Balompié"
+      },
+      "goals": {
+        "home": 1,
+        "away": 2
+      },
+      "stats": {
+        "home": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        },
+        "away": {
+          "shots": null,
+          "sot": null,
+          "corners": null,
+          "fouls": null,
+          "saves": null,
+          "cards": null
+        }
+      },
+      "source": "football-data.org",
+      "sourceMatchId": 564671,
       "sourceSeason": 2026
     }
   ]
