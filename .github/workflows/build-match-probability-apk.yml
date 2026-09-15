@@ -58,6 +58,23 @@ jobs:
           sed -i "s#src/main-ui-build79.js#src/main-ui-build80.js#" index.html
           grep -q "main-ui-build80.js" index.html
 
+      - name: Fix legacy Build79 header template
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('src/main-ui-build79.js')
+          s = p.read_text()
+          old = '</div></div>${body}<nav>'
+          new = '</div></header>${body}<nav>'
+          count = s.count(old)
+          assert count == 1, f'expected exactly one malformed header template, found {count}'
+          p.write_text(s.replace(old, new, 1))
+          check = p.read_text()
+          assert new in check, 'header close patch was not applied'
+          print('Build79 UI header template fixed: </header> inserted before page body')
+          PY
+
       - name: Build web bundle
         run: npm run build
 
@@ -87,12 +104,7 @@ jobs:
           test -x "$TOOLS/apksigner"
           test -f "$INPUT"
 
-          # Android 11+ requires resources.arsc to be STORED and 4-byte aligned.
-          # zipalign MUST run before apksigner because v2+ signs the final APK bytes.
-          # -P 16 additionally aligns uncompressed native .so files for modern Android.
           "$TOOLS/zipalign" -P 16 -f 4 "$INPUT" "$ALIGNED"
-
-          # Verify the actual ZIP alignment before signing.
           "$TOOLS/zipalign" -c -P 16 -v 4 "$ALIGNED"
 
           DEBUG_KEYSTORE="$HOME/.android/debug.keystore"
@@ -108,7 +120,6 @@ jobs:
               -dname 'CN=Android Debug,O=Android,C=US'
           fi
 
-          # Sign the already-aligned APK. apksigner preserves ZIP alignment/compression.
           "$TOOLS/apksigner" sign \
             --ks "$DEBUG_KEYSTORE" \
             --ks-pass pass:android \
@@ -122,19 +133,13 @@ jobs:
             --v4-signing-enabled false \
             --out "$FINAL" "$ALIGNED"
 
-          # Mandatory verification after signing.
           "$TOOLS/apksigner" verify --verbose --print-certs "$FINAL"
           "$TOOLS/zipalign" -c -P 16 -v 4 "$FINAL"
           unzip -t "$FINAL"
 
-          # Verify resources.arsc using the LOCAL ZIP header.
-          # Python's ZipInfo.extra describes the central-directory extra field;
-          # zipalign changes the LOCAL header padding, so checking ZipInfo.extra
-          # can report a false failure even when the APK is correctly aligned.
           python3 - <<'PY'
           import struct
           import zipfile
-
           apk = 'artifacts/Match-Probability-AI.apk'
           with zipfile.ZipFile(apk) as z:
               info = z.getinfo('resources.arsc')
@@ -149,7 +154,6 @@ jobs:
                   assert data_offset % 4 == 0, f'resources.arsc data offset {data_offset} is not 4-byte aligned'
                   print('resources.arsc: STORED and 4-byte aligned at', data_offset)
           PY
-
           test -s "$FINAL"
 
       - name: Upload APK
