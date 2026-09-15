@@ -29,11 +29,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: npm
+          cache-dependency-path: app/package.json
       - name: Install Android build tools
         working-directory: .
         run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "build-tools;${BUILD_TOOLS_VERSION}"
       - name: Install npm dependencies
-        run: npm install
+        run: npm install --no-audit --no-fund --prefer-online
       - name: Select Build98 UI entrypoint
         run: |
           set -euo pipefail
