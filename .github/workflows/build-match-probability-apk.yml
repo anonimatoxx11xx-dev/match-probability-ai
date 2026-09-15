@@ -45,12 +45,12 @@ jobs:
         run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "build-tools;${BUILD_TOOLS_VERSION}"
       - name: Install npm dependencies
         run: npm install
-      - name: Select Build91 UI entrypoint
+      - name: Select Build92 UI entrypoint
         run: |
           set -euo pipefail
-          test -f src/main-ui-build91.js
-          sed -i "s#src/main-ui-build79.js#src/main-ui-build91.js#" index.html
-          grep -q "main-ui-build91.js" index.html
+          test -f src/main-ui-build92.js
+          sed -i "s#src/main-ui-build79.js#src/main-ui-build92.js#" index.html
+          grep -q "main-ui-build92.js" index.html
       - name: Fix legacy Build79 header template
         run: |
           set -euo pipefail
