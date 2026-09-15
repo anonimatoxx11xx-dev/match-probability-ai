@@ -1,0 +1,88 @@
+/* BUILD 89 — UI ONLY. Remove overlay navigation and restore document-flow scrolling. Build78 engine/data untouched. */
+@import './style-build88.css';
+
+/* The previous fixed bottom bar was sitting above the document and intercepting
+   the lower part of the screen. In BUILD 89 the navigation is part of normal
+   document flow: the user can scroll through every match and reach the bottom. */
+html,body,#app{
+  height:auto!important;
+  min-height:100%!important;
+  overflow-x:hidden!important;
+  overflow-y:auto!important;
+  touch-action:pan-y!important;
+  -webkit-overflow-scrolling:touch!important;
+}
+body{position:relative!important;pointer-events:auto!important}
+#app{position:relative!important;pointer-events:auto!important}
+#app>.app{
+  position:relative!important;
+  height:auto!important;
+  min-height:0!important;
+  overflow:visible!important;
+  padding-bottom:24px!important;
+  touch-action:pan-y!important;
+  pointer-events:auto!important;
+}
+
+/* Header stays usable while scrolling. */
+#app>.app>header{
+  position:sticky!important;
+  top:0!important;
+  z-index:50!important;
+  pointer-events:auto!important;
+}
+
+/* CRITICAL: navigation is NOT fixed/sticky and cannot cover match cards. */
+#app>.app>nav{
+  position:relative!important;
+  left:auto!important;
+  right:auto!important;
+  top:auto!important;
+  bottom:auto!important;
+  width:100%!important;
+  height:82px!important;
+  margin:18px 0 10px!important;
+  z-index:20!important;
+  pointer-events:auto!important;
+  touch-action:manipulation!important;
+  transform:none!important;
+}
+#app>.app>nav::before,#app>.app>nav::after{pointer-events:none!important}
+#app>.app>nav button{
+  position:relative!important;
+  z-index:2!important;
+  pointer-events:auto!important;
+  touch-action:manipulation!important;
+}
+
+/* Every match remains in normal flow and has room below it. */
+.match-card{
+  position:relative!important;
+  z-index:1!important;
+  margin-bottom:14px!important;
+  pointer-events:auto!important;
+}
+.match-card button,.match-card a,.tabs button,.league-tabs button,.header-icons button{
+  pointer-events:auto!important;
+  touch-action:manipulation!important;
+}
+.market-line{touch-action:pan-x!important;overflow-x:auto!important;overflow-y:hidden!important}
+
+@media(max-width:600px){
+  html,body,#app{overflow-y:auto!important;touch-action:pan-y!important}
+  #app>.app{
+    padding:24px 8px 18px!important;
+    min-height:0!important;
+    height:auto!important;
+    overflow:visible!important;
+  }
+  #app>.app>header{position:sticky!important;top:0!important}
+  #app>.app>nav{
+    position:relative!important;
+    left:auto!important;right:auto!important;bottom:auto!important;
+    width:100%!important;height:82px!important;
+    margin:18px 0 10px!important;
+  }
+  .page{padding-bottom:18px!important}
+  .match-card{margin-bottom:14px!important}
+}
